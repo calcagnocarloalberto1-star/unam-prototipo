@@ -40,6 +40,15 @@
     padding:9px 12px;border-radius:8px;
   }
   nav.mainnav a:hover, nav.mainnav a.active{background:var(--blue-pale);color:var(--blue);}
+  .nav-dropdown{position:relative;}
+  .nav-dropdown > .dd-toggle{color:var(--navy);text-decoration:none;font-size:13.5px;font-weight:600;padding:9px 12px;border-radius:8px;background:none;border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;}
+  .nav-dropdown > .dd-toggle:hover{background:var(--blue-pale);color:var(--blue);}
+  .nav-dropdown .dd-menu{display:none;position:absolute;top:100%;left:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:280px;padding:6px;flex-direction:column;z-index:80;margin-top:4px;}
+  .nav-dropdown.open .dd-menu{display:flex;}
+  .dd-menu a{padding:10px 12px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:13.5px;font-weight:600;display:flex;flex-direction:column;gap:2px;}
+  .dd-menu a:hover{background:var(--blue-pale);color:var(--blue);}
+  .dd-menu a small{font-weight:400;color:var(--muted);font-size:12px;}
+  @media (min-width:901px){ .nav-dropdown:hover .dd-menu{display:flex;} }
   .hdr-actions{display:flex;gap:10px;align-items:center;}
   .btn{display:inline-block;padding:10px 20px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;border:2px solid transparent;cursor:pointer;}
   .btn-primary{background:var(--gold);color:#fff;}
@@ -128,6 +137,9 @@
     nav.mainnav{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;flex-direction:column;padding:10px;border-bottom:1px solid var(--line);box-shadow:var(--shadow);}
     nav.mainnav.open{display:flex;}
     .navtoggle{display:inline-block;}
+    .nav-dropdown .dd-menu{position:static;box-shadow:none;border:none;padding:0 0 0 14px;margin-top:0;min-width:0;}
+    .nav-dropdown.open .dd-menu{display:flex;}
+    .nav-dropdown > .dd-toggle{width:100%;justify-content:space-between;}
     .cards, .cards.two, .people-grid{grid-template-columns:1fr 1fr;}
     footer .cols{grid-template-columns:1fr 1fr;}
     .stat-strip{grid-template-columns:1fr 1fr;}
@@ -157,6 +169,30 @@
       <a href="#notizie">Notizie</a>
       <a href="#eventi">Eventi</a>
       <a href="#documenti">Documenti</a>
+      <div class="nav-dropdown" id="navDocAssoc">
+        <button type="button" class="dd-toggle" id="navDocAssocToggle">Documenti associativi ▾</button>
+        <div class="dd-menu">
+          <a href="documenti/UNAM_Manifesto.pdf" target="_blank" rel="noopener">Manifesto<small>I valori e gli obiettivi di U.N.A.M.</small></a>
+          <a href="documenti/UNAM_Statuto.pdf" target="_blank" rel="noopener">Statuto<small>Aggiornamento 10 maggio 2024</small></a>
+          <a href="documenti/UNAM_Atto_Costitutivo.pdf" target="_blank" rel="noopener">Atto Costitutivo<small>Costituzione dell'associazione</small></a>
+          <a href="documenti/UNAM_Regolamento_Scuola_Alta_Formazione.pdf" target="_blank" rel="noopener">Regolamento della Scuola di Alta Formazione<small>Approvato dal Comitato Esecutivo il 25 maggio 2026</small></a>
+        </div>
+      </div>
+      <div class="nav-dropdown" id="navDocUtili">
+        <button type="button" class="dd-toggle" id="navDocUtiliToggle">Documenti utili ▾</button>
+        <div class="dd-menu">
+          <a href="documenti/Codice_Deontologico_Forense.pdf" target="_blank" rel="noopener">Codice Deontologico Forense<small>Aggiornamento 29 settembre 2025</small></a>
+          <a href="documenti/Vademecum_OCF_Mediazione.pdf" target="_blank" rel="noopener">Vademecum sulla Mediazione<small>A cura di O.C.F., alla luce dei correttivi Riforma Cartabia</small></a>
+          <a href="documenti/Vademecum_OCF_Negoziazione_Assistita.pdf" target="_blank" rel="noopener">Vademecum sulla Negoziazione Assistita<small>A cura di O.C.F., alla luce dei correttivi Riforma Cartabia</small></a>
+          <a href="documenti/Crediti_Imposta_Parti_Coordinamento_Conciliazione_Forense.pdf" target="_blank" rel="noopener">Crediti d'imposta per le parti in mediazione<small>Istruzioni operative — Coordinamento della Conciliazione Forense</small></a>
+          <a href="documenti/DM_1agosto2023_Credito_dimposta.pdf" target="_blank" rel="noopener">D.M. 1° agosto 2023 — Credito d'imposta<small>Decreto ministeriale</small></a>
+          <a href="documenti/DM_1agosto2023_Patrocinio_a_spese_dello_Stato.pdf" target="_blank" rel="noopener">D.M. 1° agosto 2023 — Patrocinio a spese dello Stato<small>Decreto ministeriale</small></a>
+          <a href="documenti/DM_150_2023.pdf" target="_blank" rel="noopener">D.M. 24 ottobre 2023, n. 150<small>Registro organismi di mediazione e formatori — G.U. 31/10/2023</small></a>
+          <a href="documenti/Codice_Amministrazione_Digitale.pdf" target="_blank" rel="noopener">Codice dell'Amministrazione Digitale<small>D.Lgs. 82/2005 e successive modifiche</small></a>
+          <a href="documenti/Direttiva_52_2008.pdf" target="_blank" rel="noopener">Direttiva 2008/52/CE<small>Mediazione in materia civile e commerciale — Parlamento e Consiglio UE</small></a>
+          <a href="documenti/Carta_Principi_Fondamentali_Avvocato_Europeo.pdf" target="_blank" rel="noopener">Carta dell'Avvocato Europeo<small>Principi fondamentali e Codice deontologico — C.C.B.E.</small></a>
+        </div>
+      </div>
       <a href="#contatti">Contatti</a>
     </nav>
     <div class="hdr-actions">
@@ -174,9 +210,9 @@
       <h1>L'associazione forense specialistica che promuove la diffusione della giustizia consensuale</h1>
       <p class="lead">U.N.A.M. riunisce i professionisti del mondo forense che sostengono e promuovono la mediazione, la negoziazione assistita e, in genere, le metodologie consensuali di risoluzione dei conflitti.</p>
       <div class="cta-row" style="margin-bottom:10px;">
-        <a href="https://unam.it/wp-content/uploads/2024/03/manifesto.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Manifesto</a>
-        <a href="https://unam.it/wp-content/uploads/2024/03/atto_costitutivo_unam.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Atto Costitutivo</a>
-        <a href="https://unam.it/wp-content/uploads/2025/05/STATUTO_agg_14-03-2025.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Statuto</a>
+        <a href="documenti/UNAM_Manifesto.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Manifesto</a>
+        <a href="documenti/UNAM_Atto_Costitutivo.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Atto Costitutivo</a>
+        <a href="documenti/UNAM_Statuto.pdf" target="_blank" rel="noopener" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">Statuto</a>
       </div>
       <div class="cta-row">
         <a href="unam_area_riservata_prototipo.html#registrati" class="btn btn-primary">Unisciti a noi</a>
@@ -623,6 +659,22 @@
   window.addEventListener('hashchange', function(){ showPage(location.hash); });
   document.getElementById('navtoggle').addEventListener('click', function(){
     document.getElementById('mainnav').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-dropdown > .dd-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var thisDd = btn.parentElement;
+      document.querySelectorAll('.nav-dropdown.open').forEach(function(dd){
+        if(dd !== thisDd) dd.classList.remove('open');
+      });
+      thisDd.classList.toggle('open');
+    });
+  });
+  document.addEventListener('click', function(e){
+    document.querySelectorAll('.nav-dropdown').forEach(function(dd){
+      if(!dd.contains(e.target)) dd.classList.remove('open');
+    });
   });
   document.getElementById('contactForm').addEventListener('submit', function(e){
     e.preventDefault();

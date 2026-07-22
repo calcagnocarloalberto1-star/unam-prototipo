@@ -68,6 +68,30 @@
   .card h3{font-size:16px;margin-bottom:14px;}
   .quick-actions{display:flex;flex-direction:column;gap:10px;}
 
+  .chat-layout{display:grid;grid-template-columns:260px 1fr;gap:0;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;height:560px;margin-top:18px;}
+  .chat-channels{background:var(--blue-pale);border-right:1px solid var(--line);overflow-y:auto;padding:10px;}
+  .chat-channel{padding:11px 12px;border-radius:9px;cursor:pointer;margin-bottom:4px;display:flex;flex-direction:column;gap:2px;}
+  .chat-channel:hover{background:rgba(255,255,255,.6);}
+  .chat-channel.active{background:#fff;box-shadow:0 2px 8px rgba(28,58,82,.08);}
+  .cc-name{font-weight:700;font-size:13.5px;color:var(--navy);}
+  .cc-desc{font-size:11.5px;color:var(--muted);}
+  .chat-main{display:flex;flex-direction:column;min-width:0;}
+  .chat-header{padding:16px 20px;border-bottom:1px solid var(--line);font-weight:700;color:var(--navy);font-size:15px;}
+  .chat-thread{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+  .chat-msg{display:flex;}
+  .chat-msg.me{justify-content:flex-end;}
+  .chat-bubble{max-width:70%;background:var(--blue-pale);border-radius:14px 14px 14px 4px;padding:10px 14px;display:flex;flex-direction:column;gap:3px;}
+  .chat-msg.me .chat-bubble{background:var(--navy);color:#fff;border-radius:14px 14px 4px 14px;}
+  .cm-author{font-size:11.5px;font-weight:700;color:var(--blue);}
+  .chat-msg.me .cm-author{color:#cfe0ec;}
+  .cm-text{font-size:14px;line-height:1.4;}
+  .cm-time{font-size:10.5px;color:var(--muted);align-self:flex-end;}
+  .chat-msg.me .cm-time{color:#9db8c9;}
+  .chat-input-row{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);}
+  .chat-input-row input{margin-bottom:0;flex:1;}
+  .chat-input-row button{white-space:nowrap;}
+  @media (max-width:760px){ .chat-layout{grid-template-columns:1fr;height:auto;} .chat-channels{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);} .chat-channel{flex-shrink:0;min-width:160px;} .chat-thread{height:360px;} }
+
   table.data{width:100%;border-collapse:collapse;font-size:13.5px;}
   table.data th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em;padding:8px 6px;border-bottom:2px solid var(--line);}
   table.data td{padding:11px 6px;border-bottom:1px solid var(--line);}
@@ -230,12 +254,59 @@
           <button class="btn btn-outline btn-block" onclick="showView('iscrizione-corso')">Iscriviti al nuovo corso 2026/2027</button>
         </div>
         <div class="card">
+          <h3>Chat associativa riservata</h3>
+          <p style="font-size:13.5px;color:var(--muted);">Confrontati con gli altri soci su bacheca generale, sezione locale, progetti tematici e corso di formazione.</p>
+          <button class="btn btn-primary btn-block" onclick="showView('chat')">Apri la chat associativa</button>
+        </div>
+        <div class="card">
           <h3>Il mio profilo</h3>
           <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span></p>
           <button class="btn btn-outline btn-block btn-sm" disabled>Modifica anagrafica (demo)</button>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ===================== CHAT ASSOCIATIVA RISERVATA ===================== -->
+<section class="view" id="chat">
+  <div class="wrap">
+    <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
+    <h1>Chat associativa riservata</h1>
+    <p style="color:var(--muted);margin-top:-8px;">Spazio di confronto riservato ai soci U.N.A.M., organizzato per canali tematici.</p>
+    <div class="chat-layout">
+      <aside class="chat-channels" id="chatChannels">
+        <div class="chat-channel active" data-channel="generale" onclick="selectChannel('generale', this)">
+          <span class="cc-name"># Bacheca generale</span>
+          <span class="cc-desc">Tutti i soci U.N.A.M.</span>
+        </div>
+        <div class="chat-channel" data-channel="sezione-roma" onclick="selectChannel('sezione-roma', this)">
+          <span class="cc-name"># Sezione Roma</span>
+          <span class="cc-desc">Soci della sezione locale</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-scuola" onclick="selectChannel('progetto-scuola', this)">
+          <span class="cc-name"># Progetto Scuola</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-pa" onclick="selectChannel('progetto-pa', this)">
+          <span class="cc-name"># Progetto P.A.</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="formazione" onclick="selectChannel('formazione', this)">
+          <span class="cc-name"># Corso di Alta Formazione</span>
+          <span class="cc-desc">Corsisti 2026/2027</span>
+        </div>
+      </aside>
+      <div class="chat-main">
+        <div class="chat-header" id="chatHeader"># Bacheca generale</div>
+        <div class="chat-thread" id="chatThread"></div>
+        <form class="chat-input-row" onsubmit="event.preventDefault(); sendChatMessage();">
+          <input type="text" id="chatInput" placeholder="Scrivi un messaggio…" autocomplete="off">
+          <button type="submit" class="btn btn-primary btn-sm">Invia</button>
+        </form>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la chat è simulata: i messaggi restano solo nella tua sessione del browser, non vengono realmente inviati né salvati.</p>
   </div>
 </section>
 
@@ -358,9 +429,90 @@
     { n: "Avv. Marco Conti", m: "Ordine di Bari · Sezione locale Puglia · richiesta del 18/07/2026" }
   ];
 
+  var currentChannel = 'generale';
+  var channelNames = {
+    'generale': 'Bacheca generale',
+    'sezione-roma': 'Sezione Roma',
+    'progetto-scuola': 'Progetto Scuola',
+    'progetto-pa': 'Progetto P.A.',
+    'formazione': 'Corso di Alta Formazione'
+  };
+  var chatData = {
+    'generale': [
+      { a: 'Avv. Beatrice Irene Tonelli', t: 'Buongiorno a tutti! Ricordo che venerdì c\'è la riunione del Comitato Esecutivo.', time: '09:12' },
+      { a: 'Avv. Carlo Alberto Calcagno', t: 'Confermo la mia presenza, porto anche il punto sul nuovo sito.', time: '09:20' },
+      { a: 'Segreteria U.N.A.M.', t: 'L\'ordine del giorno è stato inviato via email a tutti i soci.', time: '09:35' }
+    ],
+    'sezione-roma': [
+      { a: 'Avv. Marco Rossi', t: 'Qualcuno ha il verbale dell\'ultimo incontro di sezione?', time: '11:03' },
+      { a: 'Avv. Elena Bianchi', t: 'Te lo giro io nel pomeriggio.', time: '11:07' }
+    ],
+    'progetto-scuola': [
+      { a: 'Avv. Giulia Fantini', t: 'Ho aggiornato il calendario degli interventi nelle scuole di Roma per il prossimo trimestre.', time: '14:45' },
+      { a: 'Avv. Marco Conti', t: 'Perfetto, ci serve anche per il report al Ministero.', time: '14:52' }
+    ],
+    'progetto-pa': [
+      { a: 'Avv. Paola Serra', t: 'Il protocollo con gli enti pubblici sta generando le prime richieste di adesione territoriale.', time: '10:15' }
+    ],
+    'formazione': [
+      { a: 'Segreteria U.N.A.M.', t: 'Ricordiamo che il Modulo 3 del Corso si terrà venerdì 9 ottobre.', time: '08:30' },
+      { a: 'Avv. Demo Rossi', t: 'Sarà disponibile la registrazione per chi non può collegarsi?', time: '08:41' },
+      { a: 'Segreteria U.N.A.M.', t: 'Sì, la trovate nell\'area riservata entro 48 ore dalla lezione.', time: '08:50' }
+    ]
+  };
+
+  function selectChannel(ch, el){
+    currentChannel = ch;
+    document.querySelectorAll('.chat-channel').forEach(function(c){ c.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    document.getElementById('chatHeader').textContent = '# ' + channelNames[ch];
+    renderChatThread();
+  }
+
+  function renderChatThread(){
+    var thread = document.getElementById('chatThread');
+    if(!thread) return;
+    thread.innerHTML = '';
+    (chatData[currentChannel] || []).forEach(function(m){
+      var isMe = m.a === demoUser.nome;
+      var row = document.createElement('div');
+      row.className = 'chat-msg' + (isMe ? ' me' : '');
+      var bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      var author = document.createElement('span');
+      author.className = 'cm-author';
+      author.textContent = m.a;
+      var text = document.createElement('span');
+      text.className = 'cm-text';
+      text.textContent = m.t;
+      var time = document.createElement('span');
+      time.className = 'cm-time';
+      time.textContent = m.time;
+      bubble.appendChild(author);
+      bubble.appendChild(text);
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      thread.appendChild(row);
+    });
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function sendChatMessage(){
+    var input = document.getElementById('chatInput');
+    var val = input.value.trim();
+    if(!val) return;
+    var now = new Date();
+    var hh = ('0' + now.getHours()).slice(-2);
+    var mm = ('0' + now.getMinutes()).slice(-2);
+    chatData[currentChannel].push({ a: demoUser.nome, t: val, time: hh + ':' + mm });
+    input.value = '';
+    renderChatThread();
+  }
+
   function showView(id){
     document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
+    if(id === 'chat'){ renderChatThread(); }
     window.scrollTo(0,0);
   }
 
