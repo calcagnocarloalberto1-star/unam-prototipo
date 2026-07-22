@@ -296,6 +296,18 @@
           <span class="cc-name"># Corso di Alta Formazione</span>
           <span class="cc-desc">Corsisti 2026/2027</span>
         </div>
+        <div class="chat-channel" data-channel="comitato-esecutivo" onclick="selectChannel('comitato-esecutivo', this)">
+          <span class="cc-name"># Comitato Esecutivo</span>
+          <span class="cc-desc">Ufficio Direttivo + membri con deleghe</span>
+        </div>
+        <div class="chat-channel" data-channel="comitato-direttivo" onclick="selectChannel('comitato-direttivo', this)">
+          <span class="cc-name"># Comitato Direttivo</span>
+          <span class="cc-desc">Ufficio Direttivo nazionale</span>
+        </div>
+        <div class="chat-channel" data-channel="responsabili-sezione" onclick="selectChannel('responsabili-sezione', this)">
+          <span class="cc-name"># Responsabili di Sezione</span>
+          <span class="cc-desc">Coordinatori delle sezioni locali</span>
+        </div>
       </aside>
       <div class="chat-main">
         <div class="chat-header" id="chatHeader"># Bacheca generale</div>
@@ -435,7 +447,10 @@
     'sezione-roma': 'Sezione Roma',
     'progetto-scuola': 'Progetto Scuola',
     'progetto-pa': 'Progetto P.A.',
-    'formazione': 'Corso di Alta Formazione'
+    'formazione': 'Corso di Alta Formazione',
+    'comitato-esecutivo': 'Comitato Esecutivo',
+    'comitato-direttivo': 'Comitato Direttivo',
+    'responsabili-sezione': 'Responsabili di Sezione'
   };
   var chatData = {
     'generale': [
@@ -458,6 +473,21 @@
       { a: 'Segreteria U.N.A.M.', t: 'Ricordiamo che il Modulo 3 del Corso si terrà venerdì 9 ottobre.', time: '08:30' },
       { a: 'Avv. Demo Rossi', t: 'Sarà disponibile la registrazione per chi non può collegarsi?', time: '08:41' },
       { a: 'Segreteria U.N.A.M.', t: 'Sì, la trovate nell\'area riservata entro 48 ore dalla lezione.', time: '08:50' }
+    ],
+    'comitato-esecutivo': [
+      { a: 'Avv. Simone Frediani', t: 'Ricordo l\'incontro di Comitato Esecutivo di venerdì alle 15:00.', time: '10:02' },
+      { a: 'Avv. Elisa Fichera', t: 'Confermo la presenza, porto l\'aggiornamento sulle nuove adesioni.', time: '10:10' },
+      { a: 'Avv. Tiziana Rosania', t: 'Io mi collegherò da remoto, invio comunque il materiale in anticipo.', time: '10:14' }
+    ],
+    'comitato-direttivo': [
+      { a: 'Avv. Daniela Sità', t: 'Buongiorno, dobbiamo validare il bilancio preventivo 2027 entro fine mese.', time: '09:00' },
+      { a: 'Avv. Duccio Viligiardi', t: 'Ho preparato la bozza, la carico in giornata.', time: '09:05' },
+      { a: 'Avv. Cristina Corba', t: 'Perfetto, la metto all\'ordine del giorno della prossima riunione.', time: '09:11' }
+    ],
+    'responsabili-sezione': [
+      { a: 'Resp. Sezione Lombardia', t: 'Buongiorno colleghi, la sezione di Milano ha organizzato un evento formativo per ottobre.', time: '15:20' },
+      { a: 'Resp. Sezione Campania', t: 'Bene, lo segnaliamo anche nel prossimo bollettino alle altre sezioni.', time: '15:27' },
+      { a: 'Segreteria U.N.A.M.', t: 'Ricordiamo di inviare il report trimestrale delle attività di sezione entro il 30 del mese.', time: '15:40' }
     ]
   };
 
