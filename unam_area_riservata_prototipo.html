@@ -62,6 +62,14 @@
   .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
   .badge.ok{background:var(--good-bg);color:var(--good);}
   .badge.warn{background:var(--warn-bg);color:var(--warn);}
+  .badge.late{background:#000000;color:#ffffff;}
+
+  .quota-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .quota-toolbar .filters{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .quota-toolbar label{font-size:13px;font-weight:600;color:var(--navy);margin:0;display:flex;align-items:center;gap:6px;}
+  .quota-toolbar select{width:auto;padding:7px 10px;margin:0;font-size:13.5px;}
+  .quota-toolbar .chk-label{font-weight:400;color:var(--ink);}
+  table.data .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
   .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;}
   .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:22px;}
@@ -418,19 +426,46 @@
     <div class="admin-tabs">
       <button class="admin-tab active" id="tabSoci" onclick="switchAdminTab('soci')">Nuovi soci</button>
       <button class="admin-tab" id="tabCorsi" onclick="switchAdminTab('corsi')">Iscrizioni corsi</button>
+      <button class="admin-tab" id="tabQuote" onclick="switchAdminTab('quote')">Quote associative</button>
     </div>
     <div class="card" id="panelSoci">
       <div id="sociList"></div>
     </div>
     <div class="card" id="panelCorsi" style="display:none;">
       <div class="approval-row">
-        <div class="who"><div class="n">Avv. Elena Bruni</div><div class="m">Corso completo — quota ordinaria · € 550,00 · pagamento ricevuto</div></div>
+        <div class="who"><div class="n">Avv. Manuela Zanussi</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Pordenone (PN)</div></div>
         <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
       </div>
       <div class="approval-row">
-        <div class="who"><div class="n">Prat. Avv. Luca Ferri</div><div class="m">Singolo modulo M3 — Mediazione familiare · € 200,00 · pagamento ricevuto</div></div>
+        <div class="who"><div class="n">Avv. Giuseppe Chierici</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Reggio Emilia (RE)</div></div>
         <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
       </div>
+      <div class="approval-row">
+        <div class="who"><div class="n">Avv. Andrea Pasquariello</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Firenze (FI)</div></div>
+        <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
+      </div>
+    </div>
+    <div class="card" id="panelQuote" style="display:none;">
+      <h3 style="margin-top:0;">Registro quote associative — tesoreria</h3>
+      <p style="color:var(--muted);font-size:13.5px;margin-top:-8px;">Stato dei pagamenti delle quote per anno, con possibilità di registrare un incasso o inviare una richiesta di pagamento/rinnovo.</p>
+      <div class="quota-toolbar">
+        <div class="filters">
+          <label>Anno
+            <select id="quotaYear" onchange="renderQuoteTable()">
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026" selected>2026</option>
+            </select>
+          </label>
+          <label class="chk-label"><input type="checkbox" id="onlyMorosiChk" onchange="renderQuoteTable()"> Mostra solo soci morosi</label>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="sollecitoMassivo()">✉ Invia sollecito a tutti i morosi mostrati</button>
+      </div>
+      <table class="data">
+        <tr><th>Socio</th><th>Sezione</th><th>Importo</th><th>Stato</th><th>Azione</th></tr>
+        <tbody id="quotaTableBody"></tbody>
+      </table>
+      <p class="hint" style="margin-top:14px;">In una versione reale: storico pluriennale completo, esportazione contabile, solleciti automatici via email/PEC e integrazione con il pagamento online delle quote (cfr. requisito Art. 4.2 del Capitolato Tecnico — area soci e gestionale iscrizioni/pagamenti).</p>
     </div>
   </div>
 </section>
@@ -595,11 +630,86 @@
     paySuccess(label, total);
   }
 
+  var quotaImporto = 30;
+  var quoteDB = [
+    { nome: 'Avv. Marco Rossi', sezione: 'Roma', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'in attesa' } },
+    { nome: 'Avv. Elena Bianchi', sezione: 'Roma', stato: { 2024: 'pagato', 2025: 'moroso', 2026: 'moroso' } },
+    { nome: 'Prat. Avv. Giulia Fantini', sezione: 'Piemonte', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Marco Conti', sezione: 'Puglia', stato: { 2024: 'moroso', 2025: 'moroso', 2026: 'moroso' } },
+    { nome: 'Avv. Paola Serra', sezione: 'Lombardia', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'in attesa' } },
+    { nome: 'Avv. Simone Frediani', sezione: 'Campania', stato: { 2024: 'pagato', 2025: 'in attesa', 2026: 'in attesa' } },
+    { nome: 'Avv. Tiziana Rosania', sezione: 'Toscana', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Duccio Viligiardi', sezione: 'Toscana', stato: { 2024: 'moroso', 2025: 'in attesa', 2026: 'in attesa' } }
+  ];
+
+  function badgeForStato(s){
+    if(s === 'pagato') return '<span class="badge ok">Pagato</span>';
+    if(s === 'moroso') return '<span class="badge late">Moroso</span>';
+    return '<span class="badge warn">In attesa</span>';
+  }
+
+  function renderQuoteTable(){
+    var year = document.getElementById('quotaYear').value;
+    var onlyMorosi = document.getElementById('onlyMorosiChk').checked;
+    var body = document.getElementById('quotaTableBody');
+    var rows = quoteDB
+      .map(function(s, i){ return { s: s, i: i, stato: s.stato[year] || 'in attesa' }; })
+      .filter(function(r){ return !onlyMorosi || r.stato === 'moroso'; });
+
+    if(rows.length === 0){
+      body.innerHTML = '<tr><td colspan="5" class="empty">Nessun socio corrisponde al filtro selezionato.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = rows.map(function(r){
+      var actions = '';
+      if(r.stato !== 'pagato'){
+        actions = '<div class="row-actions">'
+          + '<button class="btn btn-sm btn-approve" onclick="markPaid(' + r.i + ',\'' + year + '\')">Segna come pagato</button>'
+          + '<button class="btn btn-sm btn-outline" onclick="sendPaymentRequest(' + r.i + ',\'' + year + '\')">Richiedi pagamento/rinnovo</button>'
+          + '</div>';
+      } else {
+        actions = '<span style="color:var(--muted);font-size:12.5px;">—</span>';
+      }
+      return '<tr>'
+        + '<td>' + r.s.nome + '</td>'
+        + '<td>' + r.s.sezione + '</td>'
+        + '<td>€ ' + quotaImporto + ',00</td>'
+        + '<td>' + badgeForStato(r.stato) + '</td>'
+        + '<td>' + actions + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function markPaid(i, year){
+    quoteDB[i].stato[year] = 'pagato';
+    alertInline('Pagamento registrato per ' + quoteDB[i].nome + ' — quota ' + year);
+    renderQuoteTable();
+  }
+
+  function sendPaymentRequest(i, year){
+    alertInline('Richiesta di pagamento/rinnovo quota ' + year + ' inviata a ' + quoteDB[i].nome);
+  }
+
+  function sollecitoMassivo(){
+    var year = document.getElementById('quotaYear').value;
+    var onlyMorosi = document.getElementById('onlyMorosiChk').checked;
+    var targets = quoteDB.filter(function(s){
+      var st = s.stato[year] || 'in attesa';
+      return onlyMorosi ? st === 'moroso' : st !== 'pagato';
+    });
+    if(targets.length === 0){ alertInline('Nessun socio da sollecitare per la quota ' + year + '.'); return; }
+    alertInline('Sollecito di pagamento/rinnovo quota ' + year + ' inviato a ' + targets.length + ' soci.');
+  }
+
   function switchAdminTab(tab){
     document.getElementById('tabSoci').classList.toggle('active', tab === 'soci');
     document.getElementById('tabCorsi').classList.toggle('active', tab === 'corsi');
+    document.getElementById('tabQuote').classList.toggle('active', tab === 'quote');
     document.getElementById('panelSoci').style.display = tab === 'soci' ? 'block' : 'none';
     document.getElementById('panelCorsi').style.display = tab === 'corsi' ? 'block' : 'none';
+    document.getElementById('panelQuote').style.display = tab === 'quote' ? 'block' : 'none';
+    if(tab === 'quote') renderQuoteTable();
   }
 
   function renderSociList(){
