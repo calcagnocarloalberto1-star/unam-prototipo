@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#1c3a52; --blue:#256391; --blue-light:#4a89b8; --blue-pale:#eaf2f8;
-    --gold:#c98a3a; --ink:#22303c; --muted:#5b6b78; --line:#dde6ec; --paper:#fbfaf7;
-    --white:#ffffff; --radius:14px; --shadow:0 10px 30px rgba(28,58,82,0.08);
-    --good:#2e7d4f; --good-bg:#e9f6ee; --warn:#8a5c1e; --warn-bg:#fbeed9;
+    --navy:#1273a8; --blue:#07a3c9; --blue-light:#03b9e5; --blue-pale:#e8f4fa;
+    --gold:#07a3c9; --ink:#353131; --muted:#868383; --line:#eaeaea; --paper:#ffffff;
+    --white:#ffffff; --radius:14px; --shadow:0 10px 30px rgba(18,115,168,0.08);
+    --good:#1273a8; --good-bg:#e3f6fc; --warn:#353131; --warn-bg:#eaeaea;
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;}
@@ -22,7 +22,7 @@
   .wrap.narrow{max-width:560px;}
   img{max-width:100%;display:block;}
 
-  .demo-ribbon{background:var(--gold);color:#3a2a0f;text-align:center;font-size:12.5px;font-weight:700;padding:7px 12px;}
+  .demo-ribbon{background:var(--gold);color:#ffffff;text-align:center;font-size:12.5px;font-weight:700;padding:7px 12px;}
 
   header.site{background:var(--white);border-bottom:1px solid var(--line);padding:14px 0;}
   header.site .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;}
@@ -108,7 +108,7 @@
 
   .success-box{text-align:center;padding:30px 10px;}
   .success-box .check{width:64px;height:64px;border-radius:50%;background:var(--good-bg);color:var(--good);font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
-  .receipt{background:#f6f9fb;border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:left;font-size:13.5px;max-width:380px;margin:18px auto 0;}
+  .receipt{background:#eef7fb;border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:left;font-size:13.5px;max-width:380px;margin:18px auto 0;}
   .receipt div{display:flex;justify-content:space-between;padding:4px 0;}
 
   .admin-tabs{display:flex;gap:10px;margin-bottom:22px;}
@@ -121,7 +121,7 @@
   .approval-row .who .m{font-size:12.5px;color:var(--muted);}
   .approval-row .actions{display:flex;gap:8px;}
   .btn-approve{background:var(--good);color:#fff;}
-  .btn-reject{background:#fff;color:#b3401f;border-color:#f0c2b0;}
+  .btn-reject{background:#fff;color:#353131;border-color:#cfcfcf;}
   .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:22px 0;}
 
   .back-link{display:inline-block;margin-bottom:18px;font-size:13.5px;font-weight:600;}
@@ -565,7 +565,7 @@
   function alertInline(msg){
     var el = document.createElement('div');
     el.textContent = msg;
-    el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1c3a52;color:#fff;padding:12px 22px;border-radius:999px;font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:999;';
+    el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1273a8;color:#fff;padding:12px 22px;border-radius:999px;font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:999;';
     document.body.appendChild(el);
     setTimeout(function(){ el.remove(); }, 3200);
   }
