@@ -258,6 +258,12 @@
           <button class="btn btn-primary btn-block" onclick="startRinnovo()">Rinnova la quota — € 30,00</button>
         </div>
         <div class="card">
+          <h3>Assemblea Generale</h3>
+          <p id="assembleaBadgeRow"><span class="badge warn">Da confermare</span></p>
+          <p style="font-size:13.5px;color:var(--muted);">Prossima Assemblea Generale — <strong>13 dicembre 2026</strong>, Roma (in presenza e da remoto).</p>
+          <button class="btn btn-primary btn-block" onclick="showView('assemblea')">Gestisci la mia partecipazione</button>
+        </div>
+        <div class="card">
           <h3>Corsi e formazione</h3>
           <p style="font-size:13.5px;color:var(--muted);">Sei iscritto/a a: <strong>Corso di Alta Formazione 2024/2025</strong> — completato.</p>
           <button class="btn btn-outline btn-block" onclick="showView('iscrizione-corso')">Iscriviti al nuovo corso 2026/2027</button>
@@ -350,6 +356,54 @@
         <p class="hint" style="text-align:center;margin-top:10px;">Pagamento simulato — nessun addebito reale (gateway dimostrativo).</p>
       </form>
     </div>
+  </div>
+</section>
+
+<!-- ===================== ASSEMBLEA GENERALE: PARTECIPAZIONE / DELEGA ===================== -->
+<section class="view" id="assemblea">
+  <div class="wrap narrow">
+    <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
+    <div class="auth-card">
+      <h2>Assemblea Generale — 13 dicembre 2026</h2>
+      <p class="sub">Roma, ore 10:00 — in presenza e da remoto (dettagli e link di collegamento nella convocazione)</p>
+
+      <div id="assembleaChoice">
+        <p style="font-size:13.5px;color:var(--muted);margin-top:-6px;">Indica come intendi partecipare all'Assemblea:</p>
+        <button class="btn btn-primary btn-block" onclick="dichiaraPartecipazione()">✓ Dichiaro che parteciperò</button>
+        <div class="divider">oppure</div>
+        <button class="btn btn-outline btn-block" onclick="showDelegaForm()">Non posso partecipare — genera una delega</button>
+      </div>
+
+      <div id="assembleaConfermata" style="display:none;text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--good-bg);color:var(--good);font-size:26px;display:flex;align-items:center;justify-content:center;margin:6px auto 18px;">✓</div>
+        <p>Hai dichiarato la tua partecipazione. Il tuo nominativo è stato aggiunto all'elenco dei soci presenti.</p>
+        <button class="btn btn-outline btn-block" onclick="resetAssemblea()">Annulla dichiarazione</button>
+      </div>
+
+      <div id="delegaForm" style="display:none;">
+        <p style="font-size:13.5px;color:var(--muted);margin-top:-6px;">Se non puoi partecipare, puoi delegare un altro socio a rappresentarti e votare in tua vece.</p>
+        <label>Socio delegato — nome e cognome</label>
+        <input type="text" id="delegaNome" placeholder="Es. Avv. Mario Bianchi">
+        <label>Sezione locale / Ordine di appartenenza del delegato</label>
+        <input type="text" id="delegaSezione" placeholder="Es. Sezione Roma">
+        <button class="btn btn-primary btn-block" onclick="generaDelega()">Genera scheda di delega</button>
+        <button class="link-btn" style="display:block;margin:12px auto 0;" onclick="resetAssemblea()">← Annulla</button>
+      </div>
+
+      <div id="delegaGenerata" style="display:none;">
+        <div class="divider">Scheda di delega generata</div>
+        <div class="receipt" style="max-width:100%;">
+          <div><span>Delegante</span><strong id="dgDelegante">—</strong></div>
+          <div><span>Delegato</span><strong id="dgDelegato">—</strong></div>
+          <div><span>Sezione delegato</span><strong id="dgSezione">—</strong></div>
+          <div><span>Assemblea</span><strong>13/12/2026, Roma</strong></div>
+        </div>
+        <p class="hint" style="margin-top:14px;">Con l'invio, la scheda di delega compilata viene trasmessa alla segreteria U.N.A.M. per la verifica e la registrazione ai fini della validità del voto in assemblea.</p>
+        <a id="delegaMailLink" class="btn btn-primary btn-block" href="#" target="_blank" rel="noopener">✉ Invia la delega alla segreteria U.N.A.M.</a>
+        <button class="link-btn" style="display:block;margin:12px auto 0;" onclick="showDelegaForm()">Modifica delega</button>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la dichiarazione di partecipazione e l'invio della delega sono dimostrativi: il pulsante di invio apre una bozza email verso l'indirizzo reale della segreteria U.N.A.M. (info@unam.it), che l'utente deve inviare autonomamente — nessun messaggio parte automaticamente. Nel sito reale l'invio genererà una comunicazione via email/PEC alla segreteria con la scheda di delega firmabile digitalmente, e la partecipazione/delega sarà registrata nel gestionale soci (cfr. Art. 4.2 del Capitolato Tecnico).</p>
   </div>
 </section>
 
@@ -606,6 +660,49 @@
   }
 
   function startRinnovo(){ showView('rinnova'); }
+
+  function resetAssembleaView(){
+    document.getElementById('assembleaChoice').style.display = 'block';
+    document.getElementById('assembleaConfermata').style.display = 'none';
+    document.getElementById('delegaForm').style.display = 'none';
+    document.getElementById('delegaGenerata').style.display = 'none';
+  }
+
+  function dichiaraPartecipazione(){
+    document.getElementById('assembleaChoice').style.display = 'none';
+    document.getElementById('assembleaConfermata').style.display = 'block';
+    document.getElementById('assembleaBadgeRow').innerHTML = '<span class="badge ok">Partecipazione confermata</span>';
+    alertInline('Partecipazione all\'Assemblea Generale del 13/12/2026 confermata.');
+  }
+
+  function resetAssemblea(){
+    resetAssembleaView();
+    document.getElementById('assembleaBadgeRow').innerHTML = '<span class="badge warn">Da confermare</span>';
+  }
+
+  function showDelegaForm(){
+    document.getElementById('assembleaChoice').style.display = 'none';
+    document.getElementById('assembleaConfermata').style.display = 'none';
+    document.getElementById('delegaGenerata').style.display = 'none';
+    document.getElementById('delegaForm').style.display = 'block';
+  }
+
+  function generaDelega(){
+    var nome = document.getElementById('delegaNome').value.trim() || '(nome del delegato non indicato)';
+    var sezione = document.getElementById('delegaSezione').value.trim() || '(sezione non indicata)';
+    document.getElementById('dgDelegante').textContent = demoUser.nome;
+    document.getElementById('dgDelegato').textContent = nome;
+    document.getElementById('dgSezione').textContent = sezione;
+
+    var subject = 'Delega Assemblea Generale UNAM 13/12/2026 - ' + demoUser.nome;
+    var body = 'Il/la sottoscritto/a ' + demoUser.nome + ', socio/a U.N.A.M., impossibilitato/a a partecipare di persona, delega il/la socio/a ' + nome + ' (' + sezione + ') a rappresentarlo/a e a votare in sua vece nell\'Assemblea Generale U.N.A.M. del 13 dicembre 2026, Roma.\n\nModulo generato dall\'area riservata soci (prototipo dimostrativo) e inviato per la registrazione alla segreteria.';
+    var link = document.getElementById('delegaMailLink');
+    link.href = 'mailto:info@unam.it?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+
+    document.getElementById('delegaForm').style.display = 'none';
+    document.getElementById('delegaGenerata').style.display = 'block';
+    document.getElementById('assembleaBadgeRow').innerHTML = '<span class="badge ok">Delega generata</span>';
+  }
 
   function paySuccess(label, amount){
     document.getElementById('rcCausale').textContent = label;
