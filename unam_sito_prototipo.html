@@ -118,6 +118,16 @@
   form.contact textarea{min-height:110px;resize:vertical;}
   .form-ok{display:none;background:#e3f6fc;color:#0b6d8f;border:1px solid #a9dced;padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:16px;}
 
+  .callout{background:var(--blue-pale);border-left:4px solid var(--blue);border-radius:0 10px 10px 0;padding:14px 18px;font-size:14px;color:var(--ink);margin:18px 0;}
+  .callout strong{color:var(--navy);}
+
+  .cert-preview{background:#fff;border:2px solid var(--navy);border-radius:14px;padding:36px 40px;text-align:center;max-width:640px;margin:22px auto 0;}
+  .cert-preview .cp-eyebrow{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;}
+  .cert-preview h3{font-family:'Source Serif 4',serif;color:var(--navy);font-size:22px;margin:10px 0 4px;}
+  .cert-preview .cp-name{font-size:26px;font-weight:700;color:var(--blue);margin:14px 0;font-family:'Source Serif 4',serif;}
+  .cert-preview .cp-detail{font-size:14px;color:var(--muted);margin:4px 0;}
+  .cert-preview .cp-credits{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink);}
+
   .cta-banner{background:linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%);color:#fff;border-radius:20px;padding:40px;text-align:center;}
   .cta-banner h2{color:#fff;}
   .cta-banner p{color:#eaf7fc;max-width:560px;margin:0 auto 22px;}
@@ -151,6 +161,7 @@
     footer .cols{grid-template-columns:1fr;}
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -551,7 +562,8 @@
         <div class="card">
           <span class="tag">Convegno</span>
           <h3 style="margin-top:10px;">Gli Orizzonti della Mediazione in Evoluzione</h3>
-          <p>Convegno nazionale di approfondimento sulle prospettive della mediazione civile e commerciale.</p>
+          <p>Convegno organizzato da una Sezione locale U.N.A.M., con la partecipazione del Comitato Esecutivo nazionale, dedicato alle prospettive della mediazione civile e commerciale.</p>
+          <a href="#evento-dettaglio" class="btn btn-outline dl" style="margin-top:12px;">Scopri di più e iscriviti →</a>
         </div>
         <div class="card">
           <span class="tag gold">Webinar</span>
@@ -564,8 +576,99 @@
           <p>26–28 novembre 2026 · Ergife Palace Hotel, Roma. Promosso dal Consiglio Nazionale Forense, con un'area tematica dedicata a mediazione, arbitrato e gestione dei conflitti, tra gli altri temi di attualità per l'avvocatura.</p>
         </div>
       </div>
-      <p style="margin-top:20px;font-size:13px;color:var(--muted);">In una versione reale: calendario mensile, filtri per categoria/sezione locale e possibilità di iscrizione online all'evento — oggi assente sul sito attuale.</p>
+      <p style="margin-top:20px;font-size:13px;color:var(--muted);">Il convegno "Gli Orizzonti della Mediazione in Evoluzione" mostra, a titolo dimostrativo, come potrebbe funzionare la vetrina di un evento organizzato da una Sezione locale: scheda dell'evento, iscrizione online e attestato di partecipazione con crediti formativi. In una versione reale: calendario mensile e filtri per categoria/sezione locale per tutti gli eventi.</p>
     </div>
+  </section>
+</section>
+
+<!-- ============ VETRINA EVENTO — DETTAGLIO / ISCRIZIONE / ATTESTATO ============ -->
+<section class="page" id="evento-dettaglio">
+  <div class="hero" style="padding:48px 0;">
+    <div class="wrap">
+      <span class="eyebrow">Convegno · Sezione locale U.N.A.M.</span>
+      <h1>Gli Orizzonti della Mediazione in Evoluzione</h1>
+      <p class="lead">Convegno organizzato da una Sezione locale U.N.A.M. presso la propria Corte d'Appello di riferimento, con la partecipazione di membri del Comitato Esecutivo nazionale, dedicato alle prospettive di sviluppo della mediazione civile e commerciale.</p>
+      <div class="cta-row">
+        <a href="#evento-iscrizione" class="btn btn-primary">Iscriviti all'evento</a>
+        <a href="#eventi" class="btn btn-outline" style="border-color:rgba(255,255,255,.6);color:#fff;">← Torna a Eventi</a>
+      </div>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="item"><span class="num">18 set. 2026</span><span class="lbl">data dell'evento</span></div>
+    <div class="item"><span class="num">4 ore</span><span class="lbl">durata complessiva</span></div>
+    <div class="item"><span class="num">In presenza</span><span class="lbl">Corte d'Appello, con diretta streaming</span></div>
+    <div class="item"><span class="num">Crediti formativi</span><span class="lbl">su riconoscimento del COA di appartenenza</span></div>
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <h3>Il convegno</h3>
+      <p style="max-width:760px;">Ogni Sezione locale U.N.A.M. — attiva presso la propria Corte d'Appello di riferimento — può organizzare eventi di approfondimento sulla mediazione e sulle materie ADR, utilizzando il marchio e il patrocinio di U.N.A.M. e con la partecipazione, quando previsto, di membri del Comitato Esecutivo o del Comitato Direttivo nazionale. Questa pagina mostra, a titolo dimostrativo, come una singola Sezione potrebbe presentare un proprio evento, raccoglierne le iscrizioni e rilasciare l'attestato di partecipazione.</p>
+      <table class="data" style="margin-top:22px;">
+        <tr><th>Orario</th><th>Programma</th></tr>
+        <tr><td>9:30</td><td>Registrazione partecipanti e welcome coffee</td></tr>
+        <tr><td>10:00</td><td>Apertura lavori — Responsabile della Sezione locale organizzatrice</td></tr>
+        <tr><td>10:20</td><td>Intervento — un membro del Comitato Esecutivo nazionale U.N.A.M.</td></tr>
+        <tr><td>10:50</td><td>Tavola rotonda: prospettive di sviluppo della mediazione civile e commerciale</td></tr>
+        <tr><td>12:30</td><td>Question &amp; answer con il pubblico</td></tr>
+        <tr><td>13:00</td><td>Chiusura lavori e attestati di partecipazione</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <h3>Crediti formativi</h3>
+      <div class="callout">
+        <strong>Il riconoscimento dei crediti formativi non è automatico.</strong> Come per tutti gli eventi organizzati dalle Sezioni locali, la richiesta di accreditamento viene presentata al Consiglio dell'Ordine degli Avvocati (COA) di competenza; il numero di crediti effettivamente riconosciuti — ed eventuali condizioni di frequenza minima — dipende dalla delibera del proprio COA di appartenenza. L'attestato generato in questa pagina dimostrativa riporta le ore di presenza registrate: sarà cura del partecipante verificare presso il proprio Ordine se e quanti crediti formativi vengono riconosciuti per questo evento.
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="evento-iscrizione">
+    <div class="wrap two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:36px;">
+      <div>
+        <h3>Iscriviti al convegno</h3>
+        <div class="form-ok" id="eventoFormOk">Iscrizione registrata — grazie! (demo, nessun invio reale)</div>
+        <form class="contact" id="eventoForm">
+          <label>Nome e cognome</label>
+          <input type="text" id="evNome" placeholder="Mario Rossi" required>
+          <label>Email</label>
+          <input type="email" id="evEmail" placeholder="mario.rossi@studiolegale.it" required>
+          <label>Ordine degli Avvocati di appartenenza (COA)</label>
+          <input type="text" id="evCoa" placeholder="Es. Ordine degli Avvocati di Milano" required>
+          <label>Sezione locale U.N.A.M. di riferimento (facoltativo)</label>
+          <input type="text" id="evSezione" placeholder="Es. Sezione Roma">
+          <button type="submit" class="btn btn-primary" style="width:100%;">Iscriviti all'evento</button>
+          <p style="font-size:12px;color:var(--muted);margin-top:10px;margin-bottom:0;">Iscrizione simulata — a fini dimostrativi nessun dato viene realmente registrato o trasmesso al COA.</p>
+        </form>
+      </div>
+      <div>
+        <h3>Attestato di partecipazione</h3>
+        <p style="color:var(--muted);font-size:14px;">Dopo l'evento, il partecipante iscritto potrà generare il proprio attestato con le ore di presenza registrate.</p>
+        <div id="certBox" style="display:none;">
+          <button class="btn btn-outline" id="certGenBtn" onclick="generaAttestato()">Genera attestato di partecipazione</button>
+        </div>
+        <p id="certLocked" style="font-size:13px;color:var(--muted);">Completa prima l'iscrizione qui a fianco per poter generare l'attestato.</p>
+
+        <div class="cert-preview" id="certPreview" style="display:none;">
+          <div class="cp-eyebrow">Attestato di partecipazione</div>
+          <h3>U.N.A.M. — Unione Nazionale Avvocati per la Mediazione</h3>
+          <p class="cp-detail">Si attesta che</p>
+          <div class="cp-name" id="certNome">—</div>
+          <p class="cp-detail">ha partecipato al convegno</p>
+          <p class="cp-detail" style="font-weight:700;color:var(--navy);">"Gli Orizzonti della Mediazione in Evoluzione"</p>
+          <p class="cp-detail">18 settembre 2026 — 4 ore di presenza registrata</p>
+          <div class="cp-credits">
+            Crediti formativi: <strong>da riconoscimento del COA di appartenenza</strong><br>
+            <span id="certCoa">—</span>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="scaricaAttestatoPdf()">⬇ Scarica attestato (PDF)</button>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:26px;font-size:13px;color:var(--muted);">In una versione reale: verifica automatica della presenza (check-in/QR code), invio dell'attestato via email e trasmissione della richiesta di accreditamento al COA di appartenenza direttamente dal gestionale eventi (cfr. Art. 4.2 del Capitolato Tecnico).</p>
   </section>
 </section>
 
@@ -693,6 +796,66 @@
     document.getElementById('formOk').style.display = 'block';
     this.reset();
   });
+
+  var eventoIscritto = null;
+  document.getElementById('eventoForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    eventoIscritto = {
+      nome: document.getElementById('evNome').value.trim() || 'Partecipante',
+      coa: document.getElementById('evCoa').value.trim() || 'Ordine non indicato',
+      sezione: document.getElementById('evSezione').value.trim()
+    };
+    document.getElementById('eventoFormOk').style.display = 'block';
+    document.getElementById('certLocked').style.display = 'none';
+    document.getElementById('certBox').style.display = 'block';
+    document.getElementById('certPreview').style.display = 'none';
+  });
+
+  function generaAttestato(){
+    if(!eventoIscritto) return;
+    document.getElementById('certNome').textContent = eventoIscritto.nome;
+    document.getElementById('certCoa').textContent = 'Ordine di appartenenza dichiarato: ' + eventoIscritto.coa + ' — verificare presso il proprio COA il numero di crediti riconosciuti per questo evento.';
+    document.getElementById('certPreview').style.display = 'block';
+  }
+
+  function scaricaAttestatoPdf(){
+    if(!eventoIscritto) return;
+    if(typeof window.jspdf === 'undefined'){
+      alert('Generazione PDF non disponibile offline in questo ambiente dimostrativo. Sul sito pubblicato online la funzione genera un vero PDF scaricabile.');
+      return;
+    }
+    var doc = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    var W = doc.internal.pageSize.getWidth();
+    doc.setDrawColor(18,115,168);
+    doc.setLineWidth(1.2);
+    doc.rect(8, 8, W - 16, doc.internal.pageSize.getHeight() - 16);
+    doc.setTextColor(201,138,58);
+    doc.setFontSize(11);
+    doc.text('ATTESTATO DI PARTECIPAZIONE', W/2, 30, { align: 'center' });
+    doc.setTextColor(18,58,82);
+    doc.setFontSize(16);
+    doc.text('U.N.A.M. — Unione Nazionale Avvocati per la Mediazione', W/2, 40, { align: 'center' });
+    doc.setTextColor(53,49,49);
+    doc.setFontSize(12);
+    doc.text('Si attesta che', W/2, 58, { align: 'center' });
+    doc.setTextColor(7,163,201);
+    doc.setFontSize(22);
+    doc.text(eventoIscritto.nome, W/2, 70, { align: 'center' });
+    doc.setTextColor(53,49,49);
+    doc.setFontSize(12);
+    doc.text('ha partecipato al convegno', W/2, 82, { align: 'center' });
+    doc.setFontSize(13);
+    doc.setTextColor(18,58,82);
+    doc.text('"Gli Orizzonti della Mediazione in Evoluzione"', W/2, 90, { align: 'center' });
+    doc.setTextColor(53,49,49);
+    doc.setFontSize(11);
+    doc.text('18 settembre 2026 — 4 ore di presenza registrata', W/2, 98, { align: 'center' });
+    doc.setFontSize(9.5);
+    doc.text('Crediti formativi soggetti a riconoscimento del COA di appartenenza (' + eventoIscritto.coa + ').', W/2, 112, { align: 'center' });
+    doc.text('Documento generato da un prototipo dimostrativo — non costituisce attestato ufficiale.', W/2, 118, { align: 'center' });
+    doc.save('Attestato_' + eventoIscritto.nome.replace(/\s+/g, '_') + '.pdf');
+  }
+
   showPage(location.hash);
 </script>
 </body>
