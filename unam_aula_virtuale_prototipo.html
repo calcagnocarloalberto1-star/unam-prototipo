@@ -396,6 +396,42 @@
 <script>
 /* ===================== DATI DEMO ===================== */
 var HOST = { name: 'Avv. Beatrice Irene Tonelli', initials: 'BT' };
+
+// Componenti reali degli organi associativi (cfr. Verbali associativi), usati come
+// partecipanti quando l'aula ospita una riunione di organo: qui la "classe" deve
+// riflettere la composizione effettiva del Comitato, non la platea di un corso.
+var COMMITTEE_ROSTERS = {
+  direttivo: [
+    { name: 'Avv. Daniela Sità', initials: 'DS' },
+    { name: 'Avv. Simone Frediani', initials: 'SF' },
+    { name: 'Avv. Cristina Corba', initials: 'CC' },
+    { name: 'Avv. Duccio Viligiardi', initials: 'DV' }
+  ],
+  esecutivo: [
+    { name: 'Avv. Daniela Sità', initials: 'DS' },
+    { name: 'Avv. Simone Frediani', initials: 'SF' },
+    { name: 'Avv. Cristina Corba', initials: 'CC' },
+    { name: 'Avv. Duccio Viligiardi', initials: 'DV' },
+    { name: 'Avv. Elisa Fichera', initials: 'EF' },
+    { name: 'Avv. Nicola Manenti', initials: 'NM' },
+    { name: 'Avv. Maria Francesca Rosa', initials: 'MR' },
+    { name: 'Avv. Tiziana Rosania', initials: 'TR' },
+    { name: 'Avv. Alessandra Vianello', initials: 'AV' }
+  ],
+  gestione: [
+    { name: 'Avv. Daniela Sità', initials: 'DS' },
+    { name: 'Avv. Cristina Corba', initials: 'CC' },
+    { name: 'Avv. Beatrice Irene Tonelli', initials: 'BT' },
+    { name: 'Avv. Carlo Alberto Calcagno', initials: 'CAC' },
+    { name: 'Avv. Donatella Pizzi', initials: 'DP' }
+  ]
+};
+// Chi presiede la riunione quando l'utente entra come partecipante (non come relatore/host)
+var COMMITTEE_HOST = {
+  direttivo: { name: 'Avv. Daniela Sità', initials: 'DS' },
+  esecutivo: { name: 'Avv. Daniela Sità', initials: 'DS' },
+  gestione: { name: 'Avv. Beatrice Irene Tonelli', initials: 'BT' }
+};
 var DEMO_PARTICIPANTS = [
   { name: 'Avv. Manuela Zanussi', initials: 'MZ' },
   { name: 'Avv. Giuseppe Chierici', initials: 'GC' },
@@ -625,11 +661,28 @@ function enterAula(){
 
 function buildParticipants(){
   participants = [];
+  var committee = COMMITTEE_ROSTERS[sessionType]; // definito solo per direttivo/esecutivo/gestione
+  var hostInfo = committee ? (COMMITTEE_HOST[sessionType] || committee[0]) : HOST;
   if(myRole==='host'){
     participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'host', isMe:true, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
   } else {
-    participants.push({ id:'host', name: HOST.name, initials: HOST.initials, role:'host', isMe:false, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
+    participants.push({ id:'host', name: hostInfo.name, initials: hostInfo.initials, role:'host', isMe:false, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
     participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'partecipante', isMe:true, coHost:false, mic:false, cam:true, hand:false, joinOffset:0, leaveOffset:null });
+  }
+  if(committee){
+    // Riunione di un organo associativo: la "platea" deve essere i soli componenti reali
+    // dell'organo (cfr. Verbali associativi), non la classe del Corso di Alta Formazione.
+    committee.forEach(function(d,i){
+      if(myRole!=='host' && d.name === hostInfo.name) return; // evita di duplicare chi presiede
+      participants.push({
+        id:'c'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false, coHost:false,
+        mic: (i%3!==0), cam: (i%2===0), hand:false,
+        joinOffset: i*15,
+        leaveOffset: null
+      });
+    });
+    videoPage = 0;
+    return;
   }
   DEMO_PARTICIPANTS.forEach(function(d,i){
     participants.push({
@@ -639,6 +692,7 @@ function buildParticipants(){
       leaveOffset: (i === DEMO_PARTICIPANTS.length-1) ? 240 : null
     });
   });
+  if(sessionType !== 'corso'){ videoPage = 0; return; } // riunione istantanea: nessuna folla da corso
   BULK_DEMO_PARTICIPANTS.forEach(function(d,i){
     participants.push({
       id:'b'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false, coHost:false,
