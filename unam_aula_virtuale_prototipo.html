@@ -165,6 +165,13 @@
   .part-search{margin:0 0 10px 0;background:#1a242e;border:1px solid rgba(255,255,255,.15);color:#fff;padding:8px 10px;font-size:12.5px;}
   .part-empty{color:#7c93a3;font-size:12.5px;text-align:center;padding:14px 0;}
 
+  /* ---- Co-organizzatori ---- */
+  .co-host-badge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:#1a242e;background:#ffce54;border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;}
+  .promote-btn{background:none;border:none;color:#7c93a3;cursor:pointer;font-size:12px;padding:2px 4px;flex:none;}
+  .promote-btn:hover{color:#ffce54;}
+  .promote-btn.active{color:#ffce54;}
+  .tile-name .co-host-badge{padding:0 5px;font-size:9px;}
+
   /* ---- Video pager (scalabilità 100+ discenti) ---- */
   .video-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;color:#cfe0ec;font-size:12.5px;}
   .video-pager button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
@@ -243,7 +250,7 @@
 
       <button class="btn btn-primary btn-block" onclick="enterAula()">Entra nell'aula</button>
 
-      <div class="cnf-note">ℹ️ In questo prototipo l'aula è simulata: gli altri partecipanti e i loro comportamenti (microfono, verifica di presenza, risposte ai sondaggi) sono generati automaticamente per mostrare il funzionamento del sistema. Il pulsante "Relatore/Host" mostra i controlli riservati a chi tiene la lezione (avvio sondaggi, registrazione, report finale); "Partecipante" mostra la vista di un corsista.</div>
+      <div class="cnf-note">ℹ️ In questo prototipo l'aula è simulata: gli altri partecipanti e i loro comportamenti (microfono, verifica di presenza, risposte ai sondaggi) sono generati automaticamente per mostrare il funzionamento del sistema. Il pulsante "Relatore/Host" mostra i controlli riservati a chi tiene la lezione (avvio sondaggi, registrazione, report finale, nomina di co-organizzatori); "Partecipante" mostra la vista di un corsista, che dopo qualche secondo viene reso co-organizzatore a titolo dimostrativo per mostrare come cambiano gli strumenti disponibili.</div>
     </div>
   </div>
 </section>
@@ -447,6 +454,27 @@ function getInitials(name){
   return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
 }
 
+/* ===================== CO-ORGANIZZATORI ===================== */
+// Il relatore (host) può rendere co-organizzatore uno o più partecipanti: i co-organizzatori
+// ottengono gli stessi strumenti di conduzione del relatore (sondaggi, documenti, registrazione,
+// pianificazione, inviti, rinomina di altri), ma solo il relatore può assegnare/revocare il ruolo.
+function amOrganizer(){
+  var me = participants.find(function(p){ return p.isMe; });
+  return myRole==='host' || !!(me && me.coHost);
+}
+function toggleCoHost(id){
+  if(myRole!=='host') return; // solo il relatore assegna/revoca i co-organizzatori
+  var pt = participants.find(function(p){ return p.id===id; });
+  if(!pt || pt.role==='host') return;
+  pt.coHost = !pt.coHost;
+  pushChat('Sistema', pt.coHost
+    ? '🌟 '+pt.name+' è stato reso co-organizzatore della riunione.'
+    : '↩️ A '+pt.name+' è stato revocato il ruolo di co-organizzatore.', false);
+  renderPartList();
+  renderVideoGrid();
+  if(pt.isMe){ renderControlBar(); renderPollHostControls(); renderDocPane(); }
+}
+
 /* ===================== JOIN SCREEN ===================== */
 function setJoinRole(role){
   myRole = role;
@@ -473,20 +501,35 @@ function enterAula(){
   if(myRole==='host'){
     // il relatore avvia la registrazione all'inizio della lezione, come da prassi CNF
     setTimeout(function(){ toggleRecording(true); }, 1200);
+  } else {
+    // Dimostrazione: se entri come partecipante, dopo poco il relatore ti rende
+    // co-organizzatore, per mostrare come cambiano i tuoi strumenti di conduzione.
+    setTimeout(function(){
+      var me = participants.find(function(p){ return p.isMe; });
+      if(me && !me.coHost){
+        me.coHost = true;
+        pushChat('Sistema', '🌟 Il relatore ti ha reso co-organizzatore della riunione: ora hai accesso anche a sondaggi, documenti, pianificazione e inviti.', false);
+        renderPartList();
+        renderVideoGrid();
+        renderControlBar();
+        renderPollHostControls();
+        renderDocPane();
+      }
+    }, 15000);
   }
 }
 
 function buildParticipants(){
   participants = [];
   if(myRole==='host'){
-    participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'host', isMe:true, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
+    participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'host', isMe:true, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
   } else {
-    participants.push({ id:'host', name: HOST.name, initials: HOST.initials, role:'host', isMe:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
-    participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'partecipante', isMe:true, mic:false, cam:true, hand:false, joinOffset:0, leaveOffset:null });
+    participants.push({ id:'host', name: HOST.name, initials: HOST.initials, role:'host', isMe:false, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
+    participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'partecipante', isMe:true, coHost:false, mic:false, cam:true, hand:false, joinOffset:0, leaveOffset:null });
   }
   DEMO_PARTICIPANTS.forEach(function(d,i){
     participants.push({
-      id:'p'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false,
+      id:'p'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false, coHost:false,
       mic: (i%3!==0), cam: (i%2===0), hand:false,
       joinOffset: i*15,
       leaveOffset: (i === DEMO_PARTICIPANTS.length-1) ? 240 : null
@@ -494,7 +537,7 @@ function buildParticipants(){
   });
   BULK_DEMO_PARTICIPANTS.forEach(function(d,i){
     participants.push({
-      id:'b'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false,
+      id:'b'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false, coHost:false,
       mic: (i%4===0), cam: (i%5===0), hand:false,
       joinOffset: (i%12)*10,
       leaveOffset: null
@@ -533,7 +576,7 @@ function tileHtml(pt){
   return '<div class="video-tile' + (pt.role==='host' ? ' host-tile' : '') + (pt.cam ? '' : ' tile-camoff') + '" data-pid="'+pt.id+'">' +
       '<div class="avatar-circle">'+pt.initials+'</div>' +
       (pt.hand ? '<div class="tile-hand">✋</div>' : '') +
-      '<div class="tile-name">'+(pt.role==='host' ? '🎓 ' : '')+pt.name+(pt.isMe ? ' (tu)' : '')+'</div>' +
+      '<div class="tile-name">'+(pt.role==='host' ? '🎓 ' : '')+pt.name+(pt.isMe ? ' (tu)' : '')+(pt.coHost ? ' <span class="co-host-badge">🌟 Co-org.</span>' : '')+'</div>' +
       '<div class="tile-icons">' +
         '<div class="mini-icon'+(pt.mic?'':' off')+'">'+(pt.mic?'🎤':'🔇')+'</div>' +
         '<div class="mini-icon'+(pt.cam?'':' off')+'">'+(pt.cam?'🎥':'📷')+'</div>' +
@@ -617,7 +660,8 @@ function renderPartList(){
   list.forEach(function(pt){
     var row = document.createElement('div');
     row.className = 'part-row';
-    var canRename = (myRole==='host') || pt.isMe;
+    var canRename = amOrganizer() || pt.isMe;
+    var canManageCoHost = (myRole==='host') && pt.role!=='host';
     if(renamingId === pt.id){
       row.innerHTML =
         '<div class="rename-edit">' +
@@ -632,8 +676,9 @@ function renderPartList(){
     }
     row.innerHTML =
       '<div class="pr-name">' +
-        '<span class="pr-name-text">'+(pt.role==='host'?'🎓 ':'👤 ')+pt.name+(pt.isMe?' <span style="color:#7c93a3;">(tu)</span>':'')+'</span>' +
+        '<span class="pr-name-text">'+(pt.role==='host'?'🎓 ':'👤 ')+pt.name+(pt.isMe?' <span style="color:#7c93a3;">(tu)</span>':'')+(pt.coHost?' <span class="co-host-badge">🌟 Co-org.</span>':'')+'</span>' +
         (canRename ? '<button class="rename-btn" title="Rinomina" onclick="startRenamePart(\''+pt.id+'\')">✏️</button>' : '') +
+        (canManageCoHost ? '<button class="promote-btn'+(pt.coHost?' active':'')+'" title="'+(pt.coHost?'Revoca co-organizzatore':'Rendi co-organizzatore')+'" onclick="toggleCoHost(\''+pt.id+'\')">'+(pt.coHost?'★':'☆')+'</button>' : '') +
       '</div>' +
       '<div class="pr-icons">'+(pt.mic?'🎤':'🔇')+' '+(pt.cam?'🎥':'📷')+(pt.hand?' ✋':'')+'</div>';
     el.appendChild(row);
@@ -725,7 +770,7 @@ function renderDocPane(){
 }
 function renderDocHostControls(){
   var el = document.getElementById('docHostControls');
-  if(myRole!=='host'){ el.innerHTML=''; return; }
+  if(!amOrganizer()){ el.innerHTML=''; return; }
   var options = DOC_PRESETS.map(function(d){ return '<option value="'+escAttr(d)+'">'+d+'</option>'; }).join('');
   el.innerHTML =
     '<div class="doc-share-box">' +
@@ -763,7 +808,7 @@ function renderDocList(){
       '<div class="doc-title">📄 '+doc.title+'</div>' +
       '<div class="doc-meta">Condiviso da '+doc.sharedBy+' — al minuto '+fmtTime(doc.atSecond)+'</div>' +
       '<div class="doc-actions">' +
-        (myRole==='host' ? '<button onclick="sendDocumentToAll(\''+doc.id+'\')">📧 Invia ai partecipanti</button>' : '') +
+        (amOrganizer() ? '<button onclick="sendDocumentToAll(\''+doc.id+'\')">📧 Invia ai partecipanti</button>' : '') +
       '</div>' +
       (doc.sentTo!==null ? '<div class="doc-sent-note">✅ Inviato via email a '+doc.sentTo+' partecipanti.</div>' : '') +
     '</div>';
@@ -851,7 +896,7 @@ function renderControlBar(){
   html += ctrlBtnHtml('part', '👥', 'Partecipanti', false, "toggleSidePanel('part')", (sideOpen&&currentSidePane==='part')?'active-panel':'');
   html += ctrlBtnHtml('poll', '📊', 'Sondaggi', false, "toggleSidePanel('poll')", (sideOpen&&currentSidePane==='poll')?'active-panel':'');
   html += ctrlBtnHtml('doc', '📄', 'Documenti', false, "toggleSidePanel('doc')", (sideOpen&&currentSidePane==='doc')?'active-panel':'');
-  if(myRole==='host'){
+  if(amOrganizer()){
     html += ctrlBtnHtml('rec', '⏺️', recording?'Reg. ON':'Registra', recording, "toggleRecording()", recording?'rec-active':'');
     html += '<button class="ctrl-btn" onclick="openModal(\'modalSchedule\')"><span class="ic">🗓️</span>Pianifica</button>';
     html += '<button class="ctrl-btn" onclick="openModal(\'modalInvite\')"><span class="ic">✉️</span>Invita</button>';
@@ -897,7 +942,7 @@ function leaveAsParticipant(){
 /* ===================== SONDAGGI: VERIFICA DI PRESENZA ===================== */
 function renderPollHostControls(){
   var el = document.getElementById('pollHostControls');
-  if(myRole!=='host'){ el.innerHTML=''; return; }
+  if(!amOrganizer()){ el.innerHTML=''; return; }
   el.innerHTML =
     '<div class="poll-launch">' +
       '<h4 style="color:#fff;font-size:13px;margin-bottom:8px;">🔔 Verifica di presenza</h4>' +
@@ -1079,7 +1124,7 @@ function buildReport(){
       ? '<span class="badge ok">Idoneo — credito riconosciuto</span>'
       : '<span class="badge bad">Non idoneo — credito da verificare</span>';
     var row = '<tr>' +
-      '<td>'+(pt.role==='host'?'🎓 ':'')+pt.name+(pt.isMe?' (tu)':'')+'</td>' +
+      '<td>'+(pt.role==='host'?'🎓 ':'')+pt.name+(pt.isMe?' (tu)':'')+(pt.coHost?' <span class="badge ok" style="margin-left:6px;">Co-organizzatore</span>':'')+'</td>' +
       '<td>'+fmtTime(joinSec)+'</td>' +
       '<td>'+(leaveSec>=totalDuration ? 'fine sessione' : fmtTime(leaveSec))+'</td>' +
       '<td>'+durationMin+' min</td>' +
