@@ -200,14 +200,14 @@
           <legend>Dati professionista</legend>
           <div class="grid2">
             <div><label>Titolo</label><select><option>Avvocato</option><option>Praticante Avvocato</option><option>Magistrato</option></select></div>
-            <div><label>Ordine di appartenenza</label><select><option>Roma</option><option>Milano</option><option>Firenze</option><option>Bologna</option><option>Napoli</option><option>… oltre 100 fori</option></select></div>
+            <div><label>Ordine di appartenenza</label><select id="regOrdine"><option>Roma</option><option>Milano</option><option>Firenze</option><option>Bologna</option><option>Napoli</option><option>… oltre 100 fori</option></select></div>
           </div>
           <div class="grid2">
             <div><label>Nome</label><input type="text" id="regNome" placeholder="Mario"></div>
             <div><label>Cognome</label><input type="text" id="regCognome" placeholder="Rossi"></div>
           </div>
           <label>Sezione locale U.N.A.M.</label>
-          <select><option>Roma</option><option>Firenze</option><option>Milano</option><option>… circa 40 sezioni</option></select>
+          <select id="regSezione"><option>Roma</option><option>Firenze</option><option>Milano</option><option>… circa 40 sezioni</option></select>
         </fieldset>
         <fieldset>
           <legend>Documenti</legend>
@@ -504,15 +504,15 @@
     <div class="card" id="panelCorsi" style="display:none;">
       <div class="approval-row">
         <div class="who"><div class="n">Avv. Manuela Zanussi</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Pordenone (PN)</div></div>
-        <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
+        <div class="actions"><button class="btn btn-sm btn-outline" onclick="openSchedaAdmin('Avv. Manuela Zanussi', {ordine:'Pordenone (PN)'})">📄 Apri scheda</button><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
       </div>
       <div class="approval-row">
         <div class="who"><div class="n">Avv. Giuseppe Chierici</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Reggio Emilia (RE)</div></div>
-        <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
+        <div class="actions"><button class="btn btn-sm btn-outline" onclick="openSchedaAdmin('Avv. Giuseppe Chierici', {ordine:'Reggio Emilia (RE)'})">📄 Apri scheda</button><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
       </div>
       <div class="approval-row">
         <div class="who"><div class="n">Avv. Andrea Pasquariello</div><div class="m">Corso completo 2026/2027 — quota anticipata · € 480,00 · Ordine di Firenze (FI)</div></div>
-        <div class="actions"><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
+        <div class="actions"><button class="btn btn-sm btn-outline" onclick="openSchedaAdmin('Avv. Andrea Pasquariello', {ordine:'Firenze (FI)'})">📄 Apri scheda</button><button class="btn btn-sm btn-approve" onclick="this.closest('.approval-row').remove()">Conferma iscrizione</button></div>
       </div>
     </div>
     <div class="card" id="panelQuote" style="display:none;">
@@ -629,6 +629,79 @@
   </div>
 </section>
 
+<!-- ===================== SCHEDA SOCIO (VISTA AMMINISTRATIVA) ===================== -->
+<section class="view" id="admin-scheda">
+  <div class="wrap" style="max-width:760px;">
+    <button class="link-btn back-link" onclick="showView('admin')">← Torna alla vista amministrativa</button>
+    <h1>Scheda socio <span style="vertical-align:middle;font-size:12px;" class="badge warn">Vista segreteria</span></h1>
+    <p style="color:var(--muted);margin-top:-8px;">Consulta e aggiorna i dati anagrafici, professionali e di contatto del socio selezionato.</p>
+
+    <div class="card" style="border:1px dashed var(--blue);background:var(--blue-pale);">
+      <h3>📄 Compilazione automatica da documento</h3>
+      <p style="font-size:13.5px;color:var(--muted);">Carica la scheda socio, il tesserino dell'Ordine o un documento simile (PDF, JPG o PNG) ricevuto dal socio: il sistema riconosce i dati e precompila automaticamente i campi sottostanti.</p>
+      <div class="grid2" style="align-items:end;">
+        <div><label>Documento da analizzare</label><input type="file" id="admSchedaFile" accept=".pdf,.jpg,.jpeg,.png" onchange="document.getElementById('admSchedaFileBtn').disabled = !this.files.length;"></div>
+        <div><button type="button" class="btn btn-primary btn-block" id="admSchedaFileBtn" disabled onclick="caricaSchedaFileAdmin()">🔍 Analizza e compila</button></div>
+      </div>
+      <p id="admSchedaFileStatus" style="font-size:13px;color:var(--navy);font-weight:600;min-height:18px;"></p>
+      <p class="hint" style="margin-top:2px;">In questo prototipo il riconoscimento è simulato: il documento non viene realmente analizzato né conservato. Nella versione reale il caricamento estrarrà i dati anagrafici tramite riconoscimento ottico (OCR), da confermare prima del salvataggio (cfr. Art. 4.2 del Capitolato Tecnico — area soci).</p>
+    </div>
+
+    <form onsubmit="event.preventDefault(); salvaSchedaAdmin();">
+      <div class="card">
+        <h3>Dati anagrafici e professionali</h3>
+        <div class="grid2">
+          <div><label>Titolo</label><select id="admTitolo"><option>Avvocato</option><option>Praticante Avvocato</option><option>Magistrato</option></select></div>
+          <div><label>Ordine di appartenenza</label><input type="text" id="admOrdine"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Nome</label><input type="text" id="admNome"></div>
+          <div><label>Cognome</label><input type="text" id="admCognome"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Sezione locale U.N.A.M.</label><input type="text" id="admSezione"></div>
+          <div><label>Codice Fiscale</label><input type="text" id="admCf" placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"></div>
+        </div>
+        <p class="hint">Il Codice Fiscale non viene precompilato automaticamente — nemmeno con la funzione di caricamento documento qui sopra — per motivi di riservatezza: va verificato sui documenti originali e inserito manualmente dalla segreteria.</p>
+      </div>
+
+      <div class="card">
+        <h3>Studio legale</h3>
+        <label>Denominazione studio</label><input type="text" id="admStudio">
+        <div class="grid2">
+          <div><label>Indirizzo</label><input type="text" id="admIndirizzo"></div>
+          <div><label>Città</label><input type="text" id="admCitta"></div>
+        </div>
+        <div class="grid2">
+          <div><label>CAP</label><input type="text" id="admCap"></div>
+          <div><label>Provincia</label><input type="text" id="admProvincia" maxlength="2" style="text-transform:uppercase;"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Partita IVA</label><input type="text" id="admPiva" placeholder="11 cifre" maxlength="11"></div>
+          <div><label>Sito web</label><input type="text" id="admSito"></div>
+        </div>
+        <p class="hint">Anche la Partita IVA è lasciata vuota per riservatezza e va inserita manualmente.</p>
+      </div>
+
+      <div class="card">
+        <h3>Contatti</h3>
+        <div class="grid2">
+          <div><label>Email</label><input type="email" id="admEmail"></div>
+          <div><label>PEC</label><input type="email" id="admPec"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Telefono</label><input type="tel" id="admTelefono"></div>
+          <div><label>Cellulare</label><input type="tel" id="admCellulare"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">💾 Salva la scheda del socio</button>
+    </form>
+
+    <p class="hint" style="margin-top:14px;">In questo prototipo i dati mostrati per gli altri soci sono generati automaticamente a fini dimostrativi e le modifiche non vengono salvate in modo permanente. Nella versione reale ogni scheda sarà collegata al gestionale soci, con storico delle modifiche e tracciamento di chi le ha effettuate (cfr. Art. 4.2 del Capitolato Tecnico).</p>
+  </div>
+</section>
+
 <script>
   var demoUser = {
     nome: "Avv. Demo Rossi", titolo: "Avvocato", nomeProprio: "Demo", cognome: "Rossi",
@@ -639,9 +712,64 @@
     cf: "", piva: ""
   };
   var pendingSoci = [
-    { n: "Prat. Avv. Lorenzo Guidi", m: "Ordine di Torino · Sezione locale Piemonte · richiesta del 20/07/2026" },
-    { n: "Avv. Sara Moretti", m: "Ordine di Bari · Sezione locale Puglia · richiesta del 18/07/2026" }
+    { n: "Prat. Avv. Lorenzo Guidi", ordine: "Torino", sezione: "Piemonte", data: "20/07/2026" },
+    { n: "Avv. Sara Moretti", ordine: "Bari", sezione: "Puglia", data: "18/07/2026" }
   ];
+
+  // Registro condiviso delle "schede" complete degli altri soci, usato dalla vista amministrativa.
+  // Popolato pigramente da getScheda() con dati fittizi coerenti — mai con dati reali di terzi.
+  var schedeSoci = {};
+  var currentAdminScheda = null;
+
+  function slugifyNome(nome){
+    return nome
+      .replace(/^(Prat\.\s*Avv\.|Avv\.|Dott\.|Resp\.\s*Sezione)\s*/,'')
+      .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-z\s]/g,'').trim().split(/\s+/).join('.') || 'socio';
+  }
+
+  function getScheda(nome, hint){
+    hint = hint || {};
+    if(!schedeSoci[nome]){
+      var titolo = /^Prat\.\s*Avv\./.test(nome) ? 'Praticante Avvocato' : 'Avvocato';
+      var pulito = nome.replace(/^(Prat\.\s*Avv\.|Avv\.|Dott\.|Resp\.\s*Sezione)\s*/,'');
+      var parti = pulito.trim().split(/\s+/);
+      var cognome = parti.length > 1 ? parti.pop() : pulito;
+      var nomeProprio = parti.join(' ') || pulito;
+      var slug = slugifyNome(nome);
+      var localita = hint.sezione || hint.ordine || 'Roma';
+      schedeSoci[nome] = {
+        titolo: titolo, nomeProprio: nomeProprio, cognome: cognome,
+        ordine: hint.ordine || (hint.sezione ? ('Ordine di ' + hint.sezione) : '—'),
+        sezione: hint.sezione || hint.ordine || '—',
+        studio: 'Studio Legale ' + cognome,
+        indirizzo: 'Via ' + cognome + ', 1', citta: localita, cap: '00100', provincia: 'XX',
+        sito: 'www.studiolegale' + slug.replace(/\./g,'') + '-demo.it',
+        email: slug + '@unam-demo.it', pec: slug + '@pec-demo.it',
+        telefono: '06 0000000', cellulare: '333 0000000',
+        cf: '', piva: ''
+      };
+    }
+    return schedeSoci[nome];
+  }
+
+  function fillSchedaFields(prefix, data){
+    document.getElementById(prefix+'Titolo').value = data.titolo;
+    document.getElementById(prefix+'Ordine').value = data.ordine;
+    document.getElementById(prefix+'Nome').value = data.nomeProprio;
+    document.getElementById(prefix+'Cognome').value = data.cognome;
+    document.getElementById(prefix+'Sezione').value = data.sezione;
+    document.getElementById(prefix+'Studio').value = data.studio;
+    document.getElementById(prefix+'Indirizzo').value = data.indirizzo;
+    document.getElementById(prefix+'Citta').value = data.citta;
+    document.getElementById(prefix+'Cap').value = data.cap;
+    document.getElementById(prefix+'Provincia').value = data.provincia;
+    document.getElementById(prefix+'Sito').value = data.sito;
+    document.getElementById(prefix+'Email').value = data.email;
+    document.getElementById(prefix+'Pec').value = data.pec;
+    document.getElementById(prefix+'Telefono').value = data.telefono;
+    document.getElementById(prefix+'Cellulare').value = data.cellulare;
+  }
 
   var currentChannel = 'generale';
   var channelNames = {
@@ -777,23 +905,9 @@
   }
 
   function apriSchedaAccount(){
-    document.getElementById('accTitolo').value = demoUser.titolo;
-    document.getElementById('accOrdine').value = demoUser.ordine;
-    document.getElementById('accNome').value = demoUser.nomeProprio;
-    document.getElementById('accCognome').value = demoUser.cognome;
-    document.getElementById('accSezione').value = demoUser.sezione;
+    fillSchedaFields('acc', demoUser);
     document.getElementById('accCf').value = demoUser.cf || '';
-    document.getElementById('accStudio').value = demoUser.studio;
-    document.getElementById('accIndirizzo').value = demoUser.indirizzo;
-    document.getElementById('accCitta').value = demoUser.citta;
-    document.getElementById('accCap').value = demoUser.cap;
-    document.getElementById('accProvincia').value = demoUser.provincia;
     document.getElementById('accPiva').value = demoUser.piva || '';
-    document.getElementById('accSito').value = demoUser.sito;
-    document.getElementById('accEmail').value = demoUser.email;
-    document.getElementById('accPec').value = demoUser.pec;
-    document.getElementById('accTelefono').value = demoUser.telefono;
-    document.getElementById('accCellulare').value = demoUser.cellulare;
     document.getElementById('schedaFileStatus').textContent = '';
     document.getElementById('schedaFile').value = '';
     document.getElementById('schedaFileBtn').disabled = true;
@@ -807,25 +921,86 @@
     status.textContent = '⏳ Analisi di «' + fileName + '» in corso…';
     document.getElementById('schedaFileBtn').disabled = true;
     setTimeout(function(){
-      document.getElementById('accTitolo').value = demoUser.titolo;
-      document.getElementById('accOrdine').value = demoUser.ordine;
-      document.getElementById('accNome').value = demoUser.nomeProprio;
-      document.getElementById('accCognome').value = demoUser.cognome;
-      document.getElementById('accSezione').value = demoUser.sezione;
-      document.getElementById('accStudio').value = demoUser.studio;
-      document.getElementById('accIndirizzo').value = demoUser.indirizzo;
-      document.getElementById('accCitta').value = demoUser.citta;
-      document.getElementById('accCap').value = demoUser.cap;
-      document.getElementById('accProvincia').value = demoUser.provincia;
-      document.getElementById('accSito').value = demoUser.sito;
-      document.getElementById('accEmail').value = demoUser.email;
-      document.getElementById('accPec').value = demoUser.pec;
-      document.getElementById('accTelefono').value = demoUser.telefono;
-      document.getElementById('accCellulare').value = demoUser.cellulare;
+      fillSchedaFields('acc', demoUser);
       status.textContent = '✓ Dati riconosciuti e precompilati da «' + fileName + '». Verifica e correggi se necessario prima di salvare (Codice Fiscale e Partita IVA restano da inserire manualmente).';
       document.getElementById('schedaFileBtn').disabled = false;
       alertInline('Documento analizzato: campi precompilati automaticamente (demo).');
     }, 1400);
+  }
+
+  function openSchedaAdmin(nome, hint){
+    currentAdminScheda = nome;
+    var sc = getScheda(nome, hint);
+    fillSchedaFields('adm', sc);
+    document.getElementById('admCf').value = sc.cf || '';
+    document.getElementById('admPiva').value = sc.piva || '';
+    document.getElementById('admSchedaFileStatus').textContent = '';
+    document.getElementById('admSchedaFile').value = '';
+    document.getElementById('admSchedaFileBtn').disabled = true;
+    showView('admin-scheda');
+  }
+
+  function caricaSchedaFileAdmin(){
+    var fileInput = document.getElementById('admSchedaFile');
+    var status = document.getElementById('admSchedaFileStatus');
+    var fileName = (fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : 'documento';
+    status.textContent = '⏳ Analisi di «' + fileName + '» in corso…';
+    document.getElementById('admSchedaFileBtn').disabled = true;
+    setTimeout(function(){
+      var sc = schedeSoci[currentAdminScheda];
+      if(sc){ fillSchedaFields('adm', sc); }
+      status.textContent = '✓ Dati riconosciuti e precompilati da «' + fileName + '». Verifica e correggi se necessario prima di salvare (Codice Fiscale e Partita IVA restano da inserire manualmente).';
+      document.getElementById('admSchedaFileBtn').disabled = false;
+      alertInline('Documento analizzato: campi precompilati automaticamente (demo).');
+    }, 1400);
+  }
+
+  function salvaSchedaAdmin(){
+    if(!currentAdminScheda || !schedeSoci[currentAdminScheda]) return;
+    var sc = schedeSoci[currentAdminScheda];
+    sc.titolo = document.getElementById('admTitolo').value;
+    sc.nomeProprio = document.getElementById('admNome').value || sc.nomeProprio;
+    sc.cognome = document.getElementById('admCognome').value || sc.cognome;
+    sc.ordine = document.getElementById('admOrdine').value;
+    sc.sezione = document.getElementById('admSezione').value;
+    sc.cf = document.getElementById('admCf').value;
+    sc.studio = document.getElementById('admStudio').value;
+    sc.indirizzo = document.getElementById('admIndirizzo').value;
+    sc.citta = document.getElementById('admCitta').value;
+    sc.cap = document.getElementById('admCap').value;
+    sc.provincia = document.getElementById('admProvincia').value;
+    sc.piva = document.getElementById('admPiva').value;
+    sc.sito = document.getElementById('admSito').value;
+    sc.email = document.getElementById('admEmail').value;
+    sc.pec = document.getElementById('admPec').value;
+    sc.telefono = document.getElementById('admTelefono').value;
+    sc.cellulare = document.getElementById('admCellulare').value;
+
+    var prefisso = sc.titolo === 'Avvocato' ? 'Avv. ' : (sc.titolo === 'Praticante Avvocato' ? 'Prat. Avv. ' : '');
+    var nuovoNome = (prefisso + sc.nomeProprio + ' ' + sc.cognome).trim();
+    var vecchioNome = currentAdminScheda;
+    if(nuovoNome !== vecchioNome){
+      schedeSoci[nuovoNome] = sc;
+      delete schedeSoci[vecchioNome];
+    }
+    syncSchedaToLists(vecchioNome, nuovoNome, sc);
+    currentAdminScheda = nuovoNome;
+
+    showView('admin');
+    alertInline('Scheda del socio aggiornata (demo) — le modifiche non vengono salvate in modo permanente in questo prototipo.');
+  }
+
+  function syncSchedaToLists(vecchioNome, nuovoNome, sc){
+    pendingSoci.forEach(function(p){
+      if(p.n === vecchioNome){ p.n = nuovoNome; p.ordine = sc.ordine.replace(/^Ordine di\s*/,''); p.sezione = sc.sezione; }
+    });
+    if(typeof quoteDB !== 'undefined'){
+      quoteDB.forEach(function(q){
+        if(q.nome === vecchioNome){ q.nome = nuovoNome; q.sezione = sc.sezione; }
+      });
+    }
+    renderSociList();
+    if(document.getElementById('quotaTableBody')) renderQuoteTable();
   }
 
   function salvaScheda(){
@@ -857,7 +1032,9 @@
   function submitRegistrazione(){
     var nome = document.getElementById('regNome').value || 'Nuovo';
     var cognome = document.getElementById('regCognome').value || 'Iscritto';
-    pendingSoci.push({ n: 'Avv. ' + nome + ' ' + cognome, m: 'Richiesta appena inviata · in attesa di approvazione' });
+    var ordine = document.getElementById('regOrdine').value;
+    var sezione = document.getElementById('regSezione').value;
+    pendingSoci.push({ n: 'Avv. ' + nome + ' ' + cognome, ordine: ordine, sezione: sezione, data: 'oggi' });
     renderSociList();
     showView('login');
     alertInline('Richiesta inviata: la tua scheda sarà attivata dopo la conferma del direttivo.');
@@ -980,12 +1157,13 @@
       } else {
         actions = '<span style="color:var(--muted);font-size:12.5px;">—</span>';
       }
+      var schedaBtn = '<button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openSchedaAdmin(\'' + r.s.nome.replace(/'/g,"\\'") + '\', {sezione:\'' + r.s.sezione.replace(/'/g,"\\'") + '\'})">📄 Apri scheda</button>';
       return '<tr>'
         + '<td>' + r.s.nome + '</td>'
         + '<td>' + r.s.sezione + '</td>'
         + '<td>€ ' + quotaImporto + ',00</td>'
         + '<td>' + badgeForStato(r.stato) + '</td>'
-        + '<td>' + actions + '</td>'
+        + '<td>' + actions + schedaBtn + '</td>'
         + '</tr>';
     }).join('');
   }
@@ -1025,9 +1203,11 @@
     var box = document.getElementById('sociList');
     if(pendingSoci.length === 0){ box.innerHTML = '<div class="empty">Nessuna richiesta in attesa.</div>'; return; }
     box.innerHTML = pendingSoci.map(function(s, i){
+      var meta = 'Ordine di ' + s.ordine + ' · Sezione locale ' + s.sezione + ' · richiesta del ' + s.data;
       return '<div class="approval-row">'
-        + '<div class="who"><div class="n">' + s.n + '</div><div class="m">' + s.m + '</div></div>'
+        + '<div class="who"><div class="n">' + s.n + '</div><div class="m">' + meta + '</div></div>'
         + '<div class="actions">'
+        + '<button class="btn btn-sm btn-outline" onclick="openSchedaAdmin(\'' + s.n.replace(/'/g,"\\'") + '\', {ordine:\'' + s.ordine.replace(/'/g,"\\'") + '\', sezione:\'' + s.sezione.replace(/'/g,"\\'") + '\'})">📄 Apri scheda</button>'
         + '<button class="btn btn-sm btn-approve" onclick="approveSocio(' + i + ')">Approva</button>'
         + '<button class="btn btn-sm btn-reject" onclick="rejectSocio(' + i + ')">Rifiuta</button>'
         + '</div></div>';
