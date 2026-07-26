@@ -265,9 +265,10 @@
         <option value="direttivo">🏛️ Riunione del Comitato Direttivo</option>
         <option value="esecutivo">🗂️ Riunione del Comitato Esecutivo</option>
         <option value="gestione">🎓 Riunione del Comitato di Gestione</option>
+        <option value="sezione">📍 Evento di una Sezione locale (pubblico)</option>
         <option value="istantanea">🚀 Riunione istantanea (senza pianificazione)</option>
       </select>
-      <p style="font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:18px;">La piattaforma video ospita anche le riunioni degli organi associativi. L'Assemblea Generale dei soci non è gestita da questa aula virtuale.</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:18px;">La piattaforma video ospita anche le riunioni degli organi associativi e gli eventi delle Sezioni locali. L'Assemblea Generale dei soci non è gestita da questa aula virtuale.</p>
 
       <label>Il tuo nome</label>
       <input type="text" id="joinName" value="Avv. Demo Rossi">
@@ -432,6 +433,12 @@ var COMMITTEE_HOST = {
   esecutivo: { name: 'Avv. Daniela Sità', initials: 'DS' },
   gestione: { name: 'Avv. Beatrice Irene Tonelli', initials: 'BT' }
 };
+// Per i tipi di sessione senza un organo con componenti nominativi (es. evento di Sezione,
+// aperto da uno dei ~40 Responsabili di Sezione o da un organo centrale): un'etichetta di
+// ruolo generica, non un nome di persona reale specifico.
+var GENERIC_HOSTS = {
+  sezione: { name: 'Responsabile di Sezione (o organo centrale)', initials: 'RS' }
+};
 var DEMO_PARTICIPANTS = [
   { name: 'Avv. Manuela Zanussi', initials: 'MZ' },
   { name: 'Avv. Giuseppe Chierici', initials: 'GC' },
@@ -565,6 +572,17 @@ var SESSION_TYPES = {
     recNote: '📹 Trattandosi di una riunione del Comitato di Gestione, non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Il relativo verbale può essere redatto e conservato nel modulo Verbali associativi.',
     hasCredits: false
   },
+  sezione: {
+    badge: '📍 Evento di una Sezione locale',
+    title: 'Evento di una Sezione locale',
+    desc: 'Evento organizzato da una Sezione locale, o da un organo centrale (Comitato Direttivo o Comitato Esecutivo): a differenza delle lezioni del corso e delle riunioni degli organi, è un evento pubblico — il link di collegamento può essere condiviso liberamente, anche con chi non è ancora socio, e comparire nella vetrina Eventi della home del sito.',
+    meta: '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>Responsabile di Sezione o organo centrale</b></div>',
+    topTitle: 'Evento di una Sezione locale',
+    topSub: 'Evento pubblico',
+    reportSubtitle: 'Evento di una Sezione locale — evento pubblico, senza lezione del Corso di Alta Formazione',
+    recNote: '📹 Trattandosi di un evento di Sezione, non collegato a un modulo del Corso di Alta Formazione, questa sessione non genera automaticamente crediti formativi: come per gli altri eventi organizzati dalle Sezioni locali, un eventuale accreditamento va richiesto al Consiglio dell\'Ordine degli Avvocati (COA) di competenza. Il report resta comunque disponibile come registro di partecipazione.',
+    hasCredits: false
+  },
   istantanea: {
     badge: '🚀 Riunione istantanea',
     title: 'Riunione istantanea — senza lezione pianificata',
@@ -578,14 +596,16 @@ var SESSION_TYPES = {
   }
 };
 var sessionType = 'corso';
+var sezioneNome = null; // nome della Sezione locale organizzatrice, se l'evento arriva da un link con ?tipo=sezione&sezione=...
 function applySessionType(){
   var sel = document.getElementById('sessionTypeSelect');
   sessionType = sel ? sel.value : 'corso';
   var cfg = SESSION_TYPES[sessionType];
-  document.getElementById('joinLessonBadge').textContent = cfg.badge;
+  var suffisso = (sessionType === 'sezione' && sezioneNome) ? (' — ' + sezioneNome) : '';
+  document.getElementById('joinLessonBadge').textContent = cfg.badge + suffisso;
   document.getElementById('joinLessonTitle').textContent = cfg.title;
   document.getElementById('joinLessonDesc').textContent = cfg.desc;
-  document.getElementById('joinLessonMeta').innerHTML = cfg.meta;
+  document.getElementById('joinLessonMeta').innerHTML = cfg.meta + (suffisso ? '<div>📍 Sezione organizzatrice: <b>' + sezioneNome + '</b></div>' : '');
 }
 
 /* Precompilazione da parametri in query string (link diretti da altre pagine, es. Verbali associativi) */
@@ -593,6 +613,8 @@ var pendingVerbaleDoc = null;
 (function(){
   var params = new URLSearchParams(window.location.search);
   var tipo = params.get('tipo');
+  var sezioneParam = params.get('sezione');
+  if(sezioneParam){ sezioneNome = sezioneParam; }
   if(tipo && SESSION_TYPES[tipo]){
     var sel = document.getElementById('sessionTypeSelect');
     if(sel){ sel.value = tipo; }
@@ -618,7 +640,8 @@ function enterAula(){
   document.getElementById('screen-join').classList.remove('active');
   document.getElementById('screen-aula').classList.add('active');
   var sessionCfg = SESSION_TYPES[sessionType];
-  document.getElementById('avTitleBlock').innerHTML = sessionCfg.topTitle + '<small>' + sessionCfg.topSub + '</small>';
+  var topSubText = (sessionType === 'sezione' && sezioneNome) ? (sessionCfg.topSub + ' — ' + sezioneNome) : sessionCfg.topSub;
+  document.getElementById('avTitleBlock').innerHTML = sessionCfg.topTitle + '<small>' + topSubText + '</small>';
   sharedDocuments = [];
   presentingDoc = null;
   if(pendingVerbaleDoc){
@@ -662,7 +685,7 @@ function enterAula(){
 function buildParticipants(){
   participants = [];
   var committee = COMMITTEE_ROSTERS[sessionType]; // definito solo per direttivo/esecutivo/gestione
-  var hostInfo = committee ? (COMMITTEE_HOST[sessionType] || committee[0]) : HOST;
+  var hostInfo = committee ? (COMMITTEE_HOST[sessionType] || committee[0]) : (GENERIC_HOSTS[sessionType] || HOST);
   if(myRole==='host'){
     participants.push({ id:'me', name: myName, initials: getInitials(myName), role:'host', isMe:true, coHost:false, mic:true, cam:true, hand:false, joinOffset:0, leaveOffset:null });
   } else {
@@ -692,7 +715,9 @@ function buildParticipants(){
       leaveOffset: (i === DEMO_PARTICIPANTS.length-1) ? 240 : null
     });
   });
-  if(sessionType !== 'corso'){ videoPage = 0; return; } // riunione istantanea: nessuna folla da corso
+  // Gli eventi di Sezione sono pubblici e pensati per collegarsi insieme ai corsisti: usano
+  // la stessa platea simulata delle lezioni del corso. Le riunioni istantanee restano invece leggere.
+  if(sessionType !== 'corso' && sessionType !== 'sezione'){ videoPage = 0; return; }
   BULK_DEMO_PARTICIPANTS.forEach(function(d,i){
     participants.push({
       id:'b'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false, coHost:false,

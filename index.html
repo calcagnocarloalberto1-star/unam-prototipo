@@ -301,6 +301,17 @@
   <section class="block alt">
     <div class="wrap">
       <div class="section-head left" style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div><span class="kicker">In collegamento</span><h2 style="margin:0;">Eventi di Sezione in aula virtuale</h2></div>
+      </div>
+      <p style="max-width:760px;color:var(--muted);font-size:14px;margin:-6px 0 18px;">Ogni Responsabile di Sezione — o un organo centrale — può aprire un proprio evento in aula virtuale e condividerne qui il link: ci si collega direttamente, insieme agli iscritti ai corsi, senza dover prima accedere all'area riservata.</p>
+      <div class="cards" id="eventiSezioneVetrina"></div>
+      <p style="margin-top:16px;font-size:12.5px;color:var(--muted);">A titolo dimostrativo, questa vetrina mostra alcuni eventi di esempio generati dall'area riservata: nel sito reale comparirebbero qui automaticamente gli eventi pianificati dai Responsabili di Sezione.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head left" style="display:flex;justify-content:space-between;align-items:baseline;">
         <div><span class="kicker">Ultime notizie</span><h2 style="margin:0;">Dalla vita associativa</h2></div>
         <a href="#notizie" class="btn btn-outline">Tutte le notizie</a>
       </div>
@@ -1047,6 +1058,42 @@
     doc.text('Documento generato da un prototipo dimostrativo — non costituisce attestato ufficiale.', W/2, 118, { align: 'center' });
     doc.save('Attestato_' + eventoIscritto.nome.replace(/\s+/g, '_') + '.pdf');
   }
+
+  /* ===== Eventi di Sezione in aula virtuale — vetrina pubblica in home ===== */
+  // Eventi di esempio a scopo dimostrativo: nel sito reale comparirebbero qui gli eventi
+  // pianificati dai Responsabili di Sezione (o dagli organi centrali) dall'area riservata,
+  // con il link pubblico generato dalla pagina "Aula virtuale — lezioni, riunioni ed eventi di sezione".
+  var eventiSezionePubblici = [
+    {
+      sezione: 'Sezione Roma',
+      titolo: 'La mediazione familiare: casi pratici',
+      data: '10 settembre 2026', ora: '17:00',
+      link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Roma')
+    },
+    {
+      sezione: 'Sezione Toscana',
+      titolo: 'Novità sulla negoziazione assistita dopo la Riforma Cartabia',
+      data: '24 settembre 2026', ora: '18:30',
+      link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Toscana')
+    }
+  ];
+  function renderEventiSezioneVetrina(){
+    var el = document.getElementById('eventiSezioneVetrina');
+    if(!el) return;
+    if(eventiSezionePubblici.length === 0){
+      el.innerHTML = '<p style="color:var(--muted);font-size:14px;">Nessun evento di Sezione in programma al momento.</p>';
+      return;
+    }
+    el.innerHTML = eventiSezionePubblici.map(function(ev){
+      return '<div class="card">'
+        + '<span class="tag gold">📍 ' + ev.sezione + '</span>'
+        + '<h3 style="margin-top:10px;">' + ev.titolo + '</h3>'
+        + '<p>' + ev.data + ' · ore ' + ev.ora + ' · in collegamento video</p>'
+        + '<a href="' + ev.link + '" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:12px;display:inline-block;">Collegati all\'evento →</a>'
+        + '</div>';
+    }).join('');
+  }
+  renderEventiSezioneVetrina();
 
   showPage(location.hash);
 </script>
