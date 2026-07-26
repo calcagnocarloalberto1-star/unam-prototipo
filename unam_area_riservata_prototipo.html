@@ -275,8 +275,8 @@
         </div>
         <div class="card">
           <h3>Il mio profilo</h3>
-          <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span></p>
-          <button class="btn btn-outline btn-block btn-sm" disabled>Modifica anagrafica (demo)</button>
+          <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span id="dashOrdineSezione" style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span></p>
+          <button class="btn btn-outline btn-block btn-sm" onclick="apriSchedaAccount()">✎ Modifica la mia scheda</button>
         </div>
       </div>
     </div>
@@ -540,8 +540,104 @@
   </div>
 </section>
 
+<!-- ===================== LA MIA SCHEDA (ACCOUNT) ===================== -->
+<section class="view" id="account">
+  <div class="wrap" style="max-width:760px;">
+    <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
+    <h1>La mia scheda</h1>
+    <p style="color:var(--muted);margin-top:-8px;">Gestisci i tuoi dati anagrafici, professionali e di contatto.</p>
+
+    <div class="card" style="border:1px dashed var(--blue);background:var(--blue-pale);">
+      <h3>📄 Compilazione automatica da documento</h3>
+      <p style="font-size:13.5px;color:var(--muted);">Carica la tua scheda socio, il tesserino dell'Ordine o un documento simile (PDF, JPG o PNG): il sistema riconosce i dati e precompila automaticamente i campi sottostanti, senza bisogno di inserirli manualmente uno per uno.</p>
+      <div class="grid2" style="align-items:end;">
+        <div><label>Documento da analizzare</label><input type="file" id="schedaFile" accept=".pdf,.jpg,.jpeg,.png" onchange="document.getElementById('schedaFileBtn').disabled = !this.files.length;"></div>
+        <div><button type="button" class="btn btn-primary btn-block" id="schedaFileBtn" disabled onclick="caricaSchedaFile()">🔍 Analizza e compila</button></div>
+      </div>
+      <p id="schedaFileStatus" style="font-size:13px;color:var(--navy);font-weight:600;min-height:18px;"></p>
+      <p class="hint" style="margin-top:2px;">In questo prototipo il riconoscimento è simulato: il documento non viene realmente analizzato né conservato. Nella versione reale il caricamento estrarrà i dati anagrafici tramite riconoscimento ottico (OCR) e li sottoporrà a conferma prima del salvataggio (cfr. Art. 4.2 del Capitolato Tecnico — area soci).</p>
+    </div>
+
+    <form onsubmit="event.preventDefault(); salvaScheda();">
+      <div class="card">
+        <h3>Dati anagrafici e professionali</h3>
+        <div class="grid2">
+          <div><label>Titolo</label><select id="accTitolo"><option>Avvocato</option><option>Praticante Avvocato</option><option>Magistrato</option></select></div>
+          <div><label>Ordine di appartenenza</label><select id="accOrdine"><option>Roma</option><option>Milano</option><option>Firenze</option><option>Bologna</option><option>Napoli</option><option>Torino</option><option>Bari</option><option>… oltre 100 fori</option></select></div>
+        </div>
+        <div class="grid2">
+          <div><label>Nome</label><input type="text" id="accNome"></div>
+          <div><label>Cognome</label><input type="text" id="accCognome"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Sezione locale U.N.A.M.</label><select id="accSezione"><option>Roma</option><option>Milano</option><option>Firenze</option><option>Piemonte</option><option>Puglia</option><option>… circa 40 sezioni</option></select></div>
+          <div><label>Codice Fiscale</label><input type="text" id="accCf" placeholder="RSSMRA80A01H501U" maxlength="16" style="text-transform:uppercase;"></div>
+        </div>
+        <p class="hint">Il Codice Fiscale non viene precompilato automaticamente — nemmeno con la funzione di caricamento documento qui sopra — per motivi di riservatezza: inseriscilo tu stesso.</p>
+      </div>
+
+      <div class="card">
+        <h3>Studio legale</h3>
+        <label>Denominazione studio</label><input type="text" id="accStudio">
+        <div class="grid2">
+          <div><label>Indirizzo</label><input type="text" id="accIndirizzo"></div>
+          <div><label>Città</label><input type="text" id="accCitta"></div>
+        </div>
+        <div class="grid2">
+          <div><label>CAP</label><input type="text" id="accCap"></div>
+          <div><label>Provincia</label><input type="text" id="accProvincia" maxlength="2" style="text-transform:uppercase;"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Partita IVA</label><input type="text" id="accPiva" placeholder="11 cifre" maxlength="11"></div>
+          <div><label>Sito web</label><input type="text" id="accSito"></div>
+        </div>
+        <p class="hint">Anche la Partita IVA è lasciata vuota per riservatezza e va inserita manualmente.</p>
+      </div>
+
+      <div class="card">
+        <h3>Contatti</h3>
+        <div class="grid2">
+          <div><label>Email</label><input type="email" id="accEmail"></div>
+          <div><label>PEC</label><input type="email" id="accPec"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Telefono</label><input type="tel" id="accTelefono"></div>
+          <div><label>Cellulare</label><input type="tel" id="accCellulare"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Sicurezza — modifica password</h3>
+        <label>Password attuale</label><input type="password" placeholder="••••••••">
+        <div class="grid2">
+          <div><label>Nuova password</label><input type="password" placeholder="••••••••"></div>
+          <div><label>Conferma nuova password</label><input type="password" placeholder="••••••••"></div>
+        </div>
+        <button type="button" class="btn btn-outline btn-block btn-sm" onclick="alertInline('Password aggiornata (demo) — in questo prototipo la modifica non viene realmente salvata.')">Aggiorna password</button>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">💾 Salva le modifiche alla scheda</button>
+    </form>
+
+    <div class="card" style="margin-top:22px;">
+      <h3>Privacy e dati personali</h3>
+      <p style="font-size:13.5px;color:var(--muted);">I tuoi dati sono trattati da U.N.A.M. secondo l'informativa privacy pubblicata sul sito. Puoi richiedere in qualsiasi momento una copia dei tuoi dati o la loro cancellazione, scrivendo alla segreteria.</p>
+      <a class="btn btn-outline btn-block btn-sm" href="mailto:info@unam.it?subject=Richiesta%20dati%20personali%20(GDPR)&body=Buongiorno%2C%0A%0Avi%20scrivo%20per%20richiedere%20(indicare%3A%20copia%20dei%20miei%20dati%20personali%20%2F%20cancellazione%20dei%20miei%20dati%20personali)%20conservati%20da%20U.N.A.M.%2C%20ai%20sensi%20della%20normativa%20sulla%20protezione%20dei%20dati%20personali.%0A%0AGrazie%2C" target="_blank" rel="noopener">✉ Richiedi i tuoi dati o la cancellazione (GDPR)</a>
+    </div>
+
+    <p class="hint" style="margin-top:14px;">In questo prototipo i dati mostrati sono fittizi e le modifiche non vengono salvate in modo permanente. Nella versione reale la scheda sarà collegata al gestionale soci, con storicizzazione delle modifiche e verifica dei documenti caricati dalla segreteria (cfr. Art. 4.2 del Capitolato Tecnico).</p>
+  </div>
+</section>
+
 <script>
-  var demoUser = { nome: "Avv. Demo Rossi", ordine: "Roma", sezione: "Roma" };
+  var demoUser = {
+    nome: "Avv. Demo Rossi", titolo: "Avvocato", nomeProprio: "Demo", cognome: "Rossi",
+    ordine: "Roma", sezione: "Roma",
+    studio: "Studio Legale Rossi", indirizzo: "Via della Mediazione, 12", citta: "Roma", cap: "00100", provincia: "RM",
+    sito: "www.studiolegalerossi-demo.it",
+    email: "demo.rossi@unam-demo.it", pec: "demo.rossi@pec-demo.it", telefono: "06 0000000", cellulare: "333 0000000",
+    cf: "", piva: ""
+  };
   var pendingSoci = [
     { n: "Prat. Avv. Lorenzo Guidi", m: "Ordine di Torino · Sezione locale Piemonte · richiesta del 20/07/2026" },
     { n: "Avv. Sara Moretti", m: "Ordine di Bari · Sezione locale Puglia · richiesta del 18/07/2026" }
@@ -676,7 +772,86 @@
   function doLogin(){
     document.getElementById('dashWelcome').textContent = 'Bentornato/a, ' + demoUser.nome;
     document.getElementById('dashName').textContent = demoUser.nome;
+    document.getElementById('dashOrdineSezione').textContent = 'Ordine di ' + demoUser.ordine + ' · Sezione locale ' + demoUser.sezione;
     showView('dashboard');
+  }
+
+  function apriSchedaAccount(){
+    document.getElementById('accTitolo').value = demoUser.titolo;
+    document.getElementById('accOrdine').value = demoUser.ordine;
+    document.getElementById('accNome').value = demoUser.nomeProprio;
+    document.getElementById('accCognome').value = demoUser.cognome;
+    document.getElementById('accSezione').value = demoUser.sezione;
+    document.getElementById('accCf').value = demoUser.cf || '';
+    document.getElementById('accStudio').value = demoUser.studio;
+    document.getElementById('accIndirizzo').value = demoUser.indirizzo;
+    document.getElementById('accCitta').value = demoUser.citta;
+    document.getElementById('accCap').value = demoUser.cap;
+    document.getElementById('accProvincia').value = demoUser.provincia;
+    document.getElementById('accPiva').value = demoUser.piva || '';
+    document.getElementById('accSito').value = demoUser.sito;
+    document.getElementById('accEmail').value = demoUser.email;
+    document.getElementById('accPec').value = demoUser.pec;
+    document.getElementById('accTelefono').value = demoUser.telefono;
+    document.getElementById('accCellulare').value = demoUser.cellulare;
+    document.getElementById('schedaFileStatus').textContent = '';
+    document.getElementById('schedaFile').value = '';
+    document.getElementById('schedaFileBtn').disabled = true;
+    showView('account');
+  }
+
+  function caricaSchedaFile(){
+    var fileInput = document.getElementById('schedaFile');
+    var status = document.getElementById('schedaFileStatus');
+    var fileName = (fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : 'documento';
+    status.textContent = '⏳ Analisi di «' + fileName + '» in corso…';
+    document.getElementById('schedaFileBtn').disabled = true;
+    setTimeout(function(){
+      document.getElementById('accTitolo').value = demoUser.titolo;
+      document.getElementById('accOrdine').value = demoUser.ordine;
+      document.getElementById('accNome').value = demoUser.nomeProprio;
+      document.getElementById('accCognome').value = demoUser.cognome;
+      document.getElementById('accSezione').value = demoUser.sezione;
+      document.getElementById('accStudio').value = demoUser.studio;
+      document.getElementById('accIndirizzo').value = demoUser.indirizzo;
+      document.getElementById('accCitta').value = demoUser.citta;
+      document.getElementById('accCap').value = demoUser.cap;
+      document.getElementById('accProvincia').value = demoUser.provincia;
+      document.getElementById('accSito').value = demoUser.sito;
+      document.getElementById('accEmail').value = demoUser.email;
+      document.getElementById('accPec').value = demoUser.pec;
+      document.getElementById('accTelefono').value = demoUser.telefono;
+      document.getElementById('accCellulare').value = demoUser.cellulare;
+      status.textContent = '✓ Dati riconosciuti e precompilati da «' + fileName + '». Verifica e correggi se necessario prima di salvare (Codice Fiscale e Partita IVA restano da inserire manualmente).';
+      document.getElementById('schedaFileBtn').disabled = false;
+      alertInline('Documento analizzato: campi precompilati automaticamente (demo).');
+    }, 1400);
+  }
+
+  function salvaScheda(){
+    demoUser.titolo = document.getElementById('accTitolo').value;
+    demoUser.nomeProprio = document.getElementById('accNome').value || demoUser.nomeProprio;
+    demoUser.cognome = document.getElementById('accCognome').value || demoUser.cognome;
+    demoUser.nome = (demoUser.titolo === 'Avvocato' ? 'Avv. ' : (demoUser.titolo === 'Praticante Avvocato' ? 'Prat. Avv. ' : '')) + demoUser.nomeProprio + ' ' + demoUser.cognome;
+    demoUser.ordine = document.getElementById('accOrdine').value;
+    demoUser.sezione = document.getElementById('accSezione').value;
+    demoUser.cf = document.getElementById('accCf').value;
+    demoUser.studio = document.getElementById('accStudio').value;
+    demoUser.indirizzo = document.getElementById('accIndirizzo').value;
+    demoUser.citta = document.getElementById('accCitta').value;
+    demoUser.cap = document.getElementById('accCap').value;
+    demoUser.provincia = document.getElementById('accProvincia').value;
+    demoUser.piva = document.getElementById('accPiva').value;
+    demoUser.sito = document.getElementById('accSito').value;
+    demoUser.email = document.getElementById('accEmail').value;
+    demoUser.pec = document.getElementById('accPec').value;
+    demoUser.telefono = document.getElementById('accTelefono').value;
+    demoUser.cellulare = document.getElementById('accCellulare').value;
+    document.getElementById('dashName').textContent = demoUser.nome;
+    document.getElementById('dashWelcome').textContent = 'Bentornato/a, ' + demoUser.nome;
+    document.getElementById('dashOrdineSezione').textContent = 'Ordine di ' + demoUser.ordine + ' · Sezione locale ' + demoUser.sezione;
+    showView('dashboard');
+    alertInline('Scheda aggiornata (demo) — le modifiche non vengono salvate in modo permanente in questo prototipo.');
   }
 
   function submitRegistrazione(){
