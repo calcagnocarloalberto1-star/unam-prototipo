@@ -216,7 +216,7 @@
     <div class="hdr-right" id="hdrRight">
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('chat')">💬 Chat riservata</button>
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('posta')">📧 Posta interna</button>
-      <a href="unam_aula_virtuale_prototipo.html" class="btn btn-outline btn-sm">🎓 Aula virtuale</a>
+      <button type="button" class="btn btn-outline btn-sm" onclick="showView('aula-lezioni')">🎓 Aula virtuale</button>
       <a href="unam_verbali_prototipo.html" class="btn btn-outline btn-sm">📜 Verbali associativi</a>
       <a href="index.html" class="btn btn-outline btn-sm">← Torna al sito</a>
     </div>
@@ -1766,7 +1766,14 @@
     document.getElementById('dashWelcome').textContent = 'Bentornato/a, ' + demoUser.nome;
     document.getElementById('dashName').textContent = demoUser.nome;
     document.getElementById('dashOrdineSezione').textContent = 'Ordine di ' + demoUser.ordine + ' · Sezione locale ' + demoUser.sezione;
-    showView('dashboard');
+    var params = new URLSearchParams(window.location.search);
+    var requestedView = params.get('view');
+    var requestedEl = requestedView ? document.getElementById(requestedView) : null;
+    if(requestedEl && requestedEl.classList.contains('view')){
+      showView(requestedView);
+    } else {
+      showView('dashboard');
+    }
   }
 
   function doLogout(){

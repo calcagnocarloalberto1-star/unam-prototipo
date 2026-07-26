@@ -190,6 +190,15 @@
   .doc-viewer-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;color:#cfe0ec;font-size:12.5px;}
   .doc-viewer-nav button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
   .doc-viewer-nav button[disabled]{opacity:.35;cursor:not-allowed;}
+  .doc-slide-edit{align-items:stretch;text-align:left;justify-content:flex-start;}
+  .doc-slide-edit label{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;}
+  .doc-slide-edit input, .doc-slide-edit textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;margin-bottom:12px;background:#fff;color:var(--ink);}
+  .doc-slide-edit textarea{min-height:140px;resize:vertical;}
+  .doc-slide-edit-actions{display:flex;gap:10px;justify-content:flex-end;}
+  .doc-slide-edit-actions button{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:12.5px;}
+  .doc-slide-edit-actions .save-btn{background:var(--navy);color:#fff;}
+  .doc-slide-edit-actions .cancel-btn{background:var(--line);color:var(--ink);}
+  .doc-edited-badge{display:inline-block;background:var(--blue-pale);color:var(--navy);font-size:11px;font-weight:700;border-radius:12px;padding:2px 10px;margin-top:8px;}
 
   /* ---- Documenti ---- */
   .doc-share-box{background:#25313f;border-radius:10px;padding:14px;margin-bottom:14px;}
@@ -924,7 +933,7 @@ function presentDocument(id){
   if(!amOrganizer()) return;
   var doc = sharedDocuments.find(function(d){ return d.id===id; });
   if(!doc) return;
-  presentingDoc = { id: doc.id, title: doc.title, page: 1 };
+  presentingDoc = { id: doc.id, title: doc.title, page: 1, editMode: false, edits: {} };
   pushChat('Sistema', '📽️ '+myName+' ha avviato la visualizzazione a video del documento "'+doc.title+'".', false);
   renderDocViewer();
   renderDocList();
@@ -939,7 +948,36 @@ function stopPresenting(){
 }
 function changePresentPage(delta){
   if(!presentingDoc) return;
+  presentingDoc.editMode = false;
   presentingDoc.page = Math.min(DOC_VIEWER_PAGES, Math.max(1, presentingDoc.page + delta));
+  renderDocViewer();
+}
+function defaultSlideContent(){
+  return {
+    title: presentingDoc.title,
+    text: 'Contenuto dimostrativo — pagina '+presentingDoc.page+' di '+DOC_VIEWER_PAGES+'. In una versione reale qui verrebbe mostrato il contenuto effettivo del file condiviso (slide, pagina PDF o documento), visibile a tutti i partecipanti in tempo reale come una condivisione schermo.'
+  };
+}
+function toggleDocEditMode(){
+  if(!presentingDoc || !amOrganizer()) return;
+  presentingDoc.editMode = !presentingDoc.editMode;
+  renderDocViewer();
+}
+function cancelDocEdit(){
+  if(!presentingDoc) return;
+  presentingDoc.editMode = false;
+  renderDocViewer();
+}
+function saveDocEdit(){
+  if(!presentingDoc || !amOrganizer()) return;
+  var titleEl = document.getElementById('docEditTitle');
+  var textEl = document.getElementById('docEditText');
+  var newTitle = titleEl ? titleEl.value.trim() : '';
+  var newText = textEl ? textEl.value.trim() : '';
+  if(!newTitle || !newText) return;
+  presentingDoc.edits[presentingDoc.page] = { title: newTitle, text: newText };
+  presentingDoc.editMode = false;
+  pushChat('Sistema', '✏️ '+myName+' ha modificato il contenuto della pagina '+presentingDoc.page+' del documento in presentazione ("'+presentingDoc.title+'").', false);
   renderDocViewer();
 }
 function renderDocViewer(){
@@ -956,15 +994,37 @@ function renderDocViewer(){
   grid.style.display = 'none';
   pager.style.display = 'none';
   viewer.style.display = 'flex';
+  var edited = presentingDoc.edits && presentingDoc.edits[presentingDoc.page];
+  var slide = edited || defaultSlideContent();
+  var slideHtml;
+  if(amOrganizer() && presentingDoc.editMode){
+    slideHtml =
+      '<div class="doc-slide doc-slide-edit">' +
+        '<label>Titolo pagina</label>' +
+        '<input type="text" id="docEditTitle" value="'+escAttr(slide.title)+'">' +
+        '<label>Contenuto mostrato a video</label>' +
+        '<textarea id="docEditText">'+escAttr(slide.text)+'</textarea>' +
+        '<div class="doc-slide-edit-actions">' +
+          '<button type="button" class="cancel-btn" onclick="cancelDocEdit()">✕ Annulla</button>' +
+          '<button type="button" class="save-btn" onclick="saveDocEdit()">💾 Salva modifiche</button>' +
+        '</div>' +
+      '</div>';
+  } else {
+    slideHtml =
+      '<div class="doc-slide">' +
+        '<h4>'+slide.title+'</h4>' +
+        '<p>'+slide.text+'</p>' +
+        (edited ? '<span class="doc-edited-badge">✏️ Pagina modificata da chi presenta</span>' : '') +
+      '</div>';
+  }
   viewer.innerHTML =
     '<div class="doc-viewer-bar"><span>📽️ Stai visualizzando a video: <b>'+presentingDoc.title+'</b></span>' +
-    (amOrganizer() ? '<button onclick="stopPresenting()">⏹️ Chiudi presentazione</button>' : '') +
+    (amOrganizer() ? (presentingDoc.editMode
+      ? ''
+      : '<span><button onclick="toggleDocEditMode()">✏️ Modifica pagina</button> <button onclick="stopPresenting()">⏹️ Chiudi presentazione</button></span>') : '') +
     '</div>' +
-    '<div class="doc-slide">' +
-      '<h4>'+presentingDoc.title+'</h4>' +
-      '<p>Contenuto dimostrativo — pagina '+presentingDoc.page+' di '+DOC_VIEWER_PAGES+'. In una versione reale qui verrebbe mostrato il contenuto effettivo del file condiviso (slide, pagina PDF o documento), visibile a tutti i partecipanti in tempo reale come una condivisione schermo.</p>' +
-    '</div>' +
-    (amOrganizer() ? '<div class="doc-viewer-nav">' +
+    slideHtml +
+    (amOrganizer() && !presentingDoc.editMode ? '<div class="doc-viewer-nav">' +
       '<button onclick="changePresentPage(-1)" '+(presentingDoc.page<=1?'disabled':'')+'>◀ Pagina precedente</button>' +
       '<span>Pagina '+presentingDoc.page+' di '+DOC_VIEWER_PAGES+'</span>' +
       '<button onclick="changePresentPage(1)" '+(presentingDoc.page>=DOC_VIEWER_PAGES?'disabled':'')+'>Pagina successiva ▶</button>' +
