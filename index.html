@@ -1068,13 +1068,15 @@
       sezione: 'Sezione Roma',
       titolo: 'La mediazione familiare: casi pratici',
       data: '10 settembre 2026', ora: '17:00',
+      crediti: false,
       link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Roma')
     },
     {
       sezione: 'Sezione Toscana',
       titolo: 'Novità sulla negoziazione assistita dopo la Riforma Cartabia',
       data: '24 settembre 2026', ora: '18:30',
-      link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Toscana')
+      crediti: true,
+      link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Toscana') + '&crediti=si'
     }
   ];
   function renderEventiSezioneVetrina(){
@@ -1085,8 +1087,11 @@
       return;
     }
     el.innerHTML = eventiSezionePubblici.map(function(ev){
+      var creditiTag = ev.crediti
+        ? '<span class="tag" style="background:var(--good-bg,#e6f7ed);color:var(--good,#1a7f4b);">✅ Crediti richiesti al COA</span>'
+        : '<span class="tag" style="background:var(--warn-bg,#fdf1e0);color:var(--warn,#a15c00);">🚫 Crediti non richiesti</span>';
       return '<div class="card">'
-        + '<span class="tag gold">📍 ' + ev.sezione + '</span>'
+        + '<span class="tag gold">📍 ' + ev.sezione + '</span> ' + creditiTag
         + '<h3 style="margin-top:10px;">' + ev.titolo + '</h3>'
         + '<p>' + ev.data + ' · ore ' + ev.ora + ' · in collegamento video</p>'
         + '<a href="' + ev.link + '" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:12px;display:inline-block;">Collegati all\'evento →</a>'

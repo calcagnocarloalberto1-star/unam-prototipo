@@ -270,6 +270,15 @@
       </select>
       <p style="font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:18px;">La piattaforma video ospita anche le riunioni degli organi associativi e gli eventi delle Sezioni locali. L'Assemblea Generale dei soci non è gestita da questa aula virtuale.</p>
 
+      <div id="sezioneCreditiField" style="display:none;">
+        <label>Crediti formativi per questo evento</label>
+        <select id="sezioneCreditiSelect" onchange="applySessionType()" style="margin-bottom:8px;">
+          <option value="no">🚫 Crediti non richiesti</option>
+          <option value="si">✅ Crediti richiesti al COA di competenza</option>
+        </select>
+        <p style="font-size:12px;color:var(--muted);margin-top:0;margin-bottom:18px;">Indica se il Responsabile di Sezione (o l'organo centrale organizzatore) ha già richiesto l'accreditamento di questo evento al Consiglio dell'Ordine degli Avvocati (COA) di competenza: la scelta determina la dicitura mostrata ai partecipanti e nel report finale. Il riconoscimento dei crediti resta in ogni caso subordinato alla valutazione del COA.</p>
+      </div>
+
       <label>Il tuo nome</label>
       <input type="text" id="joinName" value="Avv. Demo Rossi">
 
@@ -580,7 +589,8 @@ var SESSION_TYPES = {
     topTitle: 'Evento di una Sezione locale',
     topSub: 'Evento pubblico',
     reportSubtitle: 'Evento di una Sezione locale — evento pubblico, senza lezione del Corso di Alta Formazione',
-    recNote: '📹 Trattandosi di un evento di Sezione, non collegato a un modulo del Corso di Alta Formazione, questa sessione non genera automaticamente crediti formativi: come per gli altri eventi organizzati dalle Sezioni locali, un eventuale accreditamento va richiesto al Consiglio dell\'Ordine degli Avvocati (COA) di competenza. Il report resta comunque disponibile come registro di partecipazione.',
+    recNoteCreditiNo: '📹 Per questo evento di Sezione, il Responsabile di Sezione (o l\'organo centrale organizzatore) non ha richiesto l\'accreditamento: la dicitura mostrata è "Crediti non richiesti". La sessione non genera crediti formativi; il report resta comunque disponibile come registro di partecipazione. Un eventuale accreditamento successivo andrebbe richiesto al Consiglio dell\'Ordine degli Avvocati (COA) di competenza.',
+    recNoteCreditiSi: '📹 Per questo evento di Sezione, il Responsabile di Sezione (o l\'organo centrale organizzatore) ha dichiarato di aver richiesto l\'accreditamento al Consiglio dell\'Ordine degli Avvocati (COA) di competenza: la dicitura mostrata è "Crediti richiesti al COA". Il riconoscimento effettivo dei crediti e il relativo punteggio restano comunque subordinati alla valutazione e alla delibera del COA; il report di partecipazione generato qui è a supporto dell\'istanza.',
     hasCredits: false
   },
   istantanea: {
@@ -597,6 +607,7 @@ var SESSION_TYPES = {
 };
 var sessionType = 'corso';
 var sezioneNome = null; // nome della Sezione locale organizzatrice, se l'evento arriva da un link con ?tipo=sezione&sezione=...
+var sezioneCreditiRichiesti = false; // dicitura crediti per gli eventi di Sezione: false = "Crediti non richiesti", true = "Crediti richiesti al COA"
 function applySessionType(){
   var sel = document.getElementById('sessionTypeSelect');
   sessionType = sel ? sel.value : 'corso';
@@ -605,7 +616,17 @@ function applySessionType(){
   document.getElementById('joinLessonBadge').textContent = cfg.badge + suffisso;
   document.getElementById('joinLessonTitle').textContent = cfg.title;
   document.getElementById('joinLessonDesc').textContent = cfg.desc;
-  document.getElementById('joinLessonMeta').innerHTML = cfg.meta + (suffisso ? '<div>📍 Sezione organizzatrice: <b>' + sezioneNome + '</b></div>' : '');
+  var creditiField = document.getElementById('sezioneCreditiField');
+  var creditiHtml = '';
+  if(sessionType === 'sezione'){
+    if(creditiField) creditiField.style.display = '';
+    var creditiSel = document.getElementById('sezioneCreditiSelect');
+    sezioneCreditiRichiesti = creditiSel ? (creditiSel.value === 'si') : false;
+    creditiHtml = '<div>🎓 Crediti formativi: <b>' + (sezioneCreditiRichiesti ? 'richiesti al COA di competenza' : 'non richiesti') + '</b></div>';
+  } else {
+    if(creditiField) creditiField.style.display = 'none';
+  }
+  document.getElementById('joinLessonMeta').innerHTML = cfg.meta + (suffisso ? '<div>📍 Sezione organizzatrice: <b>' + sezioneNome + '</b></div>' : '') + creditiHtml;
 }
 
 /* Precompilazione da parametri in query string (link diretti da altre pagine, es. Verbali associativi) */
@@ -614,7 +635,12 @@ var pendingVerbaleDoc = null;
   var params = new URLSearchParams(window.location.search);
   var tipo = params.get('tipo');
   var sezioneParam = params.get('sezione');
+  var creditiParam = params.get('crediti');
   if(sezioneParam){ sezioneNome = sezioneParam; }
+  if(creditiParam === 'si'){
+    var creditiSelPre = document.getElementById('sezioneCreditiSelect');
+    if(creditiSelPre){ creditiSelPre.value = 'si'; }
+  }
   if(tipo && SESSION_TYPES[tipo]){
     var sel = document.getElementById('sessionTypeSelect');
     if(sel){ sel.value = tipo; }
@@ -1364,8 +1390,12 @@ function buildReport(){
   var subtitleEl = document.getElementById('reportSubtitle');
   var recNoteEl = document.getElementById('reportRecNote');
   var reportCfg = SESSION_TYPES[sessionType];
-  if(subtitleEl) subtitleEl.textContent = reportCfg.reportSubtitle;
-  if(recNoteEl) recNoteEl.innerHTML = reportCfg.recNote;
+  var effectiveHasCredits = (sessionType === 'sezione') ? sezioneCreditiRichiesti : reportCfg.hasCredits;
+  var effectiveRecNote = (sessionType === 'sezione')
+    ? (sezioneCreditiRichiesti ? reportCfg.recNoteCreditiSi : reportCfg.recNoteCreditiNo)
+    : reportCfg.recNote;
+  if(subtitleEl) subtitleEl.textContent = reportCfg.reportSubtitle + (sessionType === 'sezione' ? (sezioneCreditiRichiesti ? ' · Crediti richiesti al COA' : ' · Crediti non richiesti') : '');
+  if(recNoteEl) recNoteEl.innerHTML = effectiveRecNote;
 
   // sommario
   var summary = document.getElementById('reportSummary');
@@ -1388,11 +1418,18 @@ function buildReport(){
     var attendancePct = totalDuration>0 ? (leaveSec-joinSec)/totalDuration : 1;
     var checksOk = checksApplicable.length===0 || checksPassed===checksApplicable.length;
     var idoneo = attendancePct>=0.85 && checksOk;
-    var badge = !reportCfg.hasCredits
-      ? '<span class="badge ok" style="background:var(--warn-bg);color:var(--warn);">Presenza registrata (nessun credito formativo)</span>'
-      : (idoneo
+    var badge;
+    if(!effectiveHasCredits){
+      badge = '<span class="badge ok" style="background:var(--warn-bg);color:var(--warn);">Presenza registrata (nessun credito formativo)</span>';
+    } else if(sessionType === 'sezione'){
+      badge = idoneo
+        ? '<span class="badge ok" style="background:var(--warn-bg);color:var(--warn);">Presenza registrata — credito da valutare dal COA</span>'
+        : '<span class="badge bad">Presenza insufficiente — credito da valutare dal COA</span>';
+    } else {
+      badge = idoneo
         ? '<span class="badge ok">Idoneo — credito riconosciuto</span>'
-        : '<span class="badge bad">Non idoneo — credito da verificare</span>');
+        : '<span class="badge bad">Non idoneo — credito da verificare</span>';
+    }
     var row = '<tr>' +
       '<td>'+(pt.role==='host'?'🎓 ':'')+pt.name+(pt.isMe?' (tu)':'')+(pt.coHost?' <span class="badge ok" style="margin-left:6px;">Co-organizzatore</span>':'')+'</td>' +
       '<td>'+fmtTime(joinSec)+'</td>' +

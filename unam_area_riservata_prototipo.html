@@ -459,6 +459,7 @@
               <option value="generale">📥 Casella Generale (smistamento per oggetto)</option>
               <option value="direttivo">🏛️ Comitato Direttivo</option>
               <option value="esecutivo">🗂️ Comitato Esecutivo</option>
+              <option value="tesoreria">💰 Tesoreria</option>
               <option value="corso">🎓 Corso di Alta Formazione</option>
             </select>
             <input type="text" id="mailOggetto" placeholder="Oggetto…" style="flex:1 1 200px;" autocomplete="off">
@@ -472,6 +473,7 @@
           <datalist id="mailAddressSuggestions">
             <option value="Comitato Direttivo">
             <option value="Comitato Esecutivo">
+            <option value="Tesoreria">
             <option value="Corso di Alta Formazione">
             <option value="Casella Generale">
           </datalist>
@@ -592,6 +594,12 @@
         <label>Sezione locale organizzatrice</label>
         <input type="text" id="alSezioneNome" placeholder="Es. Sezione Roma">
         <p style="font-size:12px;color:var(--muted);margin-top:-10px;margin-bottom:16px;">Può aprire e pianificare un evento di Sezione il relativo Responsabile, oppure un organo centrale (Comitato Direttivo o Comitato Esecutivo). A differenza delle riunioni degli organi, l'evento di Sezione è pubblico: il link di collegamento può essere condiviso liberamente, anche con chi non è ancora socio, e può essere pubblicato nella vetrina Eventi della home del sito.</p>
+        <label>Crediti formativi</label>
+        <select id="alSezioneCrediti">
+          <option value="no">🚫 Crediti non richiesti</option>
+          <option value="si">✅ Crediti richiesti al COA di competenza</option>
+        </select>
+        <p style="font-size:12px;color:var(--muted);margin-top:-10px;margin-bottom:16px;">Indica se il Responsabile di Sezione (o l'organo centrale organizzatore) ha già richiesto l'accreditamento di questo evento al Consiglio dell'Ordine degli Avvocati (COA) di competenza: la scelta compare come dicitura nell'invito e nel link pubblico. Il riconoscimento dei crediti resta in ogni caso subordinato alla valutazione del COA.</p>
       </div>
       <label>Titolo</label>
       <input type="text" id="alTitolo" value="Modulo 6 — La mediazione familiare e i minori">
@@ -1110,9 +1118,10 @@
     'generale':   { icon: '📥', name: 'Casella Generale', desc: 'Tutta la posta in arrivo, in attesa di smistamento' },
     'direttivo':  { icon: '🏛️', name: 'Comitato Direttivo', desc: 'Ufficio Direttivo nazionale' },
     'esecutivo':  { icon: '🗂️', name: 'Comitato Esecutivo', desc: 'Ufficio Direttivo + membri con deleghe' },
+    'tesoreria':  { icon: '💰', name: 'Tesoreria', desc: 'Quote associative, rendiconti e pagamenti' },
     'corso':      { icon: '🎓', name: 'Corso di Alta Formazione', desc: 'Segreteria didattica e corsisti' }
   };
-  var mailFolderOrder = ['generale', 'direttivo', 'esecutivo', 'corso'];
+  var mailFolderOrder = ['generale', 'direttivo', 'esecutivo', 'tesoreria', 'corso'];
 
   var mailSubfolderDefs = {
     'ricevuta': { icon: '📥', name: 'Posta ricevuta' },
@@ -1127,6 +1136,7 @@
   var mailRoutingRules = {
     'direttivo': ['comitato direttivo', 'direttivo', 'consiglio direttivo', 'bilancio'],
     'esecutivo': ['comitato esecutivo', 'esecutivo'],
+    'tesoreria': ['tesoreria', 'quota associativa', 'quote associative', 'rinnovo quota', 'pagamento quota', 'ricevuta di pagamento', 'rendiconto'],
     'corso': ['corso di alta formazione', 'alta formazione', 'corsisti', 'corso', 'formazione']
   };
 
@@ -1172,6 +1182,20 @@
         { from: 'Avv. Elisa Fichera', subject: 'Conferma ordine del giorno', text: 'Confermiamo l\'ordine del giorno dell\'incontro di venerdì, con il punto sulle nuove adesioni.', time: '10:20', date: '21/07/2026' }
       ],
       archivio: [],
+      bozze: [],
+      cestino: []
+    },
+    'tesoreria': {
+      ricevuta: [
+        { from: 'Avv. Duccio Viligiardi', subject: 'Rendiconto trimestrale quote associative', text: 'Buongiorno, trasmetto il rendiconto trimestrale delle quote associative incassate, da conservare in Tesoreria.', time: '09:10', date: '22/07/2026', routedTo: null, attachments: [{ name: 'Rendiconto_Trimestrale_Quote_Associative.pdf', size: '176 KB' }] },
+        { from: 'socio.demo@unam-demo.it', subject: 'Richiesta ricevuta pagamento quota associativa 2026', text: 'Buongiorno, ho rinnovato la quota associativa 2026 ma non ho ricevuto la ricevuta di pagamento: potreste inviarmela?', time: '11:20', date: '23/07/2026', routedTo: null }
+      ],
+      inviata: [
+        { from: 'Avv. Duccio Viligiardi', subject: 'Riscontro richiesta ricevuta di pagamento', text: 'Buongiorno, in allegato la ricevuta del pagamento della quota associativa 2026.', time: '11:45', date: '23/07/2026', attachments: [{ name: 'Ricevuta_Quota_Associativa_2026.pdf', size: '64 KB' }] }
+      ],
+      archivio: [
+        { from: 'Avv. Duccio Viligiardi', subject: 'Rendiconto quote associative 2025 (esercizio chiuso)', text: 'Rendiconto delle quote associative dell\'esercizio 2025, chiuso e archiviato.', time: '10:00', date: '20/01/2026' }
+      ],
       bozze: [],
       cestino: []
     },
@@ -1710,15 +1734,17 @@
     var oraFine = document.getElementById('alOraFine').value;
     var relatore = document.getElementById('alRelatore').value.trim();
     var sezioneNome = (tipo === 'sezione') ? document.getElementById('alSezioneNome').value.trim() : '';
+    var creditiRichiesti = (tipo === 'sezione') ? (document.getElementById('alSezioneCrediti').value === 'si') : false;
     if(!titolo || !data || !oraInizio){
       document.getElementById('alScheduleConfirm').innerHTML = '<p style="color:var(--warn);font-size:13px;">⚠️ Compila almeno tipo, titolo, data e ora di inizio.</p>';
       return;
     }
     var dataFmt = formatDateItAula(data);
-    var sessione = { tipo:tipo, titolo:titolo, data:dataFmt, oraInizio:oraInizio, oraFine:oraFine, relatore:relatore, sezione:sezioneNome };
+    var sessione = { tipo:tipo, titolo:titolo, data:dataFmt, oraInizio:oraInizio, oraFine:oraFine, relatore:relatore, sezione:sezioneNome, crediti:creditiRichiesti };
     sessioniPianificate.push(sessione);
+    var creditiTesto = tipo === 'sezione' ? (creditiRichiesti ? ' Crediti richiesti al COA di competenza.' : ' Crediti non richiesti.') : '';
     var esitoTesto = tipo === 'corso' ? 'I corsisti la vedranno nella sezione Corso di Alta Formazione.'
-      : tipo === 'sezione' ? 'Genera qui sotto l\'invito e il link pubblico da condividere o da segnalare per la vetrina Eventi della home.'
+      : tipo === 'sezione' ? ('Genera qui sotto l\'invito e il link pubblico da condividere o da segnalare per la vetrina Eventi della home.' + creditiTesto)
       : 'I componenti dell\'organo la vedranno tra i verbali/comunicazioni associative.';
     document.getElementById('alScheduleConfirm').innerHTML = '<p style="color:var(--good);font-size:13px;">✅ Sessione pianificata: <strong>' + titolo + '</strong> — ' + dataFmt + ' ore ' + oraInizio + (oraFine ? '–' + oraFine : '') + (sezioneNome ? (' · ' + sezioneNome) : '') + '. ' + esitoTesto + '</p>';
     renderSessioniPianificate();
@@ -1730,7 +1756,8 @@
     if(sessioniPianificate.length === 0){ el.innerHTML = ''; return; }
     var html = '<p style="font-size:12.5px;color:var(--muted);margin-bottom:6px;">Sessioni pianificate in questa visita:</p>';
     sessioniPianificate.slice().reverse().forEach(function(s){
-      html += '<div style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);">🗓️ <strong>' + s.titolo + '</strong> — ' + (SESSION_TYPE_LABELS[s.tipo] || s.tipo) + (s.sezione ? (' · ' + s.sezione) : '') + '<br>' + s.data + ' ore ' + s.oraInizio + (s.oraFine ? '–' + s.oraFine : '') + (s.relatore ? ' · ' + s.relatore : '') + '</div>';
+      var creditiTag = (s.tipo === 'sezione') ? (' · ' + (s.crediti ? '✅ Crediti richiesti al COA' : '🚫 Crediti non richiesti')) : '';
+      html += '<div style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);">🗓️ <strong>' + s.titolo + '</strong> — ' + (SESSION_TYPE_LABELS[s.tipo] || s.tipo) + (s.sezione ? (' · ' + s.sezione) : '') + creditiTag + '<br>' + s.data + ' ore ' + s.oraInizio + (s.oraFine ? '–' + s.oraFine : '') + (s.relatore ? ' · ' + s.relatore : '') + '</div>';
     });
     el.innerHTML = html;
   }
@@ -1748,19 +1775,22 @@
   function generaInvito(){
     var base = sessioniPianificate.length > 0
       ? sessioniPianificate[sessioniPianificate.length - 1]
-      : { tipo:'corso', titolo:'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione', data:'26/07/2026', oraInizio:'15:00', oraFine:'17:00', relatore:'Avv. Beatrice Irene Tonelli', sezione:'' };
+      : { tipo:'corso', titolo:'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione', data:'26/07/2026', oraInizio:'15:00', oraFine:'17:00', relatore:'Avv. Beatrice Irene Tonelli', sezione:'', crediti:false };
     var tipoLabel = SESSION_TYPE_LABELS[base.tipo] || SESSION_TYPE_LABELS.corso;
     var params = [];
     if(base.tipo !== 'corso') params.push('tipo=' + encodeURIComponent(base.tipo));
     if(base.tipo === 'sezione' && base.sezione) params.push('sezione=' + encodeURIComponent(base.sezione));
+    if(base.tipo === 'sezione' && base.crediti) params.push('crediti=si');
     var link = 'https://calcagnocarloalberto1-star.github.io/unam-prototipo/unam_aula_virtuale_prototipo.html' + (params.length ? ('?' + params.join('&')) : '');
     var isPubblico = base.tipo === 'sezione';
+    var creditiDicitura = isPubblico ? ('Crediti formativi: ' + (base.crediti ? 'richiesti al COA di competenza (accreditamento in corso di valutazione)' : 'non richiesti') + '.\n') : '';
     var testo = 'Oggetto: Invito — ' + base.titolo + (base.sezione ? (' (' + base.sezione + ')') : '') + '\n\n'
       + 'Gentile Collega,\n\n'
       + 'sei invitato/a a partecipare a: ' + tipoLabel + (base.sezione ? (' — ' + base.sezione) : '') + ' — ' + base.titolo + '.\n'
       + 'Data: ' + base.data + '\n'
       + 'Ora: ' + base.oraInizio + (base.oraFine ? (' – ' + base.oraFine) : '') + '\n'
       + (base.relatore ? ('Relatore/Organizzatore: ' + base.relatore + '\n') : '')
+      + creditiDicitura
       + '\nPer collegarti, apri il seguente link all\'ora indicata:\n' + link + '\n\n'
       + (isPubblico ? 'Evento pubblico: puoi girare questo invito liberamente, anche a chi non è ancora socio U.N.A.M.\n\n' : '')
       + 'Cordiali saluti,\nSegreteria U.N.A.M.';
