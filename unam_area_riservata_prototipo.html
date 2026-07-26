@@ -210,6 +210,7 @@
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('chat')">💬 Chat riservata</button>
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('posta')">📧 Posta interna</button>
       <a href="unam_aula_virtuale_prototipo.html" class="btn btn-outline btn-sm">🎓 Aula virtuale</a>
+      <a href="unam_verbali_prototipo.html" class="btn btn-outline btn-sm">📜 Verbali associativi</a>
       <a href="index.html" class="btn btn-outline btn-sm">← Torna al sito</a>
     </div>
   </div>
@@ -1097,7 +1098,8 @@
     'corso': {
       ricevuta: [
         { from: 'Direttore Avv. Beatrice Irene Tonelli', subject: 'Calendario aggiornato Modulo 3', text: 'Comunico che il Modulo 3 del Corso si terrà venerdì 9 ottobre; la registrazione sarà disponibile in area riservata entro 48 ore.', time: '08:30', date: '19/07/2026', routedTo: null },
-        { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedFrom: 'generale' }
+        { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedFrom: 'generale' },
+        { from: 'Avv. Martina Ferri', subject: 'Richiesta di iscrizione al Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono interessata a iscrivermi al Corso di Alta Formazione 2026/2027 (formula corso completo). Sono iscritta all\'Ordine di Bologna (BO). Resto in attesa di conferma e delle indicazioni per il pagamento della quota.', time: '10:12', date: '24/07/2026', routedTo: null, iscrizionePending: true, iscrizioneOrdine: 'Bologna (BO)' }
       ],
       inviata: [
         { from: 'Segreteria didattica', subject: 'Promemoria Modulo 3', text: 'Ricordiamo ai corsisti che il Modulo 3 si terrà venerdì 9 ottobre; la registrazione sarà disponibile entro 48 ore dalla lezione.', time: '09:00', date: '19/07/2026' }
@@ -1286,11 +1288,39 @@
     if(m.cc) meta += ' · Cc: ' + m.cc;
     if(currentMailSubfolder === 'bozze' && m.ccn) meta += ' · Ccn: ' + m.ccn;
     var canReply = (currentMailSubfolder === 'ricevuta' || currentMailSubfolder === 'archivio') && m.from;
+    var canForward = currentMailSubfolder === 'ricevuta' || currentMailSubfolder === 'archivio' || currentMailSubfolder === 'inviata';
+    var showIscrizioneBtn = currentMailFolder === 'corso' && m.iscrizionePending && !m.iscrizioneAggiunta;
     pane.innerHTML = '<div class="mail-read"><h4>' + m.subject + '</h4>'
       + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px 0;">' + meta + '</p>'
       + '<p class="mail-read-text">' + m.text + '</p>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">'
       + (canReply ? '<button type="button" class="btn btn-outline btn-sm" onclick="replyToMail(' + idx + ')">↩️ Rispondi</button>' : '')
+      + (canForward ? '<button type="button" class="btn btn-outline btn-sm" onclick="forwardMail(' + idx + ')">➡️ Inoltra</button>' : '')
+      + (showIscrizioneBtn ? '<button type="button" class="btn btn-primary btn-sm" onclick="aggiungiIscrizioneDaMail(' + idx + ')">➕ Aggiungi a Iscrizioni corso</button>' : '')
+      + '</div>'
+      + (m.iscrizioneAggiunta ? '<p style="font-size:12px;color:var(--navy);margin-top:8px;">✅ Richiesta collegata alla vista amministrativa — Iscrizioni corsi.</p>' : '')
       + '</div>';
+  }
+
+  // ---- Collegamento posta "Corso di Alta Formazione" con le iscrizioni al corso ----
+  function aggiungiIscrizioneDaMail(idx){
+    var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
+    if(!m || !m.iscrizionePending || m.iscrizioneAggiunta) return;
+    addIscrizioneCorsoRow(m.from, m.iscrizioneOrdine || '');
+    m.iscrizioneAggiunta = true;
+    openMailMessage(idx);
+  }
+
+  function addIscrizioneCorsoRow(name, ordine){
+    var panel = document.getElementById('panelCorsi');
+    if(!panel) return;
+    var row = document.createElement('div');
+    row.className = 'approval-row';
+    var nameAttr = String(name).replace(/'/g, "\\'");
+    var ordineAttr = String(ordine || '').replace(/'/g, "\\'");
+    row.innerHTML = '<div class="who"><div class="n">' + name + '</div><div class="m">Corso completo 2026/2027 — richiesta arrivata dalla posta interna (Corso di Alta Formazione)' + (ordine ? ' · Ordine di ' + ordine : '') + '</div></div>'
+      + '<div class="actions"><button class="btn btn-sm btn-outline" onclick="openSchedaAdmin(\'' + nameAttr + '\', {ordine:\'' + ordineAttr + '\'})">📄 Apri scheda</button><button class="btn btn-sm btn-approve" onclick="this.closest(\'.approval-row\').remove()">Conferma iscrizione</button></div>';
+    panel.appendChild(row);
   }
 
   function detectRouting(subject){
@@ -1305,12 +1335,14 @@
     return null;
   }
 
-  // ---- Rispondi ----
-  var replyContext = null; // { name: string }
+  // ---- Rispondi / Inoltra ----
+  var replyContext = null;   // { name: string }
+  var forwardContext = null; // { subject: string }
 
   function replyToMail(idx){
     var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
     if(!m || !m.from) return;
+    forwardContext = null;
     replyContext = { name: m.from };
     document.getElementById('mailDestinatario').value = currentMailFolder;
     var oggettoEl = document.getElementById('mailOggetto');
@@ -1324,8 +1356,27 @@
     document.querySelector('.mail-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
+  function forwardMail(idx){
+    var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
+    if(!m) return;
+    replyContext = null;
+    forwardContext = { subject: m.subject };
+    // Nell'inoltro il destinatario va scelto da chi inoltra: non precompiliamo la casella corrente.
+    var oggettoEl = document.getElementById('mailOggetto');
+    oggettoEl.value = /^inoltro:/i.test(m.subject) ? m.subject : ('Inoltro: ' + m.subject);
+    var testoEl = document.getElementById('mailTesto');
+    var quotedWhen = m.date + (m.time ? ' ' + m.time : '');
+    var fromLabel = m.from || '(bozza senza mittente)';
+    testoEl.value = '\n\n----- Messaggio inoltrato -----\nDa: ' + fromLabel + ' — ' + quotedWhen + '\nOggetto: ' + m.subject + '\n\n' + m.text;
+    renderReplyBanner();
+    testoEl.focus();
+    testoEl.setSelectionRange(0, 0);
+    document.querySelector('.mail-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   function cancelReply(){
     replyContext = null;
+    forwardContext = null;
     document.getElementById('mailOggetto').value = '';
     document.getElementById('mailTesto').value = '';
     renderReplyBanner();
@@ -1337,6 +1388,9 @@
     if(replyContext){
       el.style.display = 'flex';
       el.innerHTML = '<span>↩️ Stai rispondendo a <strong>' + replyContext.name + '</strong></span><button type="button" class="link-btn" onclick="cancelReply()">✕ Annulla risposta</button>';
+    } else if(forwardContext){
+      el.style.display = 'flex';
+      el.innerHTML = '<span>➡️ Stai inoltrando: <strong>' + forwardContext.subject + '</strong></span><button type="button" class="link-btn" onclick="cancelReply()">✕ Annulla inoltro</button>';
     } else {
       el.style.display = 'none';
       el.innerHTML = '';
@@ -1391,6 +1445,7 @@
     if(document.getElementById('mailCc')) document.getElementById('mailCc').value = '';
     if(document.getElementById('mailCcn')) document.getElementById('mailCcn').value = '';
     replyContext = null;
+    forwardContext = null;
     renderReplyBanner();
   }
 
@@ -1424,7 +1479,7 @@
     } else {
       mailData[dest].ricevuta.push(Object.assign({}, msgPublic));
       deliveredKeys.push(dest);
-      bannerHtml += '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + ' (Posta ricevuta)' + (replyContext ? ' in risposta a ' + replyContext.name : '') + '.</div>';
+      bannerHtml += '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + ' (Posta ricevuta)' + (replyContext ? ' in risposta a ' + replyContext.name : '') + (forwardContext ? ' in inoltro di "' + forwardContext.subject + '"' : '') + '.</div>';
     }
 
     // Consegna aggiuntiva alle caselle indicate in Cc/Ccn (se corrispondono a una casella di settore riconosciuta)

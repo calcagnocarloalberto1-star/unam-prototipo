@@ -179,6 +179,18 @@
   .video-pinned-label,.video-others-label{color:#7c93a3;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px;}
   .video-section-gap{margin-top:18px;}
 
+  /* ---- Documento visualizzato a video (presentazione in aula) ---- */
+  .doc-viewer{background:#0f151b;border-radius:12px;padding:22px;min-height:420px;display:flex;flex-direction:column;}
+  .doc-viewer-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;color:#cfe0ec;font-size:12.5px;}
+  .doc-viewer-bar b{color:#fff;}
+  .doc-viewer-bar button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
+  .doc-slide{flex:1;background:#fff;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;color:var(--ink);min-height:320px;}
+  .doc-slide h4{color:var(--navy);margin-bottom:14px;}
+  .doc-slide p{color:var(--muted);max-width:520px;}
+  .doc-viewer-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;color:#cfe0ec;font-size:12.5px;}
+  .doc-viewer-nav button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
+  .doc-viewer-nav button[disabled]{opacity:.35;cursor:not-allowed;}
+
   /* ---- Documenti ---- */
   .doc-share-box{background:#25313f;border-radius:10px;padding:14px;margin-bottom:14px;}
   .doc-share-box h4{color:#fff;font-size:13.5px;margin-bottom:8px;font-family:'Inter',sans-serif;}
@@ -221,6 +233,7 @@
       <span class="name">U.N.A.M.<small>Aula Virtuale · Demo</small></span>
     </a>
     <div class="hdr-right">
+      <a href="unam_verbali_prototipo.html" class="btn btn-outline btn-sm">📜 Verbali associativi</a>
       <a href="unam_area_riservata_prototipo.html" class="btn btn-outline btn-sm">← Torna all'area riservata</a>
     </div>
   </div>
@@ -230,14 +243,19 @@
 <section class="screen active" id="screen-join">
   <div class="wrap join-wrap">
     <div class="join-card">
-      <div class="lesson-badge">🎓 Corso di Alta Formazione 2026/2027</div>
-      <h2>Modulo 5 — L'intelligenza artificiale applicata alla mediazione</h2>
-      <p style="color:var(--muted);">Lezione sincrona in modalità FAD (formazione a distanza), ai sensi delle regole del Consiglio Nazionale Forense per la formazione continua: la partecipazione viene rilevata tramite verifiche di presenza periodiche e la sessione può essere registrata.</p>
-      <div class="lesson-meta">
+      <div class="lesson-badge" id="joinLessonBadge">🎓 Corso di Alta Formazione 2026/2027</div>
+      <h2 id="joinLessonTitle">Modulo 5 — L'intelligenza artificiale applicata alla mediazione</h2>
+      <p style="color:var(--muted);" id="joinLessonDesc">Lezione sincrona in modalità FAD (formazione a distanza), ai sensi delle regole del Consiglio Nazionale Forense per la formazione continua: la partecipazione viene rilevata tramite verifiche di presenza periodiche e la sessione può essere registrata.</p>
+      <div class="lesson-meta" id="joinLessonMeta">
         <div>📅 <b>26/07/2026</b></div>
         <div>🕒 <b>15:00 – 17:00</b> (2 crediti formativi)</div>
         <div>👤 Relatore: <b>Avv. Beatrice Irene Tonelli</b></div>
       </div>
+
+      <label class="chk-label" style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:var(--navy);margin-bottom:18px;">
+        <input type="checkbox" id="instantMeetingChk" onchange="toggleInstantMeeting()" style="width:auto;margin:0;">
+        Apri l'aula come riunione istantanea, senza una lezione pianificata
+      </label>
 
       <label>Il tuo nome</label>
       <input type="text" id="joinName" value="Avv. Demo Rossi">
@@ -259,7 +277,7 @@
 <section class="screen" id="screen-aula">
   <div class="aula-shell">
     <div class="av-topbar">
-      <div class="av-title">Modulo 5 — L'IA applicata alla mediazione<small>Corso di Alta Formazione 2026/2027</small></div>
+      <div class="av-title" id="avTitleBlock">Modulo 5 — L'IA applicata alla mediazione<small>Corso di Alta Formazione 2026/2027</small></div>
       <div class="av-mid">
         <div class="timer" id="avTimer">00:00</div>
         <div class="rec-indicator" id="recIndicator"><span class="rec-dot"></span> REC</div>
@@ -275,6 +293,7 @@
 
     <div class="av-body">
       <div class="av-stage">
+        <div class="doc-viewer" id="docViewer" style="display:none;"></div>
         <div class="video-grid" id="videoGrid"></div>
         <div class="video-pager" id="videoPager"></div>
       </div>
@@ -364,10 +383,10 @@
 <section class="screen" id="screen-report">
   <div class="wrap report-wrap">
     <h1>Report di partecipazione</h1>
-    <p style="color:var(--muted);margin-top:-8px;">Modulo 5 — L'intelligenza artificiale applicata alla mediazione · Corso di Alta Formazione 2026/2027 · 26/07/2026</p>
+    <p style="color:var(--muted);margin-top:-8px;" id="reportSubtitle">Modulo 5 — L'intelligenza artificiale applicata alla mediazione · Corso di Alta Formazione 2026/2027 · 26/07/2026</p>
 
     <div class="card" style="border:1px dashed var(--blue);background:var(--blue-pale);">
-      <p style="margin:0;font-size:13.5px;">📹 La registrazione della sessione sarà disponibile nell'area riservata, sezione <strong>Corso di Alta Formazione</strong>, entro 48 ore. Questo report è generato automaticamente a fini dimostrativi e riproduce il tipo di rendicontazione richiesta dal Consiglio Nazionale Forense per la formazione a distanza sincrona (rilevazione delle presenze e delle verifiche periodiche).</p>
+      <p style="margin:0;font-size:13.5px;" id="reportRecNote">📹 La registrazione della sessione sarà disponibile nell'area riservata, sezione <strong>Corso di Alta Formazione</strong>, entro 48 ore. Questo report è generato automaticamente a fini dimostrativi e riproduce il tipo di rendicontazione richiesta dal Consiglio Nazionale Forense per la formazione a distanza sincrona (rilevazione delle presenze e delle verifiche periodiche).</p>
     </div>
 
     <div class="card">
@@ -483,14 +502,40 @@ function setJoinRole(role){
 }
 setJoinRole('partecipante');
 
+var isInstantMeeting = false;
+function toggleInstantMeeting(){
+  isInstantMeeting = document.getElementById('instantMeetingChk').checked;
+  var badge = document.getElementById('joinLessonBadge');
+  var title = document.getElementById('joinLessonTitle');
+  var desc = document.getElementById('joinLessonDesc');
+  var meta = document.getElementById('joinLessonMeta');
+  if(isInstantMeeting){
+    badge.textContent = '🚀 Riunione istantanea';
+    title.textContent = 'Riunione istantanea — senza lezione pianificata';
+    desc.textContent = 'Aula aperta al volo, senza una lezione del Corso di Alta Formazione già programmata: utile per riunioni operative, allineamenti rapidi o prove tecniche. Una volta entrato potrai comunque pianificare una vera lezione dai controlli dell\'aula.';
+    meta.innerHTML = '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>';
+  } else {
+    badge.textContent = '🎓 Corso di Alta Formazione 2026/2027';
+    title.textContent = 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione';
+    desc.textContent = 'Lezione sincrona in modalità FAD (formazione a distanza), ai sensi delle regole del Consiglio Nazionale Forense per la formazione continua: la partecipazione viene rilevata tramite verifiche di presenza periodiche e la sessione può essere registrata.';
+    meta.innerHTML = '<div>📅 <b>26/07/2026</b></div><div>🕒 <b>15:00 – 17:00</b> (2 crediti formativi)</div><div>👤 Relatore: <b>Avv. Beatrice Irene Tonelli</b></div>';
+  }
+}
+
 function enterAula(){
   myName = document.getElementById('joinName').value.trim() || 'Avv. Demo Rossi';
   buildParticipants();
   document.getElementById('screen-join').classList.remove('active');
   document.getElementById('screen-aula').classList.add('active');
+  document.getElementById('avTitleBlock').innerHTML = isInstantMeeting
+    ? 'Riunione istantanea<small>Apertura senza lezione pianificata</small>'
+    : 'Modulo 5 — L\'IA applicata alla mediazione<small>Corso di Alta Formazione 2026/2027</small>';
+  sharedDocuments = [];
+  presentingDoc = null;
   avSeconds = 0;
   renderTimer();
   renderVideoGrid();
+  renderDocViewer();
   renderPartList();
   renderControlBar();
   renderPollHostControls();
@@ -763,6 +808,8 @@ var DOC_PRESETS = [
 ];
 var sharedDocuments = []; // { id, title, sharedBy, atSecond, sentTo:null|number }
 var docCounter = 0;
+var presentingDoc = null; // { id, title, page }
+var DOC_VIEWER_PAGES = 4;
 
 function renderDocPane(){
   renderDocHostControls();
@@ -804,16 +851,72 @@ function renderDocList(){
   }
   var html = '';
   sharedDocuments.slice().reverse().forEach(function(doc){
+    var isPresenting = presentingDoc && presentingDoc.id === doc.id;
     html += '<div class="doc-item">' +
-      '<div class="doc-title">📄 '+doc.title+'</div>' +
+      '<div class="doc-title">📄 '+doc.title+(isPresenting ? ' <span class="co-host-badge">🔴 In presentazione</span>' : '')+'</div>' +
       '<div class="doc-meta">Condiviso da '+doc.sharedBy+' — al minuto '+fmtTime(doc.atSecond)+'</div>' +
       '<div class="doc-actions">' +
+        (amOrganizer() ? (isPresenting
+          ? '<button onclick="stopPresenting()">⏹️ Interrompi visualizzazione</button>'
+          : '<button onclick="presentDocument(\''+doc.id+'\')">👁️ Visualizza in aula</button>') : '') +
         (amOrganizer() ? '<button onclick="sendDocumentToAll(\''+doc.id+'\')">📧 Invia ai partecipanti</button>' : '') +
       '</div>' +
       (doc.sentTo!==null ? '<div class="doc-sent-note">✅ Inviato via email a '+doc.sentTo+' partecipanti.</div>' : '') +
     '</div>';
   });
   el.innerHTML = html;
+}
+
+/* ===================== VISUALIZZAZIONE DOCUMENTO A VIDEO (presentazione in aula) ===================== */
+function presentDocument(id){
+  if(!amOrganizer()) return;
+  var doc = sharedDocuments.find(function(d){ return d.id===id; });
+  if(!doc) return;
+  presentingDoc = { id: doc.id, title: doc.title, page: 1 };
+  pushChat('Sistema', '📽️ '+myName+' ha avviato la visualizzazione a video del documento "'+doc.title+'".', false);
+  renderDocViewer();
+  renderDocList();
+}
+function stopPresenting(){
+  if(!presentingDoc) return;
+  var title = presentingDoc.title;
+  presentingDoc = null;
+  pushChat('Sistema', '⏹️ La visualizzazione a video del documento "'+title+'" è stata interrotta.', false);
+  renderDocViewer();
+  renderDocList();
+}
+function changePresentPage(delta){
+  if(!presentingDoc) return;
+  presentingDoc.page = Math.min(DOC_VIEWER_PAGES, Math.max(1, presentingDoc.page + delta));
+  renderDocViewer();
+}
+function renderDocViewer(){
+  var viewer = document.getElementById('docViewer');
+  var grid = document.getElementById('videoGrid');
+  var pager = document.getElementById('videoPager');
+  if(!presentingDoc){
+    viewer.style.display = 'none';
+    viewer.innerHTML = '';
+    grid.style.display = '';
+    pager.style.display = '';
+    return;
+  }
+  grid.style.display = 'none';
+  pager.style.display = 'none';
+  viewer.style.display = 'flex';
+  viewer.innerHTML =
+    '<div class="doc-viewer-bar"><span>📽️ Stai visualizzando a video: <b>'+presentingDoc.title+'</b></span>' +
+    (amOrganizer() ? '<button onclick="stopPresenting()">⏹️ Chiudi presentazione</button>' : '') +
+    '</div>' +
+    '<div class="doc-slide">' +
+      '<h4>'+presentingDoc.title+'</h4>' +
+      '<p>Contenuto dimostrativo — pagina '+presentingDoc.page+' di '+DOC_VIEWER_PAGES+'. In una versione reale qui verrebbe mostrato il contenuto effettivo del file condiviso (slide, pagina PDF o documento), visibile a tutti i partecipanti in tempo reale come una condivisione schermo.</p>' +
+    '</div>' +
+    (amOrganizer() ? '<div class="doc-viewer-nav">' +
+      '<button onclick="changePresentPage(-1)" '+(presentingDoc.page<=1?'disabled':'')+'>◀ Pagina precedente</button>' +
+      '<span>Pagina '+presentingDoc.page+' di '+DOC_VIEWER_PAGES+'</span>' +
+      '<button onclick="changePresentPage(1)" '+(presentingDoc.page>=DOC_VIEWER_PAGES?'disabled':'')+'>Pagina successiva ▶</button>' +
+    '</div>' : '');
 }
 
 /* ===================== MODALI (pianifica lezione / invita destinatari) ===================== */
@@ -1099,6 +1202,17 @@ function endMeetingForAll(){
 
 function buildReport(){
   var totalDuration = avSeconds;
+
+  var subtitleEl = document.getElementById('reportSubtitle');
+  var recNoteEl = document.getElementById('reportRecNote');
+  if(isInstantMeeting){
+    if(subtitleEl) subtitleEl.textContent = 'Riunione istantanea — senza lezione pianificata · ' + fmtTime(0) + ' avviata durante la sessione odierna';
+    if(recNoteEl) recNoteEl.innerHTML = '📹 Trattandosi di una riunione istantanea non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Se registrata, la registrazione sarà comunque conservata nell\'area riservata.';
+  } else {
+    if(subtitleEl) subtitleEl.textContent = 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione · Corso di Alta Formazione 2026/2027 · 26/07/2026';
+    if(recNoteEl) recNoteEl.innerHTML = '📹 La registrazione della sessione sarà disponibile nell\'area riservata, sezione <strong>Corso di Alta Formazione</strong>, entro 48 ore. Questo report è generato automaticamente a fini dimostrativi e riproduce il tipo di rendicontazione richiesta dal Consiglio Nazionale Forense per la formazione a distanza sincrona (rilevazione delle presenze e delle verifiche periodiche).';
+  }
+
   // sommario
   var summary = document.getElementById('reportSummary');
   var totalChecks = presenceChecks.length;
@@ -1120,9 +1234,11 @@ function buildReport(){
     var attendancePct = totalDuration>0 ? (leaveSec-joinSec)/totalDuration : 1;
     var checksOk = checksApplicable.length===0 || checksPassed===checksApplicable.length;
     var idoneo = attendancePct>=0.85 && checksOk;
-    var badge = idoneo
-      ? '<span class="badge ok">Idoneo — credito riconosciuto</span>'
-      : '<span class="badge bad">Non idoneo — credito da verificare</span>';
+    var badge = isInstantMeeting
+      ? '<span class="badge ok" style="background:var(--warn-bg);color:var(--warn);">Presenza registrata (nessun credito formativo)</span>'
+      : (idoneo
+        ? '<span class="badge ok">Idoneo — credito riconosciuto</span>'
+        : '<span class="badge bad">Non idoneo — credito da verificare</span>');
     var row = '<tr>' +
       '<td>'+(pt.role==='host'?'🎓 ':'')+pt.name+(pt.isMe?' (tu)':'')+(pt.coHost?' <span class="badge ok" style="margin-left:6px;">Co-organizzatore</span>':'')+'</td>' +
       '<td>'+fmtTime(joinSec)+'</td>' +
