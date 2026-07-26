@@ -313,7 +313,7 @@
         <div class="card">
           <h3>Quota associativa</h3>
           <p><span class="badge warn">In scadenza</span></p>
-          <p style="font-size:13.5px;color:var(--muted);">Quota 2026 da rinnovare entro il 31/01/2026.</p>
+          <p style="font-size:13.5px;color:var(--muted);">Quota 2026 da rinnovare entro il 30/09/2026.</p>
           <button class="btn btn-primary btn-block" onclick="startRinnovo()">Rinnova la quota — € 30,00</button>
         </div>
         <div class="card">
@@ -346,6 +346,7 @@
           <h3>Il mio profilo</h3>
           <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span id="dashOrdineSezione" style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span></p>
           <button class="btn btn-outline btn-block btn-sm" onclick="apriSchedaAccount()">✎ Modifica la mia scheda</button>
+          <button class="btn btn-outline btn-block btn-sm" style="margin-top:8px;" onclick="doLogout()">🚪 Esci (logout)</button>
         </div>
       </div>
     </div>
@@ -1475,6 +1476,13 @@
     document.getElementById('dashName').textContent = demoUser.nome;
     document.getElementById('dashOrdineSezione').textContent = 'Ordine di ' + demoUser.ordine + ' · Sezione locale ' + demoUser.sezione;
     showView('dashboard');
+  }
+
+  function doLogout(){
+    // In questo prototipo il logout riporta semplicemente alla schermata di accesso,
+    // senza cancellare i dati demo già presenti nella sessione del browser.
+    if(typeof cancelReply === 'function') cancelReply();
+    showView('login');
   }
 
   function apriSchedaAccount(){
