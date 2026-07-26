@@ -329,9 +329,9 @@
           <button class="btn btn-outline btn-block" onclick="showView('iscrizione-corso')">Iscriviti al nuovo corso 2026/2027</button>
         </div>
         <div class="card">
-          <h3>🎓 Aula virtuale — lezioni del corso</h3>
-          <p style="font-size:13.5px;color:var(--muted);">Prossima lezione: <strong>Modulo 5 — L'IA applicata alla mediazione</strong>, 26/07/2026 ore 15:00. Videolezione sincrona con report di partecipazione, sondaggi/verifiche di presenza e possibilità di registrazione, secondo le indicazioni del CNF per la FAD.</p>
-          <a href="unam_aula_virtuale_prototipo.html" class="btn btn-primary btn-block">Entra nell'aula virtuale</a>
+          <h3>🎓 Aula virtuale — lezioni e riunioni</h3>
+          <p style="font-size:13.5px;color:var(--muted);" id="dashAulaDesc">Prossima lezione: <strong>Modulo 5 — L'IA applicata alla mediazione</strong>, 26/07/2026 ore 15:00. Videolezione sincrona con report di partecipazione, sondaggi/verifiche di presenza e possibilità di registrazione, secondo le indicazioni del CNF per la FAD.</p>
+          <button type="button" class="btn btn-primary btn-block" onclick="showView('aula-lezioni')">Apri l'aula, il calendario e gli inviti</button>
         </div>
         <div class="card">
           <h3>Chat associativa riservata</h3>
@@ -552,6 +552,59 @@
       </div>
     </div>
     <p class="hint" style="margin-top:14px;">In questo prototipo la dichiarazione di partecipazione e l'invio della delega sono dimostrativi: il pulsante di invio apre una bozza email verso l'indirizzo reale della segreteria U.N.A.M. (info@unam.it), che l'utente deve inviare autonomamente — nessun messaggio parte automaticamente. Nel sito reale l'invio genererà una comunicazione via email/PEC alla segreteria con la scheda di delega firmabile digitalmente, e la partecipazione/delega sarà registrata nel gestionale soci (cfr. Art. 4.2 del Capitolato Tecnico).</p>
+  </div>
+</section>
+
+<!-- ===================== AULA VIRTUALE: APERTURA, CALENDARIO, INVITO ===================== -->
+<section class="view" id="aula-lezioni">
+  <div class="wrap narrow">
+    <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
+    <div class="auth-card">
+      <h2>🎓 Aula virtuale — lezioni e riunioni</h2>
+      <p class="sub">Apri l'aula, pianifica una nuova sessione e produci l'invito da copiare e inviare ai partecipanti.</p>
+
+      <a href="unam_aula_virtuale_prototipo.html" target="_blank" rel="noopener" class="btn btn-primary btn-block">🚪 Apri l'aula virtuale</a>
+
+      <div class="divider">Calendario — pianifica una nuova sessione</div>
+      <label>Tipo di sessione</label>
+      <select id="alTipo">
+        <option value="corso">🎓 Lezione del Corso di Alta Formazione</option>
+        <option value="direttivo">🏛️ Riunione del Comitato Direttivo</option>
+        <option value="esecutivo">🗂️ Riunione del Comitato Esecutivo</option>
+        <option value="gestione">🎓 Riunione del Comitato di Gestione</option>
+      </select>
+      <p style="font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:16px;">L'Assemblea Generale dei soci non è gestita da questo calendario: si convoca secondo le modalità statutarie ordinarie.</p>
+      <label>Titolo</label>
+      <input type="text" id="alTitolo" value="Modulo 6 — La mediazione familiare e i minori">
+      <label>Data</label>
+      <input type="date" id="alData" value="2026-09-15">
+      <div style="display:flex;gap:12px;">
+        <div style="flex:1;">
+          <label>Ora inizio</label>
+          <input type="time" id="alOraInizio" value="15:00">
+        </div>
+        <div style="flex:1;">
+          <label>Ora fine</label>
+          <input type="time" id="alOraFine" value="17:00">
+        </div>
+      </div>
+      <label>Relatore / Organizzatore</label>
+      <input type="text" id="alRelatore" value="Avv. Beatrice Irene Tonelli">
+      <div id="alScheduleConfirm"></div>
+      <button type="button" class="btn btn-primary btn-block" onclick="pianificaSessione()">🗓️ Pianifica</button>
+      <div id="alScheduleList" style="margin-top:14px;"></div>
+
+      <div class="divider">Invito al collegamento — produci e copia</div>
+      <p style="font-size:13.5px;color:var(--muted);margin-top:-6px;">L'invito viene proposto a partire dall'ultima sessione pianificata (o dalla lezione corrente, se non ne hai ancora pianificata una) ed è completamente modificabile prima di copiarlo.</p>
+      <button type="button" class="btn btn-outline btn-block" onclick="generaInvito()">✉️ Genera invito</button>
+      <textarea id="alInvitoText" style="min-height:160px;margin-top:10px;" placeholder="Genera l'invito per vederlo qui: potrai modificarlo liberamente prima di copiarlo."></textarea>
+      <button type="button" class="btn btn-primary btn-block" style="margin-top:2px;" onclick="copiaInvito()">📋 Copia invito</button>
+      <div id="alCopyConfirm"></div>
+
+      <div class="divider">Prossima sessione pianificata</div>
+      <p style="font-size:13.5px;color:var(--muted);" id="alProssimaLezioneDesc">Prossima lezione: <strong>Modulo 5 — L'IA applicata alla mediazione</strong>, 26/07/2026 ore 15:00. Videolezione sincrona con report di partecipazione, sondaggi/verifiche di presenza e possibilità di registrazione, secondo le indicazioni del CNF per la FAD.</p>
+    </div>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la pianificazione e l'invito sono dimostrativi e restano in memoria solo per la durata della sessione del browser (si azzerano ricaricando la pagina). Nel sito reale la pianificazione aggiornerà il calendario visibile a corsisti/componenti dell'organo interessato, e l'invito potrà essere inviato via email/PEC o tramite la posta interna.</p>
   </div>
 </section>
 
@@ -1524,6 +1577,101 @@
     if(id === 'chat'){ renderChatThread(); }
     if(id === 'posta'){ renderMailFolders(); renderMailSubfolders(); renderMailList(); }
     window.scrollTo(0,0);
+  }
+
+  /* ===== Aula virtuale: calendario e invito (spostati qui dall'aula, per poterli usare senza dover entrare in aula) ===== */
+  var sessioniPianificate = []; // { tipo, titolo, data, oraInizio, oraFine, relatore }
+  var SESSION_TYPE_LABELS = {
+    corso: '🎓 Lezione del Corso di Alta Formazione',
+    direttivo: '🏛️ Riunione del Comitato Direttivo',
+    esecutivo: '🗂️ Riunione del Comitato Esecutivo',
+    gestione: '🎓 Riunione del Comitato di Gestione'
+  };
+
+  function formatDateItAula(isoDate){
+    var parts = isoDate.split('-');
+    if(parts.length !== 3) return isoDate;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function pianificaSessione(){
+    var tipo = document.getElementById('alTipo').value;
+    var titolo = document.getElementById('alTitolo').value.trim();
+    var data = document.getElementById('alData').value;
+    var oraInizio = document.getElementById('alOraInizio').value;
+    var oraFine = document.getElementById('alOraFine').value;
+    var relatore = document.getElementById('alRelatore').value.trim();
+    if(!titolo || !data || !oraInizio){
+      document.getElementById('alScheduleConfirm').innerHTML = '<p style="color:var(--warn);font-size:13px;">⚠️ Compila almeno tipo, titolo, data e ora di inizio.</p>';
+      return;
+    }
+    var dataFmt = formatDateItAula(data);
+    var sessione = { tipo:tipo, titolo:titolo, data:dataFmt, oraInizio:oraInizio, oraFine:oraFine, relatore:relatore };
+    sessioniPianificate.push(sessione);
+    document.getElementById('alScheduleConfirm').innerHTML = '<p style="color:var(--good);font-size:13px;">✅ Sessione pianificata: <strong>' + titolo + '</strong> — ' + dataFmt + ' ore ' + oraInizio + (oraFine ? '–' + oraFine : '') + '. ' + (tipo === 'corso' ? 'I corsisti la vedranno nella sezione Corso di Alta Formazione.' : 'I componenti dell\'organo la vedranno tra i verbali/comunicazioni associative.') + '</p>';
+    renderSessioniPianificate();
+    aggiornaProssimaSessioneDesc();
+  }
+
+  function renderSessioniPianificate(){
+    var el = document.getElementById('alScheduleList');
+    if(sessioniPianificate.length === 0){ el.innerHTML = ''; return; }
+    var html = '<p style="font-size:12.5px;color:var(--muted);margin-bottom:6px;">Sessioni pianificate in questa visita:</p>';
+    sessioniPianificate.slice().reverse().forEach(function(s){
+      html += '<div style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);">🗓️ <strong>' + s.titolo + '</strong> — ' + (SESSION_TYPE_LABELS[s.tipo] || s.tipo) + '<br>' + s.data + ' ore ' + s.oraInizio + (s.oraFine ? '–' + s.oraFine : '') + (s.relatore ? ' · ' + s.relatore : '') + '</div>';
+    });
+    el.innerHTML = html;
+  }
+
+  function aggiornaProssimaSessioneDesc(){
+    if(sessioniPianificate.length === 0) return;
+    var s = sessioniPianificate[sessioniPianificate.length - 1];
+    var testo = 'Prossima sessione: <strong>' + s.titolo + '</strong> (' + (SESSION_TYPE_LABELS[s.tipo] || s.tipo) + '), ' + s.data + ' ore ' + s.oraInizio + (s.oraFine ? '–' + s.oraFine : '') + '.';
+    var descEl = document.getElementById('alProssimaLezioneDesc');
+    if(descEl) descEl.innerHTML = testo;
+    var dashEl = document.getElementById('dashAulaDesc');
+    if(dashEl) dashEl.innerHTML = testo;
+  }
+
+  function generaInvito(){
+    var base = sessioniPianificate.length > 0
+      ? sessioniPianificate[sessioniPianificate.length - 1]
+      : { tipo:'corso', titolo:'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione', data:'26/07/2026', oraInizio:'15:00', oraFine:'17:00', relatore:'Avv. Beatrice Irene Tonelli' };
+    var tipoLabel = SESSION_TYPE_LABELS[base.tipo] || SESSION_TYPE_LABELS.corso;
+    var link = 'https://calcagnocarloalberto1-star.github.io/unam-prototipo/unam_aula_virtuale_prototipo.html' + (base.tipo !== 'corso' ? ('?tipo=' + base.tipo) : '');
+    var testo = 'Oggetto: Invito — ' + base.titolo + '\n\n'
+      + 'Gentile Collega,\n\n'
+      + 'sei invitato/a a partecipare a: ' + tipoLabel + ' — ' + base.titolo + '.\n'
+      + 'Data: ' + base.data + '\n'
+      + 'Ora: ' + base.oraInizio + (base.oraFine ? (' – ' + base.oraFine) : '') + '\n'
+      + (base.relatore ? ('Relatore/Organizzatore: ' + base.relatore + '\n') : '')
+      + '\nPer collegarti, apri il seguente link all\'ora indicata:\n' + link + '\n\n'
+      + 'Cordiali saluti,\nSegreteria U.N.A.M.';
+    document.getElementById('alInvitoText').value = testo;
+    document.getElementById('alCopyConfirm').innerHTML = '';
+  }
+
+  function copiaInvito(){
+    var ta = document.getElementById('alInvitoText');
+    if(!ta.value.trim()){
+      document.getElementById('alCopyConfirm').innerHTML = '<p style="color:var(--warn);font-size:13px;">⚠️ Genera prima il testo dell\'invito (puoi comunque scriverlo o modificarlo liberamente).</p>';
+      return;
+    }
+    function showOk(){
+      document.getElementById('alCopyConfirm').innerHTML = '<p style="color:var(--good);font-size:13px;">✅ Invito copiato negli appunti: incollalo dove preferisci (email, posta interna, chat associativa).</p>';
+    }
+    function showFallback(){
+      ta.focus(); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch(e){ ok = false; }
+      if(ok) showOk();
+      else document.getElementById('alCopyConfirm').innerHTML = '<p style="color:var(--warn);font-size:13px;">⚠️ Copia automatica non riuscita in questo browser: il testo è selezionato, usa Ctrl/Cmd+C.</p>';
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(showOk).catch(showFallback);
+    } else {
+      showFallback();
+    }
   }
 
   function doLogin(){

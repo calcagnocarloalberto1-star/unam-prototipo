@@ -252,10 +252,15 @@
         <div>👤 Relatore: <b>Avv. Beatrice Irene Tonelli</b></div>
       </div>
 
-      <label class="chk-label" style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;color:var(--navy);margin-bottom:18px;">
-        <input type="checkbox" id="instantMeetingChk" onchange="toggleInstantMeeting()" style="width:auto;margin:0;">
-        Apri l'aula come riunione istantanea, senza una lezione pianificata
-      </label>
+      <label>Tipo di sessione</label>
+      <select id="sessionTypeSelect" onchange="applySessionType()" style="margin-bottom:18px;">
+        <option value="corso">🎓 Lezione del Corso di Alta Formazione (pianificata)</option>
+        <option value="direttivo">🏛️ Riunione del Comitato Direttivo</option>
+        <option value="esecutivo">🗂️ Riunione del Comitato Esecutivo</option>
+        <option value="gestione">🎓 Riunione del Comitato di Gestione</option>
+        <option value="istantanea">🚀 Riunione istantanea (senza pianificazione)</option>
+      </select>
+      <p style="font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:18px;">La piattaforma video ospita anche le riunioni degli organi associativi. L'Assemblea Generale dei soci non è gestita da questa aula virtuale.</p>
 
       <label>Il tuo nome</label>
       <input type="text" id="joinName" value="Avv. Demo Rossi">
@@ -329,36 +334,6 @@
     </div>
 
     <div class="control-bar" id="controlBar"></div>
-
-    <!-- ===== Modale: pianifica lezione ===== -->
-    <div class="av-modal-backdrop" id="modalSchedule">
-      <div class="av-modal">
-        <h3>🗓️ Pianifica lezione</h3>
-        <p class="sub">Programma la prossima lezione del corso: i corsisti la vedranno nell'area riservata, sezione Corso di Alta Formazione.</p>
-        <label>Titolo del modulo</label>
-        <input type="text" id="schTitle" value="Modulo 6 — La mediazione familiare e i minori">
-        <label>Data</label>
-        <input type="date" id="schDate" value="2026-09-15">
-        <div style="display:flex;gap:12px;">
-          <div style="flex:1;">
-            <label>Ora inizio</label>
-            <input type="time" id="schTimeStart" value="15:00">
-          </div>
-          <div style="flex:1;">
-            <label>Ora fine</label>
-            <input type="time" id="schTimeEnd" value="17:00">
-          </div>
-        </div>
-        <label>Relatore</label>
-        <input type="text" id="schRelatore" value="Avv. Beatrice Irene Tonelli">
-        <div id="scheduleConfirm"></div>
-        <div class="schedule-list" id="scheduleList"></div>
-        <div class="av-modal-actions">
-          <button class="btn btn-outline btn-sm" onclick="closeModal('modalSchedule')">Chiudi</button>
-          <button class="btn btn-primary btn-sm" onclick="scheduleLesson()">Pianifica lezione</button>
-        </div>
-      </div>
-    </div>
 
     <!-- ===== Modale: invita destinatari ===== -->
     <div class="av-modal-backdrop" id="modalInvite">
@@ -502,36 +477,108 @@ function setJoinRole(role){
 }
 setJoinRole('partecipante');
 
-var isInstantMeeting = false;
-function toggleInstantMeeting(){
-  isInstantMeeting = document.getElementById('instantMeetingChk').checked;
-  var badge = document.getElementById('joinLessonBadge');
-  var title = document.getElementById('joinLessonTitle');
-  var desc = document.getElementById('joinLessonDesc');
-  var meta = document.getElementById('joinLessonMeta');
-  if(isInstantMeeting){
-    badge.textContent = '🚀 Riunione istantanea';
-    title.textContent = 'Riunione istantanea — senza lezione pianificata';
-    desc.textContent = 'Aula aperta al volo, senza una lezione del Corso di Alta Formazione già programmata: utile per riunioni operative, allineamenti rapidi o prove tecniche. Una volta entrato potrai comunque pianificare una vera lezione dai controlli dell\'aula.';
-    meta.innerHTML = '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>';
-  } else {
-    badge.textContent = '🎓 Corso di Alta Formazione 2026/2027';
-    title.textContent = 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione';
-    desc.textContent = 'Lezione sincrona in modalità FAD (formazione a distanza), ai sensi delle regole del Consiglio Nazionale Forense per la formazione continua: la partecipazione viene rilevata tramite verifiche di presenza periodiche e la sessione può essere registrata.';
-    meta.innerHTML = '<div>📅 <b>26/07/2026</b></div><div>🕒 <b>15:00 – 17:00</b> (2 crediti formativi)</div><div>👤 Relatore: <b>Avv. Beatrice Irene Tonelli</b></div>';
+var SESSION_TYPES = {
+  corso: {
+    badge: '🎓 Corso di Alta Formazione 2026/2027',
+    title: 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione',
+    desc: 'Lezione sincrona in modalità FAD (formazione a distanza), ai sensi delle regole del Consiglio Nazionale Forense per la formazione continua: la partecipazione viene rilevata tramite verifiche di presenza periodiche e la sessione può essere registrata.',
+    meta: '<div>📅 <b>26/07/2026</b></div><div>🕒 <b>15:00 – 17:00</b> (2 crediti formativi)</div><div>👤 Relatore: <b>Avv. Beatrice Irene Tonelli</b></div>',
+    topTitle: 'Modulo 5 — L\'IA applicata alla mediazione',
+    topSub: 'Corso di Alta Formazione 2026/2027',
+    reportSubtitle: 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione · Corso di Alta Formazione 2026/2027 · 26/07/2026',
+    recNote: '📹 La registrazione della sessione sarà disponibile nell\'area riservata, sezione <strong>Corso di Alta Formazione</strong>, entro 48 ore. Questo report è generato automaticamente a fini dimostrativi e riproduce il tipo di rendicontazione richiesta dal Consiglio Nazionale Forense per la formazione a distanza sincrona (rilevazione delle presenze e delle verifiche periodiche).',
+    hasCredits: true
+  },
+  direttivo: {
+    badge: '🏛️ Riunione — Comitato Direttivo',
+    title: 'Riunione del Comitato Direttivo',
+    desc: 'Riunione operativa dell\'Ufficio Direttivo nazionale: non è collegata a un modulo del Corso di Alta Formazione e non genera crediti formativi. Dalla scheda Documenti puoi presentare a video il verbale della riunione precedente; quello di questa riunione potrà essere redatto e conservato nel modulo Verbali associativi.',
+    meta: '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>',
+    topTitle: 'Riunione del Comitato Direttivo',
+    topSub: 'Riunione associativa',
+    reportSubtitle: 'Riunione del Comitato Direttivo — riunione associativa, senza lezione del Corso di Alta Formazione',
+    recNote: '📹 Trattandosi di una riunione del Comitato Direttivo, non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Il relativo verbale può essere redatto e conservato nel modulo Verbali associativi.',
+    hasCredits: false
+  },
+  esecutivo: {
+    badge: '🗂️ Riunione — Comitato Esecutivo',
+    title: 'Riunione del Comitato Esecutivo',
+    desc: 'Riunione operativa del Comitato Esecutivo: non è collegata a un modulo del Corso di Alta Formazione e non genera crediti formativi. Dalla scheda Documenti puoi presentare a video il verbale della riunione precedente; quello di questa riunione potrà essere redatto e conservato nel modulo Verbali associativi.',
+    meta: '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>',
+    topTitle: 'Riunione del Comitato Esecutivo',
+    topSub: 'Riunione associativa',
+    reportSubtitle: 'Riunione del Comitato Esecutivo — riunione associativa, senza lezione del Corso di Alta Formazione',
+    recNote: '📹 Trattandosi di una riunione del Comitato Esecutivo, non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Il relativo verbale può essere redatto e conservato nel modulo Verbali associativi.',
+    hasCredits: false
+  },
+  gestione: {
+    badge: '🎓 Riunione — Comitato di Gestione',
+    title: 'Riunione del Comitato di Gestione',
+    desc: 'Riunione del Comitato di Gestione del Corso di Alta Formazione: non è una lezione del corso e non genera crediti formativi ai corsisti. Dalla scheda Documenti puoi presentare a video il verbale della riunione precedente; quello di questa riunione potrà essere redatto e conservato nel modulo Verbali associativi.',
+    meta: '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>',
+    topTitle: 'Riunione del Comitato di Gestione',
+    topSub: 'Riunione associativa',
+    reportSubtitle: 'Riunione del Comitato di Gestione — riunione associativa, senza lezione del Corso di Alta Formazione',
+    recNote: '📹 Trattandosi di una riunione del Comitato di Gestione, non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Il relativo verbale può essere redatto e conservato nel modulo Verbali associativi.',
+    hasCredits: false
+  },
+  istantanea: {
+    badge: '🚀 Riunione istantanea',
+    title: 'Riunione istantanea — senza lezione pianificata',
+    desc: 'Aula aperta al volo, senza una lezione del Corso di Alta Formazione né una riunione di un organo associativo già programmata: utile per allineamenti rapidi o prove tecniche.',
+    meta: '<div>📅 <b>Oggi</b></div><div>🕒 Avviata adesso</div><div>👤 Organizzatore: <b>chi entra come relatore/host</b></div>',
+    topTitle: 'Riunione istantanea',
+    topSub: 'Apertura senza lezione pianificata',
+    reportSubtitle: 'Riunione istantanea — senza lezione pianificata · avviata durante la sessione odierna',
+    recNote: '📹 Trattandosi di una riunione istantanea non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Se registrata, la registrazione sarà comunque conservata nell\'area riservata.',
+    hasCredits: false
   }
+};
+var sessionType = 'corso';
+function applySessionType(){
+  var sel = document.getElementById('sessionTypeSelect');
+  sessionType = sel ? sel.value : 'corso';
+  var cfg = SESSION_TYPES[sessionType];
+  document.getElementById('joinLessonBadge').textContent = cfg.badge;
+  document.getElementById('joinLessonTitle').textContent = cfg.title;
+  document.getElementById('joinLessonDesc').textContent = cfg.desc;
+  document.getElementById('joinLessonMeta').innerHTML = cfg.meta;
 }
+
+/* Precompilazione da parametri in query string (link diretti da altre pagine, es. Verbali associativi) */
+var pendingVerbaleDoc = null;
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var tipo = params.get('tipo');
+  if(tipo && SESSION_TYPES[tipo]){
+    var sel = document.getElementById('sessionTypeSelect');
+    if(sel){ sel.value = tipo; }
+    applySessionType();
+  }
+  var vTitolo = params.get('verbaleTitolo');
+  if(vTitolo){
+    var vCategoria = params.get('verbaleCategoria') || '';
+    var vData = params.get('verbaleData') || '';
+    pendingVerbaleDoc = {
+      id: 'verbale-preload',
+      name: vTitolo,
+      size: 'Verbale associativo' + (vCategoria ? ' — ' + vCategoria : '') + (vData ? ' (riunione del ' + vData + ')' : '')
+    };
+  }
+})();
 
 function enterAula(){
   myName = document.getElementById('joinName').value.trim() || 'Avv. Demo Rossi';
   buildParticipants();
   document.getElementById('screen-join').classList.remove('active');
   document.getElementById('screen-aula').classList.add('active');
-  document.getElementById('avTitleBlock').innerHTML = isInstantMeeting
-    ? 'Riunione istantanea<small>Apertura senza lezione pianificata</small>'
-    : 'Modulo 5 — L\'IA applicata alla mediazione<small>Corso di Alta Formazione 2026/2027</small>';
+  var sessionCfg = SESSION_TYPES[sessionType];
+  document.getElementById('avTitleBlock').innerHTML = sessionCfg.topTitle + '<small>' + sessionCfg.topSub + '</small>';
   sharedDocuments = [];
   presentingDoc = null;
+  if(pendingVerbaleDoc){
+    sharedDocuments.push(pendingVerbaleDoc);
+  }
   avSeconds = 0;
   renderTimer();
   renderVideoGrid();
@@ -541,6 +588,9 @@ function enterAula(){
   renderPollHostControls();
   renderDocPane();
   seedChat();
+  if(pendingVerbaleDoc){
+    pushChat('Sistema', '📜 Il verbale "' + pendingVerbaleDoc.name + '" è stato pre-caricato: apri la scheda Documenti per presentarlo a video.', false);
+  }
   startClock();
   startSpeakingRotation();
   if(myRole==='host'){
@@ -919,47 +969,17 @@ function renderDocViewer(){
     '</div>' : '');
 }
 
-/* ===================== MODALI (pianifica lezione / invita destinatari) ===================== */
-var scheduledLessons = []; // { title, date, timeStart, timeEnd, relatore }
+/* ===================== MODALE (invita destinatari) ===================== */
+/* La pianificazione delle lezioni/riunioni e la produzione dell'invito sono state
+   spostate nell'area riservata, sopra la descrizione della lezione programmata,
+   così da poterle usare senza dover prima entrare in aula. */
 
 function openModal(id){
   document.getElementById(id).classList.add('show');
-  if(id === 'modalSchedule') renderScheduleList();
   if(id === 'modalInvite') renderInviteList();
 }
 function closeModal(id){
   document.getElementById(id).classList.remove('show');
-}
-function scheduleLesson(){
-  var title = document.getElementById('schTitle').value.trim();
-  var date = document.getElementById('schDate').value;
-  var timeStart = document.getElementById('schTimeStart').value;
-  var timeEnd = document.getElementById('schTimeEnd').value;
-  var relatore = document.getElementById('schRelatore').value.trim();
-  if(!title || !date || !timeStart){
-    document.getElementById('scheduleConfirm').innerHTML = '<div class="av-modal-confirm">⚠️ Compila almeno titolo, data e ora di inizio.</div>';
-    return;
-  }
-  var dateFmt = formatItDate(date);
-  scheduledLessons.push({ title:title, date:dateFmt, timeStart:timeStart, timeEnd:timeEnd, relatore:relatore });
-  document.getElementById('scheduleConfirm').innerHTML =
-    '<div class="av-modal-confirm">✅ Lezione pianificata: <b>'+title+'</b> — '+dateFmt+' ore '+timeStart+(timeEnd?'–'+timeEnd:'')+'. I corsisti la vedranno nella sezione Corso di Alta Formazione dell\'area riservata.</div>';
-  pushChat('Sistema', '🗓️ Nuova lezione pianificata: "'+title+'" — '+dateFmt+' ore '+timeStart+(timeEnd?'–'+timeEnd:'')+' (relatore: '+relatore+').', false);
-  renderScheduleList();
-}
-function renderScheduleList(){
-  var el = document.getElementById('scheduleList');
-  if(scheduledLessons.length===0){ el.innerHTML=''; return; }
-  var html = '<p class="sub" style="margin-bottom:6px;">Lezioni pianificate in questa sessione:</p>';
-  scheduledLessons.forEach(function(l){
-    html += '<div class="schedule-item">🗓️ <b>'+l.title+'</b> — '+l.date+' ore '+l.timeStart+(l.timeEnd?'–'+l.timeEnd:'')+' · Relatore: '+l.relatore+'</div>';
-  });
-  el.innerHTML = html;
-}
-function formatItDate(isoDate){
-  var parts = isoDate.split('-');
-  if(parts.length!==3) return isoDate;
-  return parts[2]+'/'+parts[1]+'/'+parts[0];
 }
 function renderInviteList(){
   var el = document.getElementById('inviteList');
@@ -1001,7 +1021,6 @@ function renderControlBar(){
   html += ctrlBtnHtml('doc', '📄', 'Documenti', false, "toggleSidePanel('doc')", (sideOpen&&currentSidePane==='doc')?'active-panel':'');
   if(amOrganizer()){
     html += ctrlBtnHtml('rec', '⏺️', recording?'Reg. ON':'Registra', recording, "toggleRecording()", recording?'rec-active':'');
-    html += '<button class="ctrl-btn" onclick="openModal(\'modalSchedule\')"><span class="ic">🗓️</span>Pianifica</button>';
     html += '<button class="ctrl-btn" onclick="openModal(\'modalInvite\')"><span class="ic">✉️</span>Invita</button>';
     html += '<button class="ctrl-btn end" onclick="endMeetingForAll()"><span class="ic">🚪</span>Termina riunione</button>';
   } else {
@@ -1205,13 +1224,9 @@ function buildReport(){
 
   var subtitleEl = document.getElementById('reportSubtitle');
   var recNoteEl = document.getElementById('reportRecNote');
-  if(isInstantMeeting){
-    if(subtitleEl) subtitleEl.textContent = 'Riunione istantanea — senza lezione pianificata · ' + fmtTime(0) + ' avviata durante la sessione odierna';
-    if(recNoteEl) recNoteEl.innerHTML = '📹 Trattandosi di una riunione istantanea non collegata a un modulo del Corso di Alta Formazione, questa sessione non genera crediti formativi; il report resta comunque disponibile come registro interno di partecipazione. Se registrata, la registrazione sarà comunque conservata nell\'area riservata.';
-  } else {
-    if(subtitleEl) subtitleEl.textContent = 'Modulo 5 — L\'intelligenza artificiale applicata alla mediazione · Corso di Alta Formazione 2026/2027 · 26/07/2026';
-    if(recNoteEl) recNoteEl.innerHTML = '📹 La registrazione della sessione sarà disponibile nell\'area riservata, sezione <strong>Corso di Alta Formazione</strong>, entro 48 ore. Questo report è generato automaticamente a fini dimostrativi e riproduce il tipo di rendicontazione richiesta dal Consiglio Nazionale Forense per la formazione a distanza sincrona (rilevazione delle presenze e delle verifiche periodiche).';
-  }
+  var reportCfg = SESSION_TYPES[sessionType];
+  if(subtitleEl) subtitleEl.textContent = reportCfg.reportSubtitle;
+  if(recNoteEl) recNoteEl.innerHTML = reportCfg.recNote;
 
   // sommario
   var summary = document.getElementById('reportSummary');
@@ -1234,7 +1249,7 @@ function buildReport(){
     var attendancePct = totalDuration>0 ? (leaveSec-joinSec)/totalDuration : 1;
     var checksOk = checksApplicable.length===0 || checksPassed===checksApplicable.length;
     var idoneo = attendancePct>=0.85 && checksOk;
-    var badge = isInstantMeeting
+    var badge = !reportCfg.hasCredits
       ? '<span class="badge ok" style="background:var(--warn-bg);color:var(--warn);">Presenza registrata (nessun credito formativo)</span>'
       : (idoneo
         ? '<span class="badge ok">Idoneo — credito riconosciuto</span>'

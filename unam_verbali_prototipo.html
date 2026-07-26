@@ -113,7 +113,7 @@
   <h1 style="margin-top:14px;">Verbali associativi</h1>
   <p style="color:var(--muted);margin-top:-8px;">Archivio dei verbali di Assemblee, Comitato Direttivo, Comitato Esecutivo e Comitato di Gestione, con conservazione, data certa, stampa e invio ai componenti.</p>
 
-  <div class="info-banner">ℹ️ Tutte le categorie sono mostrate qui per mostrare la funzionalità completa. Nel sito reale l'accesso a ciascuna categoria sarà riservato ai soli componenti del relativo organo, secondo l'Albero degli accessi predisposto dal Delegato all'Informatica (i membri di Livello 1, incluso il Delegato all'Informatica, vedranno tutte le categorie).</p></div>
+  <div class="info-banner">ℹ️ Tutte le categorie sono mostrate qui per mostrare la funzionalità completa. Nel sito reale l'accesso a ciascuna categoria sarà riservato ai soli componenti del relativo organo, secondo l'Albero degli accessi predisposto dal Delegato all'Informatica (i membri di Livello 1, incluso il Delegato all'Informatica, vedranno tutte le categorie). I verbali di Comitato Direttivo, Comitato Esecutivo e Comitato di Gestione possono inoltre essere presentati a video in aula virtuale, che ospita anche le riunioni di questi organi: l'Assemblea Generale dei soci resta invece esclusa da questa modalità.</p></div>
 
   <div class="verbali-layout">
     <aside class="verbali-folders" id="verbaliFolders"></aside>
@@ -232,6 +232,9 @@ function renderVerbaleItem(v){
   if(v.status === 'archiviato' && !v.dataCerta){
     html += '<button type="button" class="btn btn-outline btn-sm" onclick="daiDataCertaVerbale(\'' + v.id + '\')">📌 Dai data certa</button>';
   }
+  if(currentVerbaliCategoria !== 'assemblee'){
+    html += '<button type="button" class="btn btn-outline btn-sm" onclick="presentaVerbaleInAula(\'' + v.id + '\')">🖥️ Presenta in aula virtuale</button>';
+  }
   html += '<button type="button" class="btn btn-outline btn-sm" onclick="stampaVerbale(\'' + v.id + '\')">🖨️ Stampa</button>'
     + '<button type="button" class="btn btn-outline btn-sm" onclick="inviaVerbaleComponenti(\'' + v.id + '\')">✉️ Invia ai componenti</button>'
     + '</div>';
@@ -243,6 +246,19 @@ function renderVerbaleItem(v){
   }
   html += '</div>';
   return html;
+}
+
+function presentaVerbaleInAula(id){
+  var found = findVerbale(id);
+  if(!found || found.key === 'assemblee') return;
+  var v = found.v;
+  var def = verbaliCategorie[found.key];
+  var url = 'unam_aula_virtuale_prototipo.html'
+    + '?tipo=' + encodeURIComponent(found.key)
+    + '&verbaleTitolo=' + encodeURIComponent('📜 Verbale — ' + v.title)
+    + '&verbaleCategoria=' + encodeURIComponent(def.name)
+    + '&verbaleData=' + encodeURIComponent(v.date);
+  window.open(url, '_blank');
 }
 
 function findVerbale(id){
