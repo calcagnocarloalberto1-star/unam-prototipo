@@ -126,11 +126,21 @@
   .mi-tag{font-size:10.5px;color:var(--navy);background:var(--blue-pale);border-radius:8px;padding:1px 7px;align-self:flex-start;margin-top:2px;}
   .mail-read{padding:18px 20px;border-top:1px solid var(--line);background:var(--blue-pale);}
   .mail-read h4{margin:0 0 6px 0;color:var(--navy);}
+  .mail-read-text{font-size:14px;white-space:pre-wrap;}
   .mail-compose{border-top:1px solid var(--line);padding:14px 20px;display:flex;flex-direction:column;gap:8px;background:#fff;}
-  .mail-compose-row{display:flex;gap:10px;}
+  .mail-compose-row{display:flex;gap:10px;flex-wrap:wrap;}
   .mail-compose-row select, .mail-compose-row input{margin-bottom:0;}
   .mail-compose textarea{margin-bottom:0;min-height:60px;}
+  .mail-cc-toggle{white-space:nowrap;align-self:center;font-size:12.5px;}
+  .mail-cc-row input{flex:1 1 200px;}
+  .mail-cc-row .hint-inline{font-size:11px;color:var(--muted);width:100%;margin:-4px 0 0 0;}
+  .mail-reply-banner{display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--blue-pale);border:1px solid var(--blue);border-radius:8px;padding:8px 14px;font-size:12.5px;color:var(--navy);}
   .mail-route-banner{background:#e8f4fa;border:1px solid var(--blue);color:var(--navy);font-size:13px;border-radius:8px;padding:9px 14px;margin-top:8px;}
+  .mail-notify-chk{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--ink);margin:0;}
+  .mail-notify-chk input{width:auto;margin:0;flex:none;}
+  .mail-notify-preview{margin-top:8px;background:#fff;border:1px dashed var(--blue);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink);}
+  .mail-notify-preview .np-head{font-weight:700;color:var(--navy);margin-bottom:4px;}
+  .mail-notify-preview .np-body{color:var(--muted);}
   @media (max-width:760px){ .mail-layout{grid-template-columns:1fr;height:auto;} .mail-folders{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);} .mail-folder{flex-shrink:0;min-width:160px;} .mail-body{height:340px;} }
 
   table.data{width:100%;border-collapse:collapse;font-size:13.5px;}
@@ -433,16 +443,33 @@
         <div class="mail-body" id="mailBody"></div>
         <div id="mailReadPane"></div>
         <form class="mail-compose" onsubmit="event.preventDefault(); sendMail();">
+          <div class="mail-reply-banner" id="mailReplyBanner"></div>
           <div class="mail-compose-row">
-            <select id="mailDestinatario" style="flex:0 0 240px;">
+            <select id="mailDestinatario" style="flex:0 0 200px;">
               <option value="generale">📥 Casella Generale (smistamento per oggetto)</option>
               <option value="direttivo">🏛️ Comitato Direttivo</option>
               <option value="esecutivo">🗂️ Comitato Esecutivo</option>
               <option value="corso">🎓 Corso di Alta Formazione</option>
             </select>
-            <input type="text" id="mailOggetto" placeholder="Oggetto…" style="flex:1;" autocomplete="off">
+            <input type="text" id="mailOggetto" placeholder="Oggetto…" style="flex:1 1 200px;" autocomplete="off">
+            <button type="button" class="link-btn mail-cc-toggle" id="mailCcToggleBtn" onclick="toggleCcRow()">+ Cc/Ccn</button>
           </div>
+          <div class="mail-compose-row mail-cc-row" id="mailCcRow" style="display:none;">
+            <input type="text" id="mailCc" placeholder="Cc — uno o più indirizzi/caselle separati da virgola" list="mailAddressSuggestions" autocomplete="off">
+            <input type="text" id="mailCcn" placeholder="Ccn (copia nascosta) — uno o più indirizzi/caselle separati da virgola" list="mailAddressSuggestions" autocomplete="off">
+            <div class="hint-inline">Puoi digitare il nome di una casella di settore (es. "Comitato Direttivo") oppure un indirizzo email libero. In "Ccn" i destinatari inseriti non sono visibili agli altri destinatari, ma solo a te.</div>
+          </div>
+          <datalist id="mailAddressSuggestions">
+            <option value="Comitato Direttivo">
+            <option value="Comitato Esecutivo">
+            <option value="Corso di Alta Formazione">
+            <option value="Casella Generale">
+          </datalist>
           <textarea id="mailTesto" placeholder="Scrivi il messaggio…"></textarea>
+          <label class="mail-notify-chk">
+            <input type="checkbox" id="mailNotifyPersonal" checked>
+            Avvisa il destinatario anche sulla sua email personale
+          </label>
           <div style="display:flex;justify-content:flex-end;gap:8px;">
             <button type="button" class="btn btn-outline btn-sm" onclick="saveDraft()">Salva bozza</button>
             <button type="submit" class="btn btn-primary btn-sm">Invia</button>
@@ -451,7 +478,7 @@
         </form>
       </div>
     </div>
-    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Da "Posta ricevuta" puoi archiviare un messaggio con 🗄️; dal compositore puoi anche salvare una bozza senza inviare.</p>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare.</p>
   </div>
 </section>
 
@@ -1008,9 +1035,10 @@
     'ricevuta': { icon: '📥', name: 'Posta ricevuta' },
     'inviata':  { icon: '📤', name: 'Posta inviata' },
     'archivio': { icon: '🗄️', name: 'Archivio' },
-    'bozze':    { icon: '📝', name: 'Bozze' }
+    'bozze':    { icon: '📝', name: 'Bozze' },
+    'cestino':  { icon: '🗑️', name: 'Cestino' }
   };
-  var mailSubfolderOrder = ['ricevuta', 'inviata', 'archivio', 'bozze'];
+  var mailSubfolderOrder = ['ricevuta', 'inviata', 'archivio', 'bozze', 'cestino'];
 
   // Parole chiave per lo smistamento automatico dei messaggi inviati alla Casella Generale.
   var mailRoutingRules = {
@@ -1032,7 +1060,10 @@
       archivio: [
         { from: 'segreteria.vecchia.richiesta@unam-demo.it', subject: 'Richiesta informazioni tesseramento 2025', text: 'Richiesta di informazioni sul tesseramento, evasa e archiviata a fine anno associativo.', time: '10:00', date: '15/01/2025' }
       ],
-      bozze: []
+      bozze: [],
+      cestino: [
+        { from: 'newsletter-esterna@promo-demo.it', subject: 'Proposta di partnership commerciale', text: 'Messaggio promozionale non pertinente, spostato nel cestino.', time: '07:50', date: '18/07/2026', deletedFrom: 'ricevuta' }
+      ]
     },
     'direttivo': {
       ricevuta: [
@@ -1047,7 +1078,8 @@
       ],
       bozze: [
         { subject: 'Bozza risposta alla sezione di Napoli', text: 'Bozza di risposta in merito alla validazione del rendiconto di sezione — da completare con il parere del tesoriere.', date: '23/07/2026' }
-      ]
+      ],
+      cestino: []
     },
     'esecutivo': {
       ricevuta: [
@@ -1057,7 +1089,8 @@
         { from: 'Avv. Elisa Fichera', subject: 'Conferma ordine del giorno', text: 'Confermiamo l\'ordine del giorno dell\'incontro di venerdì, con il punto sulle nuove adesioni.', time: '10:20', date: '21/07/2026' }
       ],
       archivio: [],
-      bozze: []
+      bozze: [],
+      cestino: []
     },
     'corso': {
       ricevuta: [
@@ -1072,7 +1105,8 @@
       ],
       bozze: [
         { subject: 'Bozza comunicazione Modulo 4', text: 'Bozza di comunicazione sul Modulo 4 — da completare con la data definitiva concordata con il relatore.', date: '24/07/2026' }
-      ]
+      ],
+      cestino: []
     }
   };
 
@@ -1144,23 +1178,52 @@
       row.className = 'mail-item' + (m.routedFrom ? ' routed' : '');
       row.onclick = function(){ openMailMessage(idx); };
       var tag = '';
-      if(m.routedTo){ tag = '<span class="mi-tag">🔀 Smistato anche a: ' + mailFolderDefs[m.routedTo].name + '</span>'; }
-      else if(m.routedFrom){ tag = '<span class="mi-tag">🔀 Smistato automaticamente da: ' + mailFolderDefs[m.routedFrom].name + '</span>'; }
+      if(m.routedTo){ tag += '<span class="mi-tag">🔀 Smistato anche a: ' + mailFolderDefs[m.routedTo].name + '</span>'; }
+      else if(m.routedFrom){ tag += '<span class="mi-tag">🔀 Smistato automaticamente da: ' + mailFolderDefs[m.routedFrom].name + '</span>'; }
+      if(m.cc){ tag += '<span class="mi-tag">📋 Cc: ' + m.cc + '</span>'; }
+      if(currentMailSubfolder === 'cestino' && m.deletedFrom){ tag += '<span class="mi-tag">🗑️ Eliminato da: ' + (mailSubfolderDefs[m.deletedFrom] ? mailSubfolderDefs[m.deletedFrom].name : m.deletedFrom) + '</span>'; }
       var topLine = currentMailSubfolder === 'bozze'
         ? '<div class="mi-top"><span>Bozza — non inviata</span><span>' + m.date + '</span></div>'
         : '<div class="mi-top"><span>' + m.from + '</span><span>' + m.date + (m.time ? ' · ' + m.time : '') + '</span></div>';
       row.innerHTML = topLine
         + '<span class="mi-subject">' + m.subject + '</span>'
         + '<span class="mi-preview">' + m.text + '</span>' + tag;
-      if(currentMailSubfolder === 'ricevuta'){
-        var archBtn = document.createElement('button');
-        archBtn.type = 'button';
-        archBtn.className = 'btn btn-outline btn-sm';
-        archBtn.style.cssText = 'margin-top:6px;align-self:flex-start;padding:3px 10px;font-size:11.5px;';
-        archBtn.textContent = '🗄️ Archivia';
-        archBtn.onclick = function(ev){ ev.stopPropagation(); archiveMailMessage(idx); };
-        row.appendChild(archBtn);
+      var actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;';
+      if(currentMailSubfolder === 'cestino'){
+        var restoreBtn = document.createElement('button');
+        restoreBtn.type = 'button';
+        restoreBtn.className = 'btn btn-outline btn-sm';
+        restoreBtn.style.cssText = 'align-self:flex-start;padding:3px 10px;font-size:11.5px;';
+        restoreBtn.textContent = '↩️ Ripristina';
+        restoreBtn.onclick = function(ev){ ev.stopPropagation(); restoreMailMessage(idx); };
+        actions.appendChild(restoreBtn);
+        var permBtn = document.createElement('button');
+        permBtn.type = 'button';
+        permBtn.className = 'btn btn-outline btn-sm';
+        permBtn.style.cssText = 'align-self:flex-start;padding:3px 10px;font-size:11.5px;color:var(--rec,#c62828);border-color:#c62828;';
+        permBtn.textContent = '❌ Elimina definitivamente';
+        permBtn.onclick = function(ev){ ev.stopPropagation(); permanentlyDeleteMailMessage(idx); };
+        actions.appendChild(permBtn);
+      } else {
+        if(currentMailSubfolder === 'ricevuta'){
+          var archBtn = document.createElement('button');
+          archBtn.type = 'button';
+          archBtn.className = 'btn btn-outline btn-sm';
+          archBtn.style.cssText = 'align-self:flex-start;padding:3px 10px;font-size:11.5px;';
+          archBtn.textContent = '🗄️ Archivia';
+          archBtn.onclick = function(ev){ ev.stopPropagation(); archiveMailMessage(idx); };
+          actions.appendChild(archBtn);
+        }
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn btn-outline btn-sm';
+        delBtn.style.cssText = 'align-self:flex-start;padding:3px 10px;font-size:11.5px;';
+        delBtn.textContent = '🗑️ Elimina';
+        delBtn.onclick = function(ev){ ev.stopPropagation(); deleteMailMessage(idx); };
+        actions.appendChild(delBtn);
       }
+      row.appendChild(actions);
       body.appendChild(row);
     });
   }
@@ -1176,6 +1239,41 @@
     renderMailList();
   }
 
+  function deleteMailMessage(idx){
+    var list = mailData[currentMailFolder][currentMailSubfolder];
+    var msg = list.splice(idx, 1)[0];
+    if(!msg) return;
+    msg.deletedFrom = currentMailSubfolder;
+    mailData[currentMailFolder].cestino.push(msg);
+    document.getElementById('mailReadPane').innerHTML = '';
+    renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
+  }
+
+  function restoreMailMessage(idx){
+    var list = mailData[currentMailFolder].cestino;
+    var msg = list.splice(idx, 1)[0];
+    if(!msg) return;
+    var target = msg.deletedFrom || 'ricevuta';
+    delete msg.deletedFrom;
+    if(!mailData[currentMailFolder][target]) target = 'ricevuta';
+    mailData[currentMailFolder][target].push(msg);
+    document.getElementById('mailReadPane').innerHTML = '';
+    renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
+  }
+
+  function permanentlyDeleteMailMessage(idx){
+    var list = mailData[currentMailFolder].cestino;
+    list.splice(idx, 1);
+    document.getElementById('mailReadPane').innerHTML = '';
+    renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
+  }
+
   function openMailMessage(idx){
     var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
     var pane = document.getElementById('mailReadPane');
@@ -1183,9 +1281,14 @@
     var meta = currentMailSubfolder === 'bozze'
       ? 'Bozza salvata il ' + m.date
       : 'Da: ' + m.from + ' — ' + m.date + (m.time ? ' ' + m.time : '');
+    if(m.cc) meta += ' · Cc: ' + m.cc;
+    if(currentMailSubfolder === 'bozze' && m.ccn) meta += ' · Ccn: ' + m.ccn;
+    var canReply = (currentMailSubfolder === 'ricevuta' || currentMailSubfolder === 'archivio') && m.from;
     pane.innerHTML = '<div class="mail-read"><h4>' + m.subject + '</h4>'
       + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px 0;">' + meta + '</p>'
-      + '<p style="font-size:14px;">' + m.text + '</p></div>';
+      + '<p class="mail-read-text">' + m.text + '</p>'
+      + (canReply ? '<button type="button" class="btn btn-outline btn-sm" onclick="replyToMail(' + idx + ')">↩️ Rispondi</button>' : '')
+      + '</div>';
   }
 
   function detectRouting(subject){
@@ -1200,16 +1303,99 @@
     return null;
   }
 
+  // ---- Rispondi ----
+  var replyContext = null; // { name: string }
+
+  function replyToMail(idx){
+    var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
+    if(!m || !m.from) return;
+    replyContext = { name: m.from };
+    document.getElementById('mailDestinatario').value = currentMailFolder;
+    var oggettoEl = document.getElementById('mailOggetto');
+    oggettoEl.value = /^re:/i.test(m.subject) ? m.subject : ('Re: ' + m.subject);
+    var testoEl = document.getElementById('mailTesto');
+    var quotedWhen = m.date + (m.time ? ' ' + m.time : '');
+    testoEl.value = '\n\n----- Messaggio originale -----\nDa: ' + m.from + ' — ' + quotedWhen + '\nOggetto: ' + m.subject + '\n\n' + m.text;
+    renderReplyBanner();
+    testoEl.focus();
+    testoEl.setSelectionRange(0, 0);
+    document.querySelector('.mail-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function cancelReply(){
+    replyContext = null;
+    document.getElementById('mailOggetto').value = '';
+    document.getElementById('mailTesto').value = '';
+    renderReplyBanner();
+  }
+
+  function renderReplyBanner(){
+    var el = document.getElementById('mailReplyBanner');
+    if(!el) return;
+    if(replyContext){
+      el.style.display = 'flex';
+      el.innerHTML = '<span>↩️ Stai rispondendo a <strong>' + replyContext.name + '</strong></span><button type="button" class="link-btn" onclick="cancelReply()">✕ Annulla risposta</button>';
+    } else {
+      el.style.display = 'none';
+      el.innerHTML = '';
+    }
+  }
+
+  // ---- Cc / Ccn ----
+  function toggleCcRow(){
+    var row = document.getElementById('mailCcRow');
+    var btn = document.getElementById('mailCcToggleBtn');
+    var open = row.style.display !== 'none';
+    row.style.display = open ? 'none' : 'flex';
+    if(btn) btn.textContent = open ? '+ Cc/Ccn' : '− Nascondi Cc/Ccn';
+  }
+
+  var MAIL_SECTOR_KEYWORDS = { direttivo: 'direttivo', esecutivo: 'esecutivo', corso: ['corso', 'formazione'], generale: 'general' };
+  function parseSectorAddresses(str){
+    if(!str) return [];
+    var found = [];
+    str.split(',').forEach(function(a){
+      var v = a.trim().toLowerCase();
+      if(!v) return;
+      Object.keys(MAIL_SECTOR_KEYWORDS).forEach(function(key){
+        if(found.indexOf(key) !== -1) return;
+        var kws = [].concat(MAIL_SECTOR_KEYWORDS[key]);
+        for(var i = 0; i < kws.length; i++){
+          if(v.indexOf(kws[i]) !== -1){ found.push(key); break; }
+        }
+      });
+    });
+    return found;
+  }
+
   function currentComposeData(){
     var oggetto = document.getElementById('mailOggetto').value.trim();
     var testo = document.getElementById('mailTesto').value.trim();
+    var cc = document.getElementById('mailCc') ? document.getElementById('mailCc').value.trim() : '';
+    var ccn = document.getElementById('mailCcn') ? document.getElementById('mailCcn').value.trim() : '';
+    var notify = document.getElementById('mailNotifyPersonal') ? document.getElementById('mailNotifyPersonal').checked : false;
     var now = new Date();
     var hh = ('0' + now.getHours()).slice(-2);
     var mm = ('0' + now.getMinutes()).slice(-2);
     var gg = ('0' + now.getDate()).slice(-2);
     var mo = ('0' + (now.getMonth() + 1)).slice(-2);
     var data = gg + '/' + mo + '/' + now.getFullYear();
-    return { oggetto: oggetto, testo: testo, time: hh + ':' + mm, date: data };
+    return { oggetto: oggetto, testo: testo, time: hh + ':' + mm, date: data, cc: cc, ccn: ccn, notify: notify };
+  }
+
+  function resetComposeForm(){
+    document.getElementById('mailOggetto').value = '';
+    document.getElementById('mailTesto').value = '';
+    if(document.getElementById('mailCc')) document.getElementById('mailCc').value = '';
+    if(document.getElementById('mailCcn')) document.getElementById('mailCcn').value = '';
+    replyContext = null;
+    renderReplyBanner();
+  }
+
+  function buildNotifyPreviewHtml(folderName, subject, extraNames){
+    var chi = 'i membri della casella ' + folderName + (extraNames ? ' (' + extraNames + ')' : '');
+    return '<div class="mail-notify-preview"><div class="np-head">📧 Notifica automatica inviata alla casella email personale di: ' + chi + '</div>'
+      + '<div class="np-body">Oggetto: "Nuovo messaggio nella posta interna U.N.A.M." — corpo: "Hai ricevuto un nuovo messaggio nella casella ' + folderName + '. Oggetto: \'' + subject + '\'. Accedi alla posta interna per leggerlo."</div></div>';
   }
 
   function sendMail(){
@@ -1217,24 +1403,46 @@
     var c = currentComposeData();
     var banner = document.getElementById('mailRouteBanner');
     if(!c.oggetto || !c.testo) return;
-    var msg = { from: demoUser.nome, subject: c.oggetto, text: c.testo, time: c.time, date: c.date, routedTo: null };
+    var msgPublic = { from: demoUser.nome, subject: c.oggetto, text: c.testo, time: c.time, date: c.date, routedTo: null, cc: c.cc || null };
+
+    var bannerHtml = '';
+    var deliveredKeys = [];
 
     if(dest === 'generale'){
       var routedKey = detectRouting(c.oggetto);
-      mailData['generale'].ricevuta.push(routedKey ? Object.assign({}, msg, { routedTo: routedKey }) : msg);
+      mailData['generale'].ricevuta.push(routedKey ? Object.assign({}, msgPublic, { routedTo: routedKey }) : Object.assign({}, msgPublic));
+      deliveredKeys.push('generale');
       if(routedKey){
-        mailData[routedKey].ricevuta.push(Object.assign({}, msg, { routedFrom: 'generale' }));
-        banner.innerHTML = '<div class="mail-route-banner">🔀 Messaggio inviato alla Casella Generale e smistato automaticamente anche a: <strong>' + mailFolderDefs[routedKey].name + '</strong> (parola chiave rilevata nell\'oggetto).</div>';
+        mailData[routedKey].ricevuta.push(Object.assign({}, msgPublic, { routedFrom: 'generale' }));
+        deliveredKeys.push(routedKey);
+        bannerHtml += '<div class="mail-route-banner">🔀 Messaggio inviato alla Casella Generale e smistato automaticamente anche a: <strong>' + mailFolderDefs[routedKey].name + '</strong> (parola chiave rilevata nell\'oggetto).</div>';
       } else {
-        banner.innerHTML = '<div class="mail-route-banner">✅ Messaggio inviato alla Casella Generale. Nessuna parola chiave di settore rilevata nell\'oggetto: resta solo qui.</div>';
+        bannerHtml += '<div class="mail-route-banner">✅ Messaggio inviato alla Casella Generale. Nessuna parola chiave di settore rilevata nell\'oggetto: resta solo qui.</div>';
       }
     } else {
-      mailData[dest].ricevuta.push(msg);
-      banner.innerHTML = '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + ' (Posta ricevuta).</div>';
+      mailData[dest].ricevuta.push(Object.assign({}, msgPublic));
+      deliveredKeys.push(dest);
+      bannerHtml += '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + ' (Posta ricevuta)' + (replyContext ? ' in risposta a ' + replyContext.name : '') + '.</div>';
     }
 
-    document.getElementById('mailOggetto').value = '';
-    document.getElementById('mailTesto').value = '';
+    // Consegna aggiuntiva alle caselle indicate in Cc/Ccn (se corrispondono a una casella di settore riconosciuta)
+    var ccSectors = parseSectorAddresses(c.cc);
+    var ccnSectors = parseSectorAddresses(c.ccn);
+    ccSectors.concat(ccnSectors).forEach(function(key){
+      if(deliveredKeys.indexOf(key) === -1){
+        mailData[key].ricevuta.push(Object.assign({}, msgPublic, { ccFrom: dest }));
+        deliveredKeys.push(key);
+      }
+    });
+    if(c.cc){ bannerHtml += '<div class="mail-route-banner">📋 Copia (Cc) inviata a: <strong>' + c.cc + '</strong>.</div>'; }
+    if(c.ccn){ bannerHtml += '<div class="mail-route-banner">🙈 Copia nascosta (Ccn) inviata a: <strong>' + c.ccn + '</strong> — visibile solo a te, gli altri destinatari non la vedono.</div>'; }
+
+    if(c.notify){
+      bannerHtml += buildNotifyPreviewHtml(mailFolderDefs[dest].name, c.oggetto, null);
+    }
+
+    banner.innerHTML = bannerHtml;
+    resetComposeForm();
     renderMailFolders();
     renderMailSubfolders();
     renderMailList();
@@ -1245,10 +1453,9 @@
     var c = currentComposeData();
     var banner = document.getElementById('mailRouteBanner');
     if(!c.oggetto && !c.testo) return;
-    mailData[dest].bozze.push({ subject: c.oggetto || '(senza oggetto)', text: c.testo, date: c.date });
-    document.getElementById('mailOggetto').value = '';
-    document.getElementById('mailTesto').value = '';
+    mailData[dest].bozze.push({ subject: c.oggetto || '(senza oggetto)', text: c.testo, date: c.date, cc: c.cc || null, ccn: c.ccn || null });
     banner.innerHTML = '<div class="mail-route-banner">📝 Bozza salvata nella casella ' + mailFolderDefs[dest].name + '.</div>';
+    resetComposeForm();
     renderMailFolders();
     renderMailSubfolders();
     renderMailList();
