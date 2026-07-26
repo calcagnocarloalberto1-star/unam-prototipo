@@ -112,6 +112,10 @@
   .mf-count{font-size:11px;color:#fff;background:var(--blue);border-radius:10px;padding:0 7px;align-self:flex-start;}
   .mail-main{display:flex;flex-direction:column;min-width:0;}
   .mail-header{padding:14px 20px;border-bottom:1px solid var(--line);font-weight:700;color:var(--navy);font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .mail-subfolders{display:flex;gap:4px;padding:8px 16px 0 16px;border-bottom:1px solid var(--line);}
+  .mail-subfolder{padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
+  .mail-subfolder:hover{color:var(--navy);}
+  .mail-subfolder.active{color:var(--navy);border-bottom-color:var(--blue);}
   .mail-body{flex:1;overflow-y:auto;padding:8px 0;}
   .mail-item{padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;flex-direction:column;gap:3px;}
   .mail-item:hover{background:var(--blue-pale);}
@@ -396,14 +400,7 @@
     <p style="color:var(--muted);margin-top:-8px;">Casella generale con smistamento automatico e caselle dedicate a Comitato Direttivo, Comitato Esecutivo e Corso di Alta Formazione.</p>
 
     <div class="mail-role-bar">
-      <label for="mailRoleSelect" style="font-weight:700;color:var(--navy);">Visualizza come membro di:</label>
-      <select id="mailRoleSelect" onchange="setMailRole(this.value)">
-        <option value="direttivo">Comitato Direttivo</option>
-        <option value="esecutivo">Comitato Esecutivo</option>
-        <option value="corso">Corso di Alta Formazione</option>
-        <option value="nessuno">Socio semplice (nessun settore)</option>
-      </select>
-      <span style="color:var(--muted);">— selettore dimostrativo: nel sito reale ogni socio vedrebbe solo le caselle del proprio settore.</span>
+      <span>ℹ️ Tutte le caselle di settore sono mostrate qui per mostrare la funzionalità completa. Nel sito reale l'accesso a ciascuna casella sarà riservato ai soli membri del rispettivo settore (i membri del Comitato Direttivo vedranno anche la Casella Generale, per validare quanto in arrivo prima dello smistamento).</span>
     </div>
 
     <div class="mail-layout">
@@ -413,6 +410,7 @@
           <span id="mailFolderTitle"># Casella Generale</span>
           <span id="mailFolderCount" style="font-weight:400;font-size:12px;color:var(--muted);"></span>
         </div>
+        <div class="mail-subfolders" id="mailSubfolders"></div>
         <div class="mail-body" id="mailBody"></div>
         <div id="mailReadPane"></div>
         <form class="mail-compose" onsubmit="event.preventDefault(); sendMail();">
@@ -426,14 +424,15 @@
             <input type="text" id="mailOggetto" placeholder="Oggetto…" style="flex:1;" autocomplete="off">
           </div>
           <textarea id="mailTesto" placeholder="Scrivi il messaggio…"></textarea>
-          <div style="display:flex;justify-content:flex-end;">
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="saveDraft()">Salva bozza</button>
             <button type="submit" class="btn btn-primary btn-sm">Invia</button>
           </div>
           <div id="mailRouteBanner"></div>
         </form>
       </div>
     </div>
-    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione).</p>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Da "Posta ricevuta" puoi archiviare un messaggio con 🗄️; dal compositore puoi anche salvare una bozza senza inviare.</p>
   </div>
 </section>
 
@@ -974,9 +973,9 @@
     renderChatThread();
   }
 
-  // ===================== POSTA INTERNA (settori + smistamento automatico) =====================
-  var mailRole = 'direttivo'; // ruolo demo selezionato: 'direttivo' | 'esecutivo' | 'corso' | 'nessuno'
+  // ===================== POSTA INTERNA (settori + sotto-cartelle + smistamento automatico) =====================
   var currentMailFolder = 'generale';
+  var currentMailSubfolder = 'ricevuta';
 
   var mailFolderDefs = {
     'generale':   { icon: '📥', name: 'Casella Generale', desc: 'Tutta la posta in arrivo, in attesa di smistamento' },
@@ -984,6 +983,15 @@
     'esecutivo':  { icon: '🗂️', name: 'Comitato Esecutivo', desc: 'Ufficio Direttivo + membri con deleghe' },
     'corso':      { icon: '🎓', name: 'Corso di Alta Formazione', desc: 'Segreteria didattica e corsisti' }
   };
+  var mailFolderOrder = ['generale', 'direttivo', 'esecutivo', 'corso'];
+
+  var mailSubfolderDefs = {
+    'ricevuta': { icon: '📥', name: 'Posta ricevuta' },
+    'inviata':  { icon: '📤', name: 'Posta inviata' },
+    'archivio': { icon: '🗄️', name: 'Archivio' },
+    'bozze':    { icon: '📝', name: 'Bozze' }
+  };
+  var mailSubfolderOrder = ['ricevuta', 'inviata', 'archivio', 'bozze'];
 
   // Parole chiave per lo smistamento automatico dei messaggi inviati alla Casella Generale.
   var mailRoutingRules = {
@@ -992,57 +1000,73 @@
     'corso': ['corso di alta formazione', 'alta formazione', 'corsisti', 'corso', 'formazione']
   };
 
-  // Quali caselle sono visibili per ciascun ruolo demo. Il Comitato Direttivo vede anche la Casella
-  // Generale, come richiesto (visibilità di tutta la posta in arrivo prima dello smistamento).
-  var mailRoleFolders = {
-    'direttivo': ['generale', 'direttivo'],
-    'esecutivo': ['esecutivo'],
-    'corso': ['corso'],
-    'nessuno': []
-  };
-
   var mailData = {
-    'generale': [
-      { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedTo: 'corso' },
-      { from: 'segreteria.sezione.napoli@unam-demo.it', subject: 'Richiesta validazione bilancio di sezione per il Comitato Direttivo', text: 'Buongiorno, trasmettiamo il rendiconto della sezione di Napoli da sottoporre al Comitato Direttivo per la validazione.', time: '09:40', date: '22/07/2026', routedTo: 'direttivo' },
-      { from: 'avv.demo.candidato@unam-demo.it', subject: 'Candidatura per il gruppo di lavoro Mediazione e IA', text: 'Vorrei proporre la mia candidatura al gruppo di lavoro sulla mediazione e intelligenza artificiale.', time: '11:05', date: '23/07/2026', routedTo: null }
-    ],
-    'direttivo': [
-      { from: 'Avv. Daniela Sità', subject: 'Ordine del giorno prossima riunione', text: 'Buongiorno, alleghiamo l\'ordine del giorno della prossima riunione del Comitato Direttivo, con il punto sul bilancio preventivo 2027.', time: '09:00', date: '20/07/2026', routedTo: null },
-      { from: 'segreteria.sezione.napoli@unam-demo.it', subject: 'Richiesta validazione bilancio di sezione per il Comitato Direttivo', text: 'Buongiorno, trasmettiamo il rendiconto della sezione di Napoli da sottoporre al Comitato Direttivo per la validazione.', time: '09:40', date: '22/07/2026', routedFrom: 'generale' }
-    ],
-    'esecutivo': [
-      { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni.', time: '10:02', date: '21/07/2026', routedTo: null }
-    ],
-    'corso': [
-      { from: 'Direttore Avv. Beatrice Irene Tonelli', subject: 'Calendario aggiornato Modulo 3', text: 'Comunico che il Modulo 3 del Corso si terrà venerdì 9 ottobre; la registrazione sarà disponibile in area riservata entro 48 ore.', time: '08:30', date: '19/07/2026', routedTo: null },
-      { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedFrom: 'generale' }
-    ]
+    'generale': {
+      ricevuta: [
+        { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedTo: 'corso' },
+        { from: 'segreteria.sezione.napoli@unam-demo.it', subject: 'Richiesta validazione bilancio di sezione per il Comitato Direttivo', text: 'Buongiorno, trasmettiamo il rendiconto della sezione di Napoli da sottoporre al Comitato Direttivo per la validazione.', time: '09:40', date: '22/07/2026', routedTo: 'direttivo' },
+        { from: 'avv.demo.candidato@unam-demo.it', subject: 'Candidatura per il gruppo di lavoro Mediazione e IA', text: 'Vorrei proporre la mia candidatura al gruppo di lavoro sulla mediazione e intelligenza artificiale.', time: '11:05', date: '23/07/2026', routedTo: null }
+      ],
+      inviata: [
+        { from: 'Segreteria U.N.A.M.', subject: 'Riscontro alla richiesta di informazioni', text: 'Buongiorno, in allegato il bando del Corso di Alta Formazione 2026/2027 con le relative scadenze di iscrizione.', time: '09:30', date: '21/07/2026' }
+      ],
+      archivio: [
+        { from: 'segreteria.vecchia.richiesta@unam-demo.it', subject: 'Richiesta informazioni tesseramento 2025', text: 'Richiesta di informazioni sul tesseramento, evasa e archiviata a fine anno associativo.', time: '10:00', date: '15/01/2025' }
+      ],
+      bozze: []
+    },
+    'direttivo': {
+      ricevuta: [
+        { from: 'Avv. Daniela Sità', subject: 'Ordine del giorno prossima riunione', text: 'Buongiorno, alleghiamo l\'ordine del giorno della prossima riunione del Comitato Direttivo, con il punto sul bilancio preventivo 2027.', time: '09:00', date: '20/07/2026', routedTo: null },
+        { from: 'segreteria.sezione.napoli@unam-demo.it', subject: 'Richiesta validazione bilancio di sezione per il Comitato Direttivo', text: 'Buongiorno, trasmettiamo il rendiconto della sezione di Napoli da sottoporre al Comitato Direttivo per la validazione.', time: '09:40', date: '22/07/2026', routedFrom: 'generale' }
+      ],
+      inviata: [
+        { from: 'Avv. Daniela Sità', subject: 'Convocazione Comitato Direttivo', text: 'Convochiamo il Comitato Direttivo per la validazione del bilancio preventivo 2027, con delega alle sezioni interessate.', time: '09:15', date: '20/07/2026' }
+      ],
+      archivio: [
+        { from: 'Avv. Duccio Viligiardi', subject: 'Verbale riunione precedente', text: 'Verbale della riunione del Comitato Direttivo del trimestre precedente, approvato e archiviato.', time: '11:00', date: '10/04/2026' }
+      ],
+      bozze: [
+        { subject: 'Bozza risposta alla sezione di Napoli', text: 'Bozza di risposta in merito alla validazione del rendiconto di sezione — da completare con il parere del tesoriere.', date: '23/07/2026' }
+      ]
+    },
+    'esecutivo': {
+      ricevuta: [
+        { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni.', time: '10:02', date: '21/07/2026', routedTo: null }
+      ],
+      inviata: [
+        { from: 'Avv. Elisa Fichera', subject: 'Conferma ordine del giorno', text: 'Confermiamo l\'ordine del giorno dell\'incontro di venerdì, con il punto sulle nuove adesioni.', time: '10:20', date: '21/07/2026' }
+      ],
+      archivio: [],
+      bozze: []
+    },
+    'corso': {
+      ricevuta: [
+        { from: 'Direttore Avv. Beatrice Irene Tonelli', subject: 'Calendario aggiornato Modulo 3', text: 'Comunico che il Modulo 3 del Corso si terrà venerdì 9 ottobre; la registrazione sarà disponibile in area riservata entro 48 ore.', time: '08:30', date: '19/07/2026', routedTo: null },
+        { from: 'info-richieste@unam-demo.it', subject: 'Richiesta informazioni Corso di Alta Formazione 2026/2027', text: 'Buongiorno, sono un avvocato interessato al nuovo Corso di Alta Formazione: potreste inviarmi il bando e le scadenze di iscrizione?', time: '08:15', date: '21/07/2026', routedFrom: 'generale' }
+      ],
+      inviata: [
+        { from: 'Segreteria didattica', subject: 'Promemoria Modulo 3', text: 'Ricordiamo ai corsisti che il Modulo 3 si terrà venerdì 9 ottobre; la registrazione sarà disponibile entro 48 ore dalla lezione.', time: '09:00', date: '19/07/2026' }
+      ],
+      archivio: [
+        { from: 'Segreteria didattica', subject: 'Calendario Modulo 1 (concluso)', text: 'Calendario del Modulo 1, concluso e archiviato a fine modulo.', time: '08:00', date: '10/02/2026' }
+      ],
+      bozze: [
+        { subject: 'Bozza comunicazione Modulo 4', text: 'Bozza di comunicazione sul Modulo 4 — da completare con la data definitiva concordata con il relatore.', date: '24/07/2026' }
+      ]
+    }
   };
-
-  function setMailRole(role){
-    mailRole = role;
-    var allowed = mailRoleFolders[role] || [];
-    currentMailFolder = allowed.length ? allowed[0] : 'generale';
-    renderMailFolders();
-    renderMailList();
-  }
 
   function renderMailFolders(){
     var box = document.getElementById('mailFolders');
     if(!box) return;
-    var allowed = mailRoleFolders[mailRole] || [];
     box.innerHTML = '';
-    if(!allowed.length){
-      box.innerHTML = '<p style="font-size:12.5px;color:var(--muted);padding:8px;">Nessuna casella di settore assegnata a questo profilo demo.</p>';
-      return;
-    }
-    allowed.forEach(function(key){
+    mailFolderOrder.forEach(function(key){
       var def = mailFolderDefs[key];
       var div = document.createElement('div');
       div.className = 'mail-folder' + (key === currentMailFolder ? ' active' : '');
       div.onclick = function(){ selectMailFolder(key); };
-      var count = (mailData[key] || []).length;
+      var count = (mailData[key].ricevuta || []).length;
       div.innerHTML = '<span class="mf-name">' + def.icon + ' ' + def.name + '</span>'
         + '<span class="mf-desc">' + def.desc + '</span>'
         + '<span class="mf-count">' + count + '</span>';
@@ -1052,8 +1076,32 @@
 
   function selectMailFolder(key){
     currentMailFolder = key;
+    currentMailSubfolder = 'ricevuta';
     document.getElementById('mailReadPane').innerHTML = '';
     renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
+  }
+
+  function renderMailSubfolders(){
+    var box = document.getElementById('mailSubfolders');
+    if(!box) return;
+    box.innerHTML = '';
+    mailSubfolderOrder.forEach(function(key){
+      var def = mailSubfolderDefs[key];
+      var count = (mailData[currentMailFolder][key] || []).length;
+      var tab = document.createElement('div');
+      tab.className = 'mail-subfolder' + (key === currentMailSubfolder ? ' active' : '');
+      tab.onclick = function(){ selectMailSubfolder(key); };
+      tab.textContent = def.icon + ' ' + def.name + ' (' + count + ')';
+      box.appendChild(tab);
+    });
+  }
+
+  function selectMailSubfolder(key){
+    currentMailSubfolder = key;
+    document.getElementById('mailReadPane').innerHTML = '';
+    renderMailSubfolders();
     renderMailList();
   }
 
@@ -1063,12 +1111,13 @@
     var countEl = document.getElementById('mailFolderCount');
     if(!body) return;
     var def = mailFolderDefs[currentMailFolder];
-    if(titleEl) titleEl.textContent = '# ' + def.name;
-    var items = mailData[currentMailFolder] || [];
+    var subDef = mailSubfolderDefs[currentMailSubfolder];
+    if(titleEl) titleEl.textContent = '# ' + def.name + ' — ' + subDef.name;
+    var items = mailData[currentMailFolder][currentMailSubfolder] || [];
     if(countEl) countEl.textContent = items.length + (items.length === 1 ? ' messaggio' : ' messaggi');
     body.innerHTML = '';
     if(!items.length){
-      body.innerHTML = '<p style="padding:16px 20px;color:var(--muted);font-size:13px;">Nessun messaggio in questa casella.</p>';
+      body.innerHTML = '<p style="padding:16px 20px;color:var(--muted);font-size:13px;">Nessun messaggio in questa cartella.</p>';
       return;
     }
     items.forEach(function(m, idx){
@@ -1078,19 +1127,45 @@
       var tag = '';
       if(m.routedTo){ tag = '<span class="mi-tag">🔀 Smistato anche a: ' + mailFolderDefs[m.routedTo].name + '</span>'; }
       else if(m.routedFrom){ tag = '<span class="mi-tag">🔀 Smistato automaticamente da: ' + mailFolderDefs[m.routedFrom].name + '</span>'; }
-      row.innerHTML = '<div class="mi-top"><span>' + m.from + '</span><span>' + m.date + ' · ' + m.time + '</span></div>'
+      var topLine = currentMailSubfolder === 'bozze'
+        ? '<div class="mi-top"><span>Bozza — non inviata</span><span>' + m.date + '</span></div>'
+        : '<div class="mi-top"><span>' + m.from + '</span><span>' + m.date + (m.time ? ' · ' + m.time : '') + '</span></div>';
+      row.innerHTML = topLine
         + '<span class="mi-subject">' + m.subject + '</span>'
         + '<span class="mi-preview">' + m.text + '</span>' + tag;
+      if(currentMailSubfolder === 'ricevuta'){
+        var archBtn = document.createElement('button');
+        archBtn.type = 'button';
+        archBtn.className = 'btn btn-outline btn-sm';
+        archBtn.style.cssText = 'margin-top:6px;align-self:flex-start;padding:3px 10px;font-size:11.5px;';
+        archBtn.textContent = '🗄️ Archivia';
+        archBtn.onclick = function(ev){ ev.stopPropagation(); archiveMailMessage(idx); };
+        row.appendChild(archBtn);
+      }
       body.appendChild(row);
     });
   }
 
+  function archiveMailMessage(idx){
+    var list = mailData[currentMailFolder].ricevuta;
+    var msg = list.splice(idx, 1)[0];
+    if(!msg) return;
+    mailData[currentMailFolder].archivio.push(msg);
+    document.getElementById('mailReadPane').innerHTML = '';
+    renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
+  }
+
   function openMailMessage(idx){
-    var m = (mailData[currentMailFolder] || [])[idx];
+    var m = (mailData[currentMailFolder][currentMailSubfolder] || [])[idx];
     var pane = document.getElementById('mailReadPane');
     if(!m || !pane) return;
+    var meta = currentMailSubfolder === 'bozze'
+      ? 'Bozza salvata il ' + m.date
+      : 'Da: ' + m.from + ' — ' + m.date + (m.time ? ' ' + m.time : '');
     pane.innerHTML = '<div class="mail-read"><h4>' + m.subject + '</h4>'
-      + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px 0;">Da: ' + m.from + ' — ' + m.date + ' ' + m.time + '</p>'
+      + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px 0;">' + meta + '</p>'
       + '<p style="font-size:14px;">' + m.text + '</p></div>';
   }
 
@@ -1106,49 +1181,65 @@
     return null;
   }
 
-  function sendMail(){
-    var dest = document.getElementById('mailDestinatario').value;
+  function currentComposeData(){
     var oggetto = document.getElementById('mailOggetto').value.trim();
     var testo = document.getElementById('mailTesto').value.trim();
-    var banner = document.getElementById('mailRouteBanner');
-    if(!oggetto || !testo) return;
     var now = new Date();
     var hh = ('0' + now.getHours()).slice(-2);
     var mm = ('0' + now.getMinutes()).slice(-2);
     var gg = ('0' + now.getDate()).slice(-2);
     var mo = ('0' + (now.getMonth() + 1)).slice(-2);
     var data = gg + '/' + mo + '/' + now.getFullYear();
-    var msg = { from: demoUser.nome, subject: oggetto, text: testo, time: hh + ':' + mm, date: data, routedTo: null };
+    return { oggetto: oggetto, testo: testo, time: hh + ':' + mm, date: data };
+  }
+
+  function sendMail(){
+    var dest = document.getElementById('mailDestinatario').value;
+    var c = currentComposeData();
+    var banner = document.getElementById('mailRouteBanner');
+    if(!c.oggetto || !c.testo) return;
+    var msg = { from: demoUser.nome, subject: c.oggetto, text: c.testo, time: c.time, date: c.date, routedTo: null };
 
     if(dest === 'generale'){
-      var routedKey = detectRouting(oggetto);
-      mailData['generale'].push(routedKey ? Object.assign({}, msg, { routedTo: routedKey }) : msg);
+      var routedKey = detectRouting(c.oggetto);
+      mailData['generale'].ricevuta.push(routedKey ? Object.assign({}, msg, { routedTo: routedKey }) : msg);
       if(routedKey){
-        mailData[routedKey].push(Object.assign({}, msg, { routedFrom: 'generale' }));
+        mailData[routedKey].ricevuta.push(Object.assign({}, msg, { routedFrom: 'generale' }));
         banner.innerHTML = '<div class="mail-route-banner">🔀 Messaggio inviato alla Casella Generale e smistato automaticamente anche a: <strong>' + mailFolderDefs[routedKey].name + '</strong> (parola chiave rilevata nell\'oggetto).</div>';
       } else {
         banner.innerHTML = '<div class="mail-route-banner">✅ Messaggio inviato alla Casella Generale. Nessuna parola chiave di settore rilevata nell\'oggetto: resta solo qui.</div>';
       }
     } else {
-      mailData[dest].push(msg);
-      banner.innerHTML = '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + '.</div>';
+      mailData[dest].ricevuta.push(msg);
+      banner.innerHTML = '<div class="mail-route-banner">✅ Messaggio inviato direttamente alla casella ' + mailFolderDefs[dest].name + ' (Posta ricevuta).</div>';
     }
 
     document.getElementById('mailOggetto').value = '';
     document.getElementById('mailTesto').value = '';
     renderMailFolders();
-    if((mailRoleFolders[mailRole] || []).indexOf(dest === 'generale' ? 'generale' : dest) !== -1 || dest === currentMailFolder){
-      renderMailList();
-    } else {
-      renderMailList();
-    }
+    renderMailSubfolders();
+    renderMailList();
+  }
+
+  function saveDraft(){
+    var dest = document.getElementById('mailDestinatario').value;
+    var c = currentComposeData();
+    var banner = document.getElementById('mailRouteBanner');
+    if(!c.oggetto && !c.testo) return;
+    mailData[dest].bozze.push({ subject: c.oggetto || '(senza oggetto)', text: c.testo, date: c.date });
+    document.getElementById('mailOggetto').value = '';
+    document.getElementById('mailTesto').value = '';
+    banner.innerHTML = '<div class="mail-route-banner">📝 Bozza salvata nella casella ' + mailFolderDefs[dest].name + '.</div>';
+    renderMailFolders();
+    renderMailSubfolders();
+    renderMailList();
   }
 
   function showView(id){
     document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     if(id === 'chat'){ renderChatThread(); }
-    if(id === 'posta'){ renderMailFolders(); renderMailList(); }
+    if(id === 'posta'){ renderMailFolders(); renderMailSubfolders(); renderMailList(); }
     window.scrollTo(0,0);
   }
 
