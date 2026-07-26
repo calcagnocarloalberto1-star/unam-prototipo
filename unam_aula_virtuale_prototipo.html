@@ -151,6 +151,56 @@
     .video-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
     .av-topbar{justify-content:center;text-align:center;}
   }
+
+  /* ---- Rename partecipanti ---- */
+  .pr-name{flex:1;min-width:0;display:flex;align-items:center;gap:6px;}
+  .pr-name .pr-name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rename-btn{background:none;border:none;color:#7c93a3;cursor:pointer;font-size:12px;padding:2px 4px;flex:none;}
+  .rename-btn:hover{color:#fff;}
+  .rename-edit{display:flex;gap:6px;align-items:center;flex:1;min-width:0;}
+  .rename-edit input{margin:0;background:#1a242e;border:1px solid var(--blue-light);color:#fff;padding:5px 8px;font-size:12.5px;flex:1;min-width:0;}
+  .rename-edit button{background:none;border:none;cursor:pointer;font-size:14px;color:#fff;padding:2px 4px;flex:none;}
+
+  /* ---- Ricerca partecipanti ---- */
+  .part-search{margin:0 0 10px 0;background:#1a242e;border:1px solid rgba(255,255,255,.15);color:#fff;padding:8px 10px;font-size:12.5px;}
+  .part-empty{color:#7c93a3;font-size:12.5px;text-align:center;padding:14px 0;}
+
+  /* ---- Video pager (scalabilità 100+ discenti) ---- */
+  .video-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;color:#cfe0ec;font-size:12.5px;}
+  .video-pager button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:12px;}
+  .video-pager button[disabled]{opacity:.35;cursor:not-allowed;}
+  .video-pinned-label,.video-others-label{color:#7c93a3;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin:0 0 8px;}
+  .video-section-gap{margin-top:18px;}
+
+  /* ---- Documenti ---- */
+  .doc-share-box{background:#25313f;border-radius:10px;padding:14px;margin-bottom:14px;}
+  .doc-share-box h4{color:#fff;font-size:13.5px;margin-bottom:8px;font-family:'Inter',sans-serif;}
+  .doc-share-box select, .doc-share-box input{background:#1a242e;color:#fff;border:1px solid rgba(255,255,255,.15);}
+  .doc-item{background:#25313f;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:12.5px;}
+  .doc-item .doc-title{color:#fff;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .doc-item .doc-meta{color:#7c93a3;font-size:11px;margin:3px 0 8px;}
+  .doc-item .doc-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .doc-item .doc-actions button{background:rgba(255,255,255,.08);border:none;color:#fff;padding:6px 12px;border-radius:7px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:600;}
+  .doc-sent-note{color:var(--blue-light);font-size:11px;margin-top:6px;}
+  .doc-empty{color:#7c93a3;font-size:12.5px;}
+
+  /* ---- Modali (pianifica lezione / invita destinatari) ---- */
+  .av-modal-backdrop{display:none;position:fixed;inset:0;background:rgba(10,16,22,.72);z-index:80;align-items:center;justify-content:center;padding:20px;}
+  .av-modal-backdrop.show{display:flex;}
+  .av-modal{background:#1a242e;border-radius:14px;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;padding:26px 26px 22px;box-shadow:0 20px 50px rgba(0,0,0,.5);}
+  .av-modal h3{color:#fff;font-family:'Inter',sans-serif;font-size:16px;margin:0 0 4px;}
+  .av-modal p.sub{color:#9fb2c2;font-size:12.5px;margin:0 0 18px;}
+  .av-modal label{color:#cfe0ec;}
+  .av-modal input, .av-modal select, .av-modal textarea{background:#25313f;border:1px solid rgba(255,255,255,.15);color:#fff;}
+  .av-modal textarea{min-height:60px;font-family:inherit;}
+  .invite-list{max-height:180px;overflow-y:auto;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;margin-bottom:14px;background:#25313f;}
+  .invite-check{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:#e7edf1;}
+  .invite-check input{width:auto;margin:0;}
+  .av-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+  .av-modal-confirm{background:rgba(7,163,201,.15);border:1px solid var(--blue-light);border-radius:9px;padding:12px 14px;margin-top:12px;font-size:12.5px;color:#e7edf1;}
+  .schedule-list{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;}
+  .schedule-item{font-size:12px;color:#cfe0ec;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+  @media (max-width:520px){ .av-modal{padding:20px 18px 18px;} }
 </style>
 </head>
 <body>
@@ -219,23 +269,30 @@
     <div class="av-body">
       <div class="av-stage">
         <div class="video-grid" id="videoGrid"></div>
+        <div class="video-pager" id="videoPager"></div>
       </div>
       <div class="av-side" id="avSide">
         <div class="side-tabs">
           <button class="side-tab active" data-pane="chat" onclick="selectSidePane('chat')">💬 Chat</button>
           <button class="side-tab" data-pane="part" onclick="selectSidePane('part')">👥 Partecipanti</button>
           <button class="side-tab" data-pane="poll" onclick="selectSidePane('poll')">📊 Sondaggi</button>
+          <button class="side-tab" data-pane="doc" onclick="selectSidePane('doc')">📄 Documenti</button>
         </div>
         <div class="side-panel-body">
           <div class="side-pane active" id="pane-chat">
             <div id="chatList"></div>
           </div>
           <div class="side-pane" id="pane-part">
+            <input type="text" class="part-search" id="partSearch" placeholder="🔎 Cerca partecipante…" oninput="renderPartList()">
             <div id="partList"></div>
           </div>
           <div class="side-pane" id="pane-poll">
             <div id="pollHostControls"></div>
             <div id="pollActive"></div>
+          </div>
+          <div class="side-pane" id="pane-doc">
+            <div id="docHostControls"></div>
+            <div id="docList"></div>
           </div>
         </div>
         <div class="chat-input-av" id="chatInputRow">
@@ -246,6 +303,53 @@
     </div>
 
     <div class="control-bar" id="controlBar"></div>
+
+    <!-- ===== Modale: pianifica lezione ===== -->
+    <div class="av-modal-backdrop" id="modalSchedule">
+      <div class="av-modal">
+        <h3>🗓️ Pianifica lezione</h3>
+        <p class="sub">Programma la prossima lezione del corso: i corsisti la vedranno nell'area riservata, sezione Corso di Alta Formazione.</p>
+        <label>Titolo del modulo</label>
+        <input type="text" id="schTitle" value="Modulo 6 — La mediazione familiare e i minori">
+        <label>Data</label>
+        <input type="date" id="schDate" value="2026-09-15">
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;">
+            <label>Ora inizio</label>
+            <input type="time" id="schTimeStart" value="15:00">
+          </div>
+          <div style="flex:1;">
+            <label>Ora fine</label>
+            <input type="time" id="schTimeEnd" value="17:00">
+          </div>
+        </div>
+        <label>Relatore</label>
+        <input type="text" id="schRelatore" value="Avv. Beatrice Irene Tonelli">
+        <div id="scheduleConfirm"></div>
+        <div class="schedule-list" id="scheduleList"></div>
+        <div class="av-modal-actions">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modalSchedule')">Chiudi</button>
+          <button class="btn btn-primary btn-sm" onclick="scheduleLesson()">Pianifica lezione</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Modale: invita destinatari ===== -->
+    <div class="av-modal-backdrop" id="modalInvite">
+      <div class="av-modal">
+        <h3>✉️ Invita destinatari</h3>
+        <p class="sub">Seleziona i corsisti da invitare alla riunione, oppure aggiungi altri indirizzi email.</p>
+        <label>Corsisti</label>
+        <div class="invite-list" id="inviteList"></div>
+        <label>Altri indirizzi email (separati da virgola)</label>
+        <input type="text" id="inviteExtraEmails" placeholder="es. segreteria@unam.it, mario.rossi@studiolegale.it">
+        <div id="inviteConfirm"></div>
+        <div class="av-modal-actions">
+          <button class="btn btn-outline btn-sm" onclick="closeModal('modalInvite')">Chiudi</button>
+          <button class="btn btn-primary btn-sm" onclick="sendInvites()">Invia inviti</button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -294,9 +398,34 @@ var DEMO_PARTICIPANTS = [
 ];
 var MISSER_NAME = 'Avv. Andrea Pasquariello'; // partecipante che dimostra il caso "non idoneo"
 
+// Nomi generici usati SOLO per generare un numero elevato di corsisti dimostrativi
+// (necessari per simulare la capienza di almeno 100 discenti richiesta dal capitolato).
+// Sono combinazioni casuali di nomi/cognomi comuni, non riferiti ad alcuna persona reale.
+var BULK_FIRST_NAMES = ['Marco','Giulia','Alessandro','Francesca','Matteo','Chiara','Davide','Elena','Simone','Valentina','Luca','Silvia','Riccardo','Martina','Federico','Ilaria','Tommaso','Giorgia','Nicola','Serena','Stefano','Alice','Fabio','Camilla','Paolo','Beatrice','Antonio','Laura','Michele','Roberta','Giovanni','Cristina','Emanuele','Veronica','Daniele','Sofia','Pietro','Arianna','Salvatore','Eleonora'];
+var BULK_LAST_NAMES = ['Bianchi','Ferrari','Russo','Romano','Colombo','Ricci','Marino','Greco','Bruno','Gallo','Conti','De Luca','Costa','Giordano','Mancini','Rizzo','Lombardi','Moretti','Barbieri','Fontana','Santoro','Mariani','Rinaldi','Caruso','Ferrara','Galli','Martini','Leone','Longo','Gentile','Vitale','Serra','Pellegrini','Palumbo','Sanna','Farina','Riva','Amato','Testa','Orlando'];
+function generateBulkDemoParticipants(count){
+  var out = [];
+  var used = {};
+  var attempts = 0;
+  while(out.length < count && attempts < count*30){
+    attempts++;
+    var fn = BULK_FIRST_NAMES[Math.floor(Math.random()*BULK_FIRST_NAMES.length)];
+    var ln = BULK_LAST_NAMES[Math.floor(Math.random()*BULK_LAST_NAMES.length)];
+    var full = (attempts%3===0?'Prat. Avv. ':'Avv. ') + fn + ' ' + ln;
+    if(used[full]) continue;
+    used[full] = true;
+    out.push({ name: full, initials: (fn[0]+ln[0]).toUpperCase() });
+  }
+  return out;
+}
+// Totale discenti simulati: 2 (relatore + tu) + 6 nominativi demo + ~94 generati = 100+
+var BULK_DEMO_PARTICIPANTS = generateBulkDemoParticipants(96);
+
 var myRole = 'partecipante';
 var myName = 'Avv. Demo Rossi';
 var participants = [];
+var videoPage = 0;
+var VIDEO_PAGE_SIZE = 24;
 var avSeconds = 0;
 var avTimerHandle = null;
 var recording = false;
@@ -337,6 +466,7 @@ function enterAula(){
   renderPartList();
   renderControlBar();
   renderPollHostControls();
+  renderDocPane();
   seedChat();
   startClock();
   startSpeakingRotation();
@@ -362,6 +492,15 @@ function buildParticipants(){
       leaveOffset: (i === DEMO_PARTICIPANTS.length-1) ? 240 : null
     });
   });
+  BULK_DEMO_PARTICIPANTS.forEach(function(d,i){
+    participants.push({
+      id:'b'+i, name:d.name, initials:d.initials, role:'partecipante', isMe:false,
+      mic: (i%4===0), cam: (i%5===0), hand:false,
+      joinOffset: (i%12)*10,
+      leaveOffset: null
+    });
+  });
+  videoPage = 0;
 }
 
 /* ===================== CLOCK ===================== */
@@ -389,24 +528,46 @@ function startSpeakingRotation(){
   }, 4000);
 }
 
-/* ===================== VIDEO GRID ===================== */
-function renderVideoGrid(){
-  var grid = document.getElementById('videoGrid');
-  grid.innerHTML = '';
-  participants.forEach(function(pt){
-    var tile = document.createElement('div');
-    tile.className = 'video-tile' + (pt.role==='host' ? ' host-tile' : '') + (pt.cam ? '' : ' tile-camoff');
-    tile.innerHTML =
+/* ===================== VIDEO GRID (con paginazione per reggere 100+ discenti) ===================== */
+function tileHtml(pt){
+  return '<div class="video-tile' + (pt.role==='host' ? ' host-tile' : '') + (pt.cam ? '' : ' tile-camoff') + '" data-pid="'+pt.id+'">' +
       '<div class="avatar-circle">'+pt.initials+'</div>' +
       (pt.hand ? '<div class="tile-hand">✋</div>' : '') +
       '<div class="tile-name">'+(pt.role==='host' ? '🎓 ' : '')+pt.name+(pt.isMe ? ' (tu)' : '')+'</div>' +
       '<div class="tile-icons">' +
         '<div class="mini-icon'+(pt.mic?'':' off')+'">'+(pt.mic?'🎤':'🔇')+'</div>' +
         '<div class="mini-icon'+(pt.cam?'':' off')+'">'+(pt.cam?'🎥':'📷')+'</div>' +
-      '</div>';
-    grid.appendChild(tile);
-  });
+      '</div>' +
+    '</div>';
+}
+function renderVideoGrid(){
+  var grid = document.getElementById('videoGrid');
+  var pinned = participants.filter(function(p){ return p.role==='host' || p.isMe; });
+  var others = participants.filter(function(p){ return !(p.role==='host' || p.isMe); });
+  var totalPages = Math.max(1, Math.ceil(others.length / VIDEO_PAGE_SIZE));
+  if(videoPage >= totalPages) videoPage = totalPages-1;
+  if(videoPage < 0) videoPage = 0;
+  var pageItems = others.slice(videoPage*VIDEO_PAGE_SIZE, (videoPage+1)*VIDEO_PAGE_SIZE);
+
+  var html = '';
+  pinned.forEach(function(pt){ html += tileHtml(pt); });
+  pageItems.forEach(function(pt){ html += tileHtml(pt); });
+  grid.innerHTML = html;
+
+  var pager = document.getElementById('videoPager');
+  if(others.length > VIDEO_PAGE_SIZE){
+    pager.innerHTML =
+      '<button onclick="changeVideoPage(-1)" '+(videoPage<=0?'disabled':'')+'>◀ Precedenti</button>' +
+      '<span>Pagina '+(videoPage+1)+' di '+totalPages+' &nbsp;·&nbsp; '+participants.length+' partecipanti totali</span>' +
+      '<button onclick="changeVideoPage(1)" '+(videoPage>=totalPages-1?'disabled':'')+'>Successivi ▶</button>';
+  } else {
+    pager.innerHTML = '';
+  }
   document.getElementById('partCount').textContent = '👥 '+participants.length+' partecipanti';
+}
+function changeVideoPage(delta){
+  videoPage += delta;
+  renderVideoGrid();
 }
 
 /* ===================== SIDE PANEL ===================== */
@@ -433,21 +594,78 @@ function selectSidePane(pane){
   document.getElementById('chatInputRow').style.display = (pane==='chat') ? 'flex' : 'none';
   if(pane==='part') renderPartList();
   if(pane==='poll') renderPollHostControls();
+  if(pane==='doc') renderDocPane();
   renderControlBar();
 }
 
 /* ===================== PARTECIPANTI ===================== */
+var renamingId = null;
+
 function renderPartList(){
   var el = document.getElementById('partList');
   el.innerHTML = '';
-  participants.forEach(function(pt){
+  var searchEl = document.getElementById('partSearch');
+  var q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  var list = participants;
+  if(q){
+    list = participants.filter(function(p){ return p.name.toLowerCase().indexOf(q) !== -1; });
+  }
+  if(list.length === 0){
+    el.innerHTML = '<div class="part-empty">Nessun partecipante trovato.</div>';
+    return;
+  }
+  list.forEach(function(pt){
     var row = document.createElement('div');
     row.className = 'part-row';
+    var canRename = (myRole==='host') || pt.isMe;
+    if(renamingId === pt.id){
+      row.innerHTML =
+        '<div class="rename-edit">' +
+          '<input type="text" id="renameInput_'+pt.id+'" value="'+escAttr(pt.name)+'" onkeydown="if(event.key===\'Enter\')confirmRenamePart(\''+pt.id+'\');if(event.key===\'Escape\')cancelRenamePart();">' +
+          '<button title="Conferma" onclick="confirmRenamePart(\''+pt.id+'\')">✅</button>' +
+          '<button title="Annulla" onclick="cancelRenamePart()">✖️</button>' +
+        '</div>';
+      el.appendChild(row);
+      var inp = row.querySelector('input');
+      if(inp){ inp.focus(); inp.select(); }
+      return;
+    }
     row.innerHTML =
-      '<div class="pr-name">'+(pt.role==='host'?'🎓 ':'👤 ')+pt.name+(pt.isMe?' <span style="color:#7c93a3;">(tu)</span>':'')+'</div>' +
+      '<div class="pr-name">' +
+        '<span class="pr-name-text">'+(pt.role==='host'?'🎓 ':'👤 ')+pt.name+(pt.isMe?' <span style="color:#7c93a3;">(tu)</span>':'')+'</span>' +
+        (canRename ? '<button class="rename-btn" title="Rinomina" onclick="startRenamePart(\''+pt.id+'\')">✏️</button>' : '') +
+      '</div>' +
       '<div class="pr-icons">'+(pt.mic?'🎤':'🔇')+' '+(pt.cam?'🎥':'📷')+(pt.hand?' ✋':'')+'</div>';
     el.appendChild(row);
   });
+}
+function escAttr(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function startRenamePart(id){
+  renamingId = id;
+  renderPartList();
+}
+function cancelRenamePart(){
+  renamingId = null;
+  renderPartList();
+}
+function confirmRenamePart(id){
+  var input = document.getElementById('renameInput_'+id);
+  var pt = participants.find(function(p){ return p.id===id; });
+  if(!input || !pt) return;
+  var newName = input.value.trim();
+  if(!newName){ cancelRenamePart(); return; }
+  var oldName = pt.name;
+  pt.name = newName;
+  pt.initials = getInitials(newName);
+  if(pt.isMe) myName = newName;
+  renamingId = null;
+  if(oldName !== newName){
+    pushChat('Sistema', '🔤 "'+oldName+'" è stato rinominato in "'+newName+'".', false);
+  }
+  renderPartList();
+  renderVideoGrid();
 }
 
 /* ===================== CHAT ===================== */
@@ -491,6 +709,133 @@ function fmtTime(sec){
   return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
 }
 
+/* ===================== DOCUMENTI (condividi / invia) ===================== */
+var DOC_PRESETS = [
+  'Slide — Modulo 5 IA e mediazione.pdf',
+  'Dispensa — Casi pratici di mediazione assistita.pdf',
+  'Bibliografia del modulo.pdf',
+  'Materiale integrativo — Linee guida CNF.pdf'
+];
+var sharedDocuments = []; // { id, title, sharedBy, atSecond, sentTo:null|number }
+var docCounter = 0;
+
+function renderDocPane(){
+  renderDocHostControls();
+  renderDocList();
+}
+function renderDocHostControls(){
+  var el = document.getElementById('docHostControls');
+  if(myRole!=='host'){ el.innerHTML=''; return; }
+  var options = DOC_PRESETS.map(function(d){ return '<option value="'+escAttr(d)+'">'+d+'</option>'; }).join('');
+  el.innerHTML =
+    '<div class="doc-share-box">' +
+      '<h4>📤 Condividi un documento</h4>' +
+      '<label>Documento</label>' +
+      '<select id="docPreset">'+options+'</select>' +
+      '<button class="btn btn-primary btn-sm btn-block" onclick="shareDocument()">Condividi in aula</button>' +
+    '</div>';
+}
+function shareDocument(){
+  var sel = document.getElementById('docPreset');
+  if(!sel) return;
+  docCounter++;
+  var doc = { id:'d'+docCounter, title: sel.value, sharedBy: myName, atSecond: avSeconds, sentTo: null };
+  sharedDocuments.push(doc);
+  pushChat('Sistema', '📄 '+myName+' ha condiviso il documento "'+doc.title+'".', false);
+  renderDocList();
+}
+function sendDocumentToAll(id){
+  var doc = sharedDocuments.find(function(d){ return d.id===id; });
+  if(!doc) return;
+  doc.sentTo = participants.length - 1; // tutti tranne chi invia
+  pushChat('Sistema', '📧 Il documento "'+doc.title+'" è stato inviato via email a '+doc.sentTo+' partecipanti.', false);
+  renderDocList();
+}
+function renderDocList(){
+  var el = document.getElementById('docList');
+  if(sharedDocuments.length===0){
+    el.innerHTML = '<div class="doc-empty">Nessun documento condiviso finora in questa sessione.</div>';
+    return;
+  }
+  var html = '';
+  sharedDocuments.slice().reverse().forEach(function(doc){
+    html += '<div class="doc-item">' +
+      '<div class="doc-title">📄 '+doc.title+'</div>' +
+      '<div class="doc-meta">Condiviso da '+doc.sharedBy+' — al minuto '+fmtTime(doc.atSecond)+'</div>' +
+      '<div class="doc-actions">' +
+        (myRole==='host' ? '<button onclick="sendDocumentToAll(\''+doc.id+'\')">📧 Invia ai partecipanti</button>' : '') +
+      '</div>' +
+      (doc.sentTo!==null ? '<div class="doc-sent-note">✅ Inviato via email a '+doc.sentTo+' partecipanti.</div>' : '') +
+    '</div>';
+  });
+  el.innerHTML = html;
+}
+
+/* ===================== MODALI (pianifica lezione / invita destinatari) ===================== */
+var scheduledLessons = []; // { title, date, timeStart, timeEnd, relatore }
+
+function openModal(id){
+  document.getElementById(id).classList.add('show');
+  if(id === 'modalSchedule') renderScheduleList();
+  if(id === 'modalInvite') renderInviteList();
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+}
+function scheduleLesson(){
+  var title = document.getElementById('schTitle').value.trim();
+  var date = document.getElementById('schDate').value;
+  var timeStart = document.getElementById('schTimeStart').value;
+  var timeEnd = document.getElementById('schTimeEnd').value;
+  var relatore = document.getElementById('schRelatore').value.trim();
+  if(!title || !date || !timeStart){
+    document.getElementById('scheduleConfirm').innerHTML = '<div class="av-modal-confirm">⚠️ Compila almeno titolo, data e ora di inizio.</div>';
+    return;
+  }
+  var dateFmt = formatItDate(date);
+  scheduledLessons.push({ title:title, date:dateFmt, timeStart:timeStart, timeEnd:timeEnd, relatore:relatore });
+  document.getElementById('scheduleConfirm').innerHTML =
+    '<div class="av-modal-confirm">✅ Lezione pianificata: <b>'+title+'</b> — '+dateFmt+' ore '+timeStart+(timeEnd?'–'+timeEnd:'')+'. I corsisti la vedranno nella sezione Corso di Alta Formazione dell\'area riservata.</div>';
+  pushChat('Sistema', '🗓️ Nuova lezione pianificata: "'+title+'" — '+dateFmt+' ore '+timeStart+(timeEnd?'–'+timeEnd:'')+' (relatore: '+relatore+').', false);
+  renderScheduleList();
+}
+function renderScheduleList(){
+  var el = document.getElementById('scheduleList');
+  if(scheduledLessons.length===0){ el.innerHTML=''; return; }
+  var html = '<p class="sub" style="margin-bottom:6px;">Lezioni pianificate in questa sessione:</p>';
+  scheduledLessons.forEach(function(l){
+    html += '<div class="schedule-item">🗓️ <b>'+l.title+'</b> — '+l.date+' ore '+l.timeStart+(l.timeEnd?'–'+l.timeEnd:'')+' · Relatore: '+l.relatore+'</div>';
+  });
+  el.innerHTML = html;
+}
+function formatItDate(isoDate){
+  var parts = isoDate.split('-');
+  if(parts.length!==3) return isoDate;
+  return parts[2]+'/'+parts[1]+'/'+parts[0];
+}
+function renderInviteList(){
+  var el = document.getElementById('inviteList');
+  var pool = DEMO_PARTICIPANTS.concat(BULK_DEMO_PARTICIPANTS.slice(0,10));
+  var html = '';
+  pool.forEach(function(d,i){
+    html += '<label class="invite-check"><input type="checkbox" value="'+escAttr(d.name)+'" checked> '+d.name+'</label>';
+  });
+  el.innerHTML = html;
+  document.getElementById('inviteConfirm').innerHTML = '';
+}
+function sendInvites(){
+  var checked = Array.prototype.slice.call(document.querySelectorAll('#inviteList input:checked')).map(function(i){ return i.value; });
+  var extra = document.getElementById('inviteExtraEmails').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var total = checked.length + extra.length;
+  if(total===0){
+    document.getElementById('inviteConfirm').innerHTML = '<div class="av-modal-confirm">⚠️ Seleziona almeno un destinatario o inserisci un indirizzo email.</div>';
+    return;
+  }
+  document.getElementById('inviteConfirm').innerHTML =
+    '<div class="av-modal-confirm">✅ Invito alla lezione inviato a '+total+' destinatari ('+checked.length+' corsisti + '+extra.length+' indirizzi aggiuntivi).</div>';
+  pushChat('Sistema', '✉️ Invito alla lezione inviato a '+total+' destinatari.', false);
+}
+
 /* ===================== CONTROLLI (mic/video/mano/rec/fine) ===================== */
 function renderControlBar(){
   var bar = document.getElementById('controlBar');
@@ -505,8 +850,11 @@ function renderControlBar(){
   html += ctrlBtnHtml('chat', '💬', 'Chat', false, "toggleSidePanel('chat')", (sideOpen&&currentSidePane==='chat')?'active-panel':'');
   html += ctrlBtnHtml('part', '👥', 'Partecipanti', false, "toggleSidePanel('part')", (sideOpen&&currentSidePane==='part')?'active-panel':'');
   html += ctrlBtnHtml('poll', '📊', 'Sondaggi', false, "toggleSidePanel('poll')", (sideOpen&&currentSidePane==='poll')?'active-panel':'');
+  html += ctrlBtnHtml('doc', '📄', 'Documenti', false, "toggleSidePanel('doc')", (sideOpen&&currentSidePane==='doc')?'active-panel':'');
   if(myRole==='host'){
     html += ctrlBtnHtml('rec', '⏺️', recording?'Reg. ON':'Registra', recording, "toggleRecording()", recording?'rec-active':'');
+    html += '<button class="ctrl-btn" onclick="openModal(\'modalSchedule\')"><span class="ic">🗓️</span>Pianifica</button>';
+    html += '<button class="ctrl-btn" onclick="openModal(\'modalInvite\')"><span class="ic">✉️</span>Invita</button>';
     html += '<button class="ctrl-btn end" onclick="endMeetingForAll()"><span class="ic">🚪</span>Termina riunione</button>';
   } else {
     html += '<button class="ctrl-btn end" onclick="leaveAsParticipant()"><span class="ic">🚪</span>Esci dall\'aula</button>';
