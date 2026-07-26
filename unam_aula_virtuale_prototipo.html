@@ -561,8 +561,10 @@ var pendingVerbaleDoc = null;
     var vData = params.get('verbaleData') || '';
     pendingVerbaleDoc = {
       id: 'verbale-preload',
-      name: vTitolo,
-      size: 'Verbale associativo' + (vCategoria ? ' — ' + vCategoria : '') + (vData ? ' (riunione del ' + vData + ')' : '')
+      title: vTitolo + (vData ? ' (riunione del ' + vData + ')' : ''),
+      sharedBy: vCategoria ? ('Verbali associativi — ' + vCategoria) : 'Verbali associativi',
+      atSecond: 0,
+      sentTo: null
     };
   }
 })();
@@ -589,7 +591,7 @@ function enterAula(){
   renderDocPane();
   seedChat();
   if(pendingVerbaleDoc){
-    pushChat('Sistema', '📜 Il verbale "' + pendingVerbaleDoc.name + '" è stato pre-caricato: apri la scheda Documenti per presentarlo a video.', false);
+    pushChat('Sistema', '📜 Il verbale "' + pendingVerbaleDoc.title + '" è stato pre-caricato: apri la scheda Documenti per presentarlo a video.', false);
   }
   startClock();
   startSpeakingRotation();
