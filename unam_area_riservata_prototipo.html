@@ -138,6 +138,13 @@
   .mail-route-banner{background:#e8f4fa;border:1px solid var(--blue);color:var(--navy);font-size:13px;border-radius:8px;padding:9px 14px;margin-top:8px;}
   .mail-notify-chk{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:400;color:var(--ink);margin:0;}
   .mail-notify-chk input{width:auto;margin:0;flex:none;}
+  .mail-attach-row{align-items:center;}
+  .mail-attachment-list{display:flex;gap:8px;flex-wrap:wrap;}
+  .mail-attachment-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-pale);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--navy);}
+  .mail-attachment-chip .ma-size{color:var(--muted);}
+  .mail-attachment-chip button{border:none;background:transparent;color:var(--navy);cursor:pointer;font-size:12px;padding:0 0 0 2px;line-height:1;}
+  .mail-attachments-view{margin-top:10px;}
+  .mail-attachments-view .mail-attachment-chip{margin:0 6px 6px 0;}
   .mail-notify-preview{margin-top:8px;background:#fff;border:1px dashed var(--blue);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink);}
   .mail-notify-preview .np-head{font-weight:700;color:var(--navy);margin-bottom:4px;}
   .mail-notify-preview .np-body{color:var(--muted);}
@@ -469,6 +476,12 @@
             <option value="Casella Generale">
           </datalist>
           <textarea id="mailTesto" placeholder="Scrivi il messaggio…"></textarea>
+          <div class="mail-compose-row mail-attach-row">
+            <label class="btn btn-outline btn-sm" for="mailAttachmentInput" style="cursor:pointer;margin-bottom:0;">📎 Allega file</label>
+            <input type="file" id="mailAttachmentInput" multiple style="display:none;" onchange="onMailAttachmentChange(event)">
+            <span id="mailAttachmentHint" style="font-size:12px;color:var(--muted);">Nessun allegato</span>
+          </div>
+          <div id="mailAttachmentList" class="mail-attachment-list"></div>
           <label class="mail-notify-chk">
             <input type="checkbox" id="mailNotifyPersonal" checked>
             Avvisa il destinatario anche sulla sua email personale
@@ -481,7 +494,7 @@
         </form>
       </div>
     </div>
-    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare.</p>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare. Con "📎 Allega file" puoi allegare uno o più documenti al messaggio prima di inviarlo (o rimuoverli con "✕" prima dell'invio); inoltrando un messaggio con allegati, questi vengono automaticamente ripresi nell'inoltro. I messaggi ricevuti con allegati mostrano l'indicatore 📎 in elenco e permettono di scaricarli aprendo il messaggio — in questo prototipo il download genera un file segnaposto dimostrativo, non il documento reale.</p>
   </div>
 </section>
 
@@ -1111,7 +1124,7 @@
         { from: 'avv.demo.candidato@unam-demo.it', subject: 'Candidatura per il gruppo di lavoro Mediazione e IA', text: 'Vorrei proporre la mia candidatura al gruppo di lavoro sulla mediazione e intelligenza artificiale.', time: '11:05', date: '23/07/2026', routedTo: null }
       ],
       inviata: [
-        { from: 'Segreteria U.N.A.M.', subject: 'Riscontro alla richiesta di informazioni', text: 'Buongiorno, in allegato il bando del Corso di Alta Formazione 2026/2027 con le relative scadenze di iscrizione.', time: '09:30', date: '21/07/2026' }
+        { from: 'Segreteria U.N.A.M.', subject: 'Riscontro alla richiesta di informazioni', text: 'Buongiorno, in allegato il bando del Corso di Alta Formazione 2026/2027 con le relative scadenze di iscrizione.', time: '09:30', date: '21/07/2026', attachments: [{ name: 'Bando_Corso_Alta_Formazione_2026-2027.pdf', size: '842 KB' }] }
       ],
       archivio: [
         { from: 'segreteria.vecchia.richiesta@unam-demo.it', subject: 'Richiesta informazioni tesseramento 2025', text: 'Richiesta di informazioni sul tesseramento, evasa e archiviata a fine anno associativo.', time: '10:00', date: '15/01/2025' }
@@ -1123,7 +1136,7 @@
     },
     'direttivo': {
       ricevuta: [
-        { from: 'Avv. Daniela Sità', subject: 'Ordine del giorno prossima riunione', text: 'Buongiorno, alleghiamo l\'ordine del giorno della prossima riunione del Comitato Direttivo, con il punto sul bilancio preventivo 2027.', time: '09:00', date: '20/07/2026', routedTo: null },
+        { from: 'Avv. Daniela Sità', subject: 'Ordine del giorno prossima riunione', text: 'Buongiorno, alleghiamo l\'ordine del giorno della prossima riunione del Comitato Direttivo, con il punto sul bilancio preventivo 2027.', time: '09:00', date: '20/07/2026', routedTo: null, attachments: [{ name: 'Ordine_del_Giorno_Comitato_Direttivo.pdf', size: '128 KB' }] },
         { from: 'segreteria.sezione.napoli@unam-demo.it', subject: 'Richiesta validazione bilancio di sezione per il Comitato Direttivo', text: 'Buongiorno, trasmettiamo il rendiconto della sezione di Napoli da sottoporre al Comitato Direttivo per la validazione.', time: '09:40', date: '22/07/2026', routedFrom: 'generale' }
       ],
       inviata: [
@@ -1139,7 +1152,7 @@
     },
     'esecutivo': {
       ricevuta: [
-        { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni.', time: '10:02', date: '21/07/2026', routedTo: null }
+        { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni.', time: '10:02', date: '21/07/2026', routedTo: null, attachments: [{ name: 'Materiali_Incontro_Esecutivo.pdf', size: '1.4 MB' }, { name: 'Aggiornamento_Nuove_Adesioni.xlsx', size: '96 KB' }] }
       ],
       inviata: [
         { from: 'Avv. Elisa Fichera', subject: 'Conferma ordine del giorno', text: 'Confermiamo l\'ordine del giorno dell\'incontro di venerdì, con il punto sulle nuove adesioni.', time: '10:20', date: '21/07/2026' }
@@ -1158,7 +1171,7 @@
         { from: 'Segreteria didattica', subject: 'Promemoria Modulo 3', text: 'Ricordiamo ai corsisti che il Modulo 3 si terrà venerdì 9 ottobre; la registrazione sarà disponibile entro 48 ore dalla lezione.', time: '09:00', date: '19/07/2026' }
       ],
       archivio: [
-        { from: 'Segreteria didattica', subject: 'Calendario Modulo 1 (concluso)', text: 'Calendario del Modulo 1, concluso e archiviato a fine modulo.', time: '08:00', date: '10/02/2026' }
+        { from: 'Segreteria didattica', subject: 'Calendario Modulo 1 (concluso)', text: 'Calendario del Modulo 1, concluso e archiviato a fine modulo.', time: '08:00', date: '10/02/2026', attachments: [{ name: 'Calendario_Modulo1.pdf', size: '210 KB' }] }
       ],
       bozze: [
         { subject: 'Bozza comunicazione Modulo 4', text: 'Bozza di comunicazione sul Modulo 4 — da completare con la data definitiva concordata con il relatore.', date: '24/07/2026' }
@@ -1238,6 +1251,7 @@
       if(m.routedTo){ tag += '<span class="mi-tag">🔀 Smistato anche a: ' + mailFolderDefs[m.routedTo].name + '</span>'; }
       else if(m.routedFrom){ tag += '<span class="mi-tag">🔀 Smistato automaticamente da: ' + mailFolderDefs[m.routedFrom].name + '</span>'; }
       if(m.cc){ tag += '<span class="mi-tag">📋 Cc: ' + m.cc + '</span>'; }
+      if(m.attachments && m.attachments.length){ tag += '<span class="mi-tag">📎 ' + m.attachments.length + (m.attachments.length === 1 ? ' allegato' : ' allegati') + '</span>'; }
       if(currentMailSubfolder === 'cestino' && m.deletedFrom){ tag += '<span class="mi-tag">🗑️ Eliminato da: ' + (mailSubfolderDefs[m.deletedFrom] ? mailSubfolderDefs[m.deletedFrom].name : m.deletedFrom) + '</span>'; }
       var topLine = currentMailSubfolder === 'bozze'
         ? '<div class="mi-top"><span>Bozza — non inviata</span><span>' + m.date + '</span></div>'
@@ -1346,6 +1360,7 @@
     pane.innerHTML = '<div class="mail-read"><h4>' + m.subject + '</h4>'
       + '<p style="font-size:12.5px;color:var(--muted);margin:0 0 10px 0;">' + meta + '</p>'
       + '<p class="mail-read-text">' + m.text + '</p>'
+      + buildAttachmentsViewHtml(m.attachments)
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">'
       + (canReply ? '<button type="button" class="btn btn-outline btn-sm" onclick="replyToMail(' + idx + ')">↩️ Rispondi</button>' : '')
       + (canForward ? '<button type="button" class="btn btn-outline btn-sm" onclick="forwardMail(' + idx + ')">➡️ Inoltra</button>' : '')
@@ -1403,6 +1418,8 @@
     var testoEl = document.getElementById('mailTesto');
     var quotedWhen = m.date + (m.time ? ' ' + m.time : '');
     testoEl.value = '\n\n----- Messaggio originale -----\nDa: ' + m.from + ' — ' + quotedWhen + '\nOggetto: ' + m.subject + '\n\n' + m.text;
+    composeAttachments = [];
+    renderComposeAttachments();
     renderReplyBanner();
     testoEl.focus();
     testoEl.setSelectionRange(0, 0);
@@ -1421,6 +1438,8 @@
     var quotedWhen = m.date + (m.time ? ' ' + m.time : '');
     var fromLabel = m.from || '(bozza senza mittente)';
     testoEl.value = '\n\n----- Messaggio inoltrato -----\nDa: ' + fromLabel + ' — ' + quotedWhen + '\nOggetto: ' + m.subject + '\n\n' + m.text;
+    composeAttachments = (m.attachments || []).slice();
+    renderComposeAttachments();
     renderReplyBanner();
     testoEl.focus();
     testoEl.setSelectionRange(0, 0);
@@ -1432,6 +1451,8 @@
     forwardContext = null;
     document.getElementById('mailOggetto').value = '';
     document.getElementById('mailTesto').value = '';
+    composeAttachments = [];
+    renderComposeAttachments();
     renderReplyBanner();
   }
 
@@ -1477,6 +1498,70 @@
     return found;
   }
 
+  // ---- Allegati (compose) ----
+  var composeAttachments = []; // { name, size }
+
+  function formatFileSize(bytes){
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function onMailAttachmentChange(ev){
+    var files = Array.prototype.slice.call((ev.target && ev.target.files) || []);
+    files.forEach(function(f){
+      composeAttachments.push({ name: f.name, size: formatFileSize(f.size) });
+    });
+    ev.target.value = ''; // consente di selezionare di nuovo lo stesso file
+    renderComposeAttachments();
+  }
+
+  function removeComposeAttachment(i){
+    composeAttachments.splice(i, 1);
+    renderComposeAttachments();
+  }
+
+  function renderComposeAttachments(){
+    var hint = document.getElementById('mailAttachmentHint');
+    var list = document.getElementById('mailAttachmentList');
+    if(!list) return;
+    if(composeAttachments.length === 0){
+      if(hint) hint.textContent = 'Nessun allegato';
+      list.innerHTML = '';
+      return;
+    }
+    if(hint) hint.textContent = composeAttachments.length + (composeAttachments.length === 1 ? ' allegato' : ' allegati');
+    var html = '';
+    composeAttachments.forEach(function(a, i){
+      html += '<span class="mail-attachment-chip">📎 ' + a.name + ' <span class="ma-size">(' + a.size + ')</span> <button type="button" onclick="removeComposeAttachment(' + i + ')" aria-label="Rimuovi allegato" title="Rimuovi allegato">✕</button></span>';
+    });
+    list.innerHTML = html;
+  }
+
+  function buildAttachmentsViewHtml(attachments){
+    if(!attachments || !attachments.length) return '';
+    var html = '<div class="mail-attachments-view"><p style="font-size:12px;color:var(--muted);margin:10px 0 6px;">📎 ' + attachments.length + (attachments.length === 1 ? ' allegato:' : ' allegati:') + '</p>';
+    attachments.forEach(function(a){
+      var nameAttr = String(a.name).replace(/'/g, "\\'");
+      html += '<span class="mail-attachment-chip">📎 ' + a.name + ' <span class="ma-size">(' + a.size + ')</span> <button type="button" onclick="scaricaAllegatoDemo(\'' + nameAttr + '\')">⬇️ Scarica</button></span>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function scaricaAllegatoDemo(name){
+    var testo = 'Documento dimostrativo — U.N.A.M.\n\nQuesto è un file segnaposto generato dal prototipo per simulare il download dell\'allegato "' + name + '".\nNel sito reale verrebbe scaricato il file effettivamente allegato al messaggio.';
+    var blob = new Blob([testo], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = name.replace(/\.[^.]+$/, '') + '_demo.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
   function currentComposeData(){
     var oggetto = document.getElementById('mailOggetto').value.trim();
     var testo = document.getElementById('mailTesto').value.trim();
@@ -1499,6 +1584,8 @@
     if(document.getElementById('mailCcn')) document.getElementById('mailCcn').value = '';
     replyContext = null;
     forwardContext = null;
+    composeAttachments = [];
+    renderComposeAttachments();
     renderReplyBanner();
   }
 
@@ -1513,7 +1600,7 @@
     var c = currentComposeData();
     var banner = document.getElementById('mailRouteBanner');
     if(!c.oggetto || !c.testo) return;
-    var msgPublic = { from: demoUser.nome, subject: c.oggetto, text: c.testo, time: c.time, date: c.date, routedTo: null, cc: c.cc || null };
+    var msgPublic = { from: demoUser.nome, subject: c.oggetto, text: c.testo, time: c.time, date: c.date, routedTo: null, cc: c.cc || null, attachments: composeAttachments.slice() };
 
     var bannerHtml = '';
     var deliveredKeys = [];
@@ -1546,6 +1633,7 @@
     });
     if(c.cc){ bannerHtml += '<div class="mail-route-banner">📋 Copia (Cc) inviata a: <strong>' + c.cc + '</strong>.</div>'; }
     if(c.ccn){ bannerHtml += '<div class="mail-route-banner">🙈 Copia nascosta (Ccn) inviata a: <strong>' + c.ccn + '</strong> — visibile solo a te, gli altri destinatari non la vedono.</div>'; }
+    if(msgPublic.attachments.length){ bannerHtml += '<div class="mail-route-banner">📎 Inviato con ' + msgPublic.attachments.length + (msgPublic.attachments.length === 1 ? ' allegato' : ' allegati') + ': <strong>' + msgPublic.attachments.map(function(a){ return a.name; }).join(', ') + '</strong>.</div>'; }
 
     if(c.notify){
       bannerHtml += buildNotifyPreviewHtml(mailFolderDefs[dest].name, c.oggetto, null);
@@ -1563,7 +1651,7 @@
     var c = currentComposeData();
     var banner = document.getElementById('mailRouteBanner');
     if(!c.oggetto && !c.testo) return;
-    mailData[dest].bozze.push({ subject: c.oggetto || '(senza oggetto)', text: c.testo, date: c.date, cc: c.cc || null, ccn: c.ccn || null });
+    mailData[dest].bozze.push({ subject: c.oggetto || '(senza oggetto)', text: c.testo, date: c.date, cc: c.cc || null, ccn: c.ccn || null, attachments: composeAttachments.slice() });
     banner.innerHTML = '<div class="mail-route-banner">📝 Bozza salvata nella casella ' + mailFolderDefs[dest].name + '.</div>';
     resetComposeForm();
     renderMailFolders();
