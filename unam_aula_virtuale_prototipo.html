@@ -605,7 +605,7 @@ var SESSION_TYPES = {
     hasCredits: false
   }
 };
-var sessionType = 'corso';
+var sessionType = 'istantanea';
 var sezioneNome = null; // nome della Sezione locale organizzatrice, se l'evento arriva da un link con ?tipo=sezione&sezione=...
 var sezioneCreditiRichiesti = false; // dicitura crediti per gli eventi di Sezione: false = "Crediti non richiesti", true = "Crediti richiesti al COA"
 function applySessionType(){
@@ -644,6 +644,12 @@ var pendingVerbaleDoc = null;
   if(tipo && SESSION_TYPES[tipo]){
     var sel = document.getElementById('sessionTypeSelect');
     if(sel){ sel.value = tipo; }
+    applySessionType();
+  } else {
+    // Nessun tipo indicato in link (es. pulsante generico "Apri l'aula virtuale"):
+    // apre un'aula neutra ("Riunione istantanea"), non una lezione/evento specifico precompilato.
+    var selNeutro = document.getElementById('sessionTypeSelect');
+    if(selNeutro){ selNeutro.value = 'istantanea'; }
     applySessionType();
   }
   var vTitolo = params.get('verbaleTitolo');
