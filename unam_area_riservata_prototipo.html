@@ -69,6 +69,7 @@
   .quota-toolbar label{font-size:13px;font-weight:600;color:var(--navy);margin:0;display:flex;align-items:center;gap:6px;}
   .quota-toolbar select{width:auto;padding:7px 10px;margin:0;font-size:13.5px;}
   .quota-toolbar .chk-label{font-weight:400;color:var(--ink);}
+  tr.row-highlight td{background:#fff3cd !important;}
   table.data .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
   .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;}
@@ -2094,7 +2095,27 @@
     { nome: 'Avv. Paola Serra', sezione: 'Lombardia', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'in attesa' } },
     { nome: 'Avv. Simone Frediani', sezione: 'Campania', stato: { 2024: 'pagato', 2025: 'in attesa', 2026: 'in attesa' } },
     { nome: 'Avv. Tiziana Rosania', sezione: 'Toscana', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
-    { nome: 'Avv. Duccio Viligiardi', sezione: 'Toscana', stato: { 2024: 'moroso', 2025: 'in attesa', 2026: 'in attesa' } }
+    { nome: 'Avv. Duccio Viligiardi', sezione: 'Toscana', stato: { 2024: 'moroso', 2025: 'in attesa', 2026: 'in attesa' } },
+    // Soci collegati alla vetrina pubblica "I soci" (index.html): stato sempre regolare,
+    // per non attribuire ritardi di pagamento a persone reali e identificabili.
+    { nome: 'Avv. Marisa Abbatantuoni', sezione: 'Macerata', slug: 'abbatantuoni-marisa', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Amedeo Abbate', sezione: 'Napoli Nord', slug: 'abbate-amedeo', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Vincenzo Acerra', sezione: 'Napoli Nord', slug: 'acerra-vincenzo', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Gianclaudio Addamiano', sezione: 'Potenza', slug: 'addamiano-gianclaudio', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Maria Agnino', sezione: 'Roma', slug: 'agnino-maria', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Fabio Agostoni', sezione: 'Lecco', slug: 'agostoni-fabio', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Benedetta Albanese', sezione: 'Firenze', slug: 'albanese-benedetta', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Elena Alberico', sezione: 'Verbania', slug: 'alberico-elena', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avvocato Patrizia Alboreo', sezione: 'Trani', slug: 'alboreo-patrizia', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Maura Alessandri', sezione: 'Bologna', slug: 'alessandri-maura', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Moira Alessiani', sezione: 'Macerata', slug: 'alessiani-moira', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Federica Amici', sezione: 'Verona', slug: 'amici-federica', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Cinzia Anceschi', sezione: 'Modena', slug: 'anceschi-cinzia', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Cristiano Andreozzi', sezione: 'Napoli Nord', slug: 'andreozzi-cristiano', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Luigi Andreozzi', sezione: 'Ascoli Piceno', slug: 'andreozzi-luigi', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Prat. Eleonora Archetti', sezione: 'Verbania', slug: 'archetti-eleonora', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Danilo Areni', sezione: 'Perugia', slug: 'areni-danilo', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } },
+    { nome: 'Avv. Fabiola Astarita', sezione: 'Santa Maria C.V.', slug: 'astarita-fabiola', stato: { 2024: 'pagato', 2025: 'pagato', 2026: 'pagato' } }
   ];
 
   function badgeForStato(s){
@@ -2127,12 +2148,14 @@
         actions = '<span style="color:var(--muted);font-size:12.5px;">—</span>';
       }
       var schedaBtn = '<button class="btn btn-sm btn-outline" style="margin-top:6px;" onclick="openSchedaAdmin(\'' + r.s.nome.replace(/'/g,"\\'") + '\', {sezione:\'' + r.s.sezione.replace(/'/g,"\\'") + '\'})">📄 Apri scheda</button>';
-      return '<tr>'
+      var pubblicaBtn = r.s.slug ? ' <a class="btn btn-sm btn-outline" style="margin-top:6px;" href="index.html#socio/' + r.s.slug + '" target="_blank" rel="noopener">🔗 Scheda pubblica</a>' : '';
+      var rowId = r.s.slug ? ' id="quotaRow-' + r.s.slug + '"' : '';
+      return '<tr' + rowId + '>'
         + '<td>' + r.s.nome + '</td>'
         + '<td>' + r.s.sezione + '</td>'
         + '<td>€ ' + quotaImporto + ',00</td>'
         + '<td>' + badgeForStato(r.stato) + '</td>'
-        + '<td>' + actions + schedaBtn + '</td>'
+        + '<td>' + actions + schedaBtn + pubblicaBtn + '</td>'
         + '</tr>';
     }).join('');
   }
@@ -2186,6 +2209,20 @@
   function rejectSocio(i){ alertInline('Richiesta rifiutata: ' + pendingSoci[i].n); pendingSoci.splice(i,1); renderSociList(); }
 
   renderSociList();
+
+  /* ===== Collegamento con la scheda pubblica "I soci" (index.html): apre direttamente
+     la Tesoreria sul socio richiesto tramite ?tesoreria=<slug> ===== */
+  (function initDeepLinkTesoreria(){
+    var params = new URLSearchParams(window.location.search);
+    var slug = params.get('tesoreria');
+    if(!slug) return;
+    showView('admin');
+    switchAdminTab('quote');
+    setTimeout(function(){
+      var row = document.getElementById('quotaRow-' + slug);
+      if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.classList.add('row-highlight'); }
+    }, 60);
+  })();
 </script>
 </body>
 </html>
