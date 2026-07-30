@@ -127,6 +127,19 @@
   .person.photo{display:flex;align-items:center;gap:12px;padding:12px 16px;}
   .person.photo .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--line);}
 
+  .soci-note{background:var(--blue-pale);border-radius:10px;padding:14px 18px;font-size:13.5px;color:var(--navy);margin-bottom:26px;}
+  .soci-filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .soci-filter input[type=search],.soci-filter select{padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;color:var(--ink);background:#fff;}
+  .soci-filter input[type=search]{flex:1 1 220px;}
+  .soci-filter select{flex:0 1 220px;}
+  .soci-count{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .socio-row{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px;flex-wrap:wrap;}
+  .socio-row .socio-nome{flex:1 1 210px;font-weight:700;color:var(--navy);font-size:14.5px;}
+  .socio-titolo{display:inline-block;background:var(--blue-pale);color:var(--blue);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;margin-right:6px;text-transform:uppercase;vertical-align:middle;}
+  .socio-row .socio-ordine,.socio-row .socio-sezione{flex:1 1 160px;font-size:12.5px;color:var(--muted);}
+  .socio-row .socio-ordine strong,.socio-row .socio-sezione strong{display:block;color:var(--ink);font-size:13.5px;font-weight:600;}
+  @media (max-width:700px){ .socio-row{flex-direction:column;align-items:flex-start;} }
+
   .doc-item{display:flex;align-items:center;flex-wrap:wrap;gap:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:10px;}
   .doc-item .dicon{width:36px;height:36px;border-radius:8px;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none;}
   .doc-item > div:not(.dicon){flex:1 1 200px;min-width:0;}
@@ -217,6 +230,7 @@
       <a href="#home">Home</a>
       <a href="#chi-siamo">Chi siamo</a>
       <a href="#organigramma">Organigramma</a>
+      <a href="#soci">I soci</a>
       <a href="#progetti">Progetti tematici</a>
       <a href="#formazione">Formazione</a>
       <a href="#notizie">Notizie</a>
@@ -399,6 +413,35 @@
         <tr><td>Rapporti O.C.F.</td><td>Avv. Daniela Sità</td></tr>
       </table>
     </div>
+  </section>
+</section>
+
+<!-- ============ I SOCI ============ -->
+<section class="page" id="soci">
+  <div class="hero" style="padding:44px 0;">
+    <div class="wrap"><span class="eyebrow">Chi siamo</span><h1>I soci</h1><p class="lead">L'elenco degli iscritti a U.N.A.M., consultabile per cognome, Ordine degli Avvocati di appartenenza e Sezione locale.</p></div>
+  </div>
+  <section class="block">
+    <div class="wrap">
+      <p class="soci-note">📋 <strong>Vetrina dimostrativa</strong> — questa pagina riproduce il funzionamento reale della sezione "I soci" del sito unam.it (ricerca, filtri, scheda del singolo iscritto) su un campione di 18 schede reali tratte dal registro pubblico. Nel sito definitivo la sezione conterrebbe l'elenco completo di tutti gli iscritti, alimentato dall'area riservata.</p>
+      <div class="soci-filter">
+        <input type="search" id="sociSearch" placeholder="Cerca per cognome o nome...">
+        <select id="sociOrdine"><option value="">Ordine degli Avvocati</option></select>
+        <select id="sociSezione"><option value="">Sezione locale</option></select>
+      </div>
+      <div class="soci-count" id="sociCount"></div>
+      <div id="sociLista"></div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ SCHEDA SOCIO ============ -->
+<section class="page" id="socio-scheda">
+  <div class="hero" style="padding:44px 0;">
+    <div class="wrap"><span class="eyebrow">I soci</span><h1>Scheda associato</h1></div>
+  </div>
+  <section class="block">
+    <div class="wrap" id="socioSchedaContent" style="max-width:640px;"></div>
   </section>
 </section>
 
@@ -917,6 +960,7 @@
       <div>
         <h5>Sezioni</h5>
         <p><a href="#chi-siamo">Chi siamo</a></p>
+        <p><a href="#soci">I soci</a></p>
         <p><a href="#progetti">Progetti tematici</a></p>
         <p><a href="#formazione">Formazione</a></p>
       </div>
@@ -1099,6 +1143,101 @@
     }).join('');
   }
   renderEventiSezioneVetrina();
+
+  /* ===== I soci — vetrina dimostrativa =====
+     Campione di 18 schede reali tratte dal registro pubblico "I soci" di unam.it
+     (nome, Ordine di appartenenza, Sezione locale, email professionale già pubblici sul sito
+     dell'associazione). Nel sito definitivo l'elenco completo degli iscritti sarebbe alimentato
+     dall'area riservata, come i dati di anagrafica e i documenti di iscrizione all'Ordine. */
+  var sociDemo = [
+    {titolo:'Avv.', cognome:'ABBATANTUONI', nome:'Marisa', ordine:'Macerata', sezione:'Macerata', email:'segreteria@consulex.biz', dal:null},
+    {titolo:'Avv.', cognome:'ABBATE', nome:'Amedeo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'amedeoabbate@gmail.com', dal:'05/12/23'},
+    {titolo:'Avv.', cognome:'ACERRA', nome:'Vincenzo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'studiolegaleacerra@gmail.com', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ADDAMIANO', nome:'Gianclaudio', ordine:'Potenza', sezione:'Potenza', email:'gianclaudioaddamiano@tiscali.it', dal:null},
+    {titolo:'Avv.', cognome:'AGNINO', nome:'Maria', ordine:'Roma', sezione:'Roma', email:'mariaagnino73@gmail.com', dal:'11/04/14'},
+    {titolo:'Avv.', cognome:'AGOSTONI', nome:'Fabio', ordine:'Lecco', sezione:'Lecco', email:'avv.agostonifabio@gmail.com', dal:'08/01/21'},
+    {titolo:'Avv.', cognome:'ALBANESE', nome:'Benedetta', ordine:'Firenze', sezione:'Firenze', email:'benedetta.albanese@gmail.com', dal:'21/12/17'},
+    {titolo:'Avv.', cognome:'ALBERICO', nome:'Elena', ordine:'Verbania', sezione:'Verbania', email:'elena.alberico@gmail.com', dal:'05/07/21'},
+    {titolo:'Avvocato', cognome:'ALBOREO', nome:'Patrizia', ordine:'Trani', sezione:null, email:'avvpatrizia.alboreo@gmail.com', dal:null},
+    {titolo:'Avv.', cognome:'ALESSANDRI', nome:'Maura', ordine:'Bologna', sezione:'Bologna', email:'maura.alessandri@studiolegalealessandri.com', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ALESSIANI', nome:'Moira', ordine:'Macerata', sezione:'Macerata', email:'moira.alessiani@cheapnet.it', dal:'21/03/22'},
+    {titolo:'Avv.', cognome:'AMICI', nome:'Federica', ordine:'Verona', sezione:'Verona', email:'avv.federica.amici@gmail.com', dal:'21/09/21'},
+    {titolo:'Avv.', cognome:'ANCESCHI', nome:'Cinzia', ordine:'Modena', sezione:'Modena', email:'avvanceschi@interfree.it', dal:'11/06/18'},
+    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Cristiano', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'andreozzicristiano@gmail.com', dal:'21/11/23'},
+    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Luigi', ordine:'Ascoli Piceno', sezione:'Ascoli Piceno', email:'l.andreozzi@legalset.it', dal:'11/04/14'},
+    {titolo:'Prat.', cognome:'ARCHETTI', nome:'Eleonora', ordine:'Verbania', sezione:'Verbania', email:'eleonoraarchetti@libero.it', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ARENI', nome:'Danilo', ordine:'Perugia', sezione:'Perugia', email:'studiolegaleareni@gmail.com', dal:'12/03/24'},
+    {titolo:'Avv.', cognome:'ASTARITA', nome:'Fabiola', ordine:'Santa Maria C.V.', sezione:'Santa Maria C.V.', email:'fabiola.astarita@gmail.com', dal:'07/11/23'}
+  ];
+
+  function renderSociLista(){
+    var qEl = document.getElementById('sociSearch'), ordEl = document.getElementById('sociOrdine'), sezEl = document.getElementById('sociSezione');
+    if(!qEl) return;
+    var q = (qEl.value || '').toLowerCase();
+    var ord = ordEl.value, sez = sezEl.value;
+    var el = document.getElementById('sociLista');
+    var filtered = sociDemo.filter(function(s){
+      var full = (s.cognome + ' ' + s.nome).toLowerCase();
+      var okQ = !q || full.indexOf(q) !== -1;
+      var okOrd = !ord || s.ordine === ord;
+      var okSez = !sez || s.sezione === sez;
+      return okQ && okOrd && okSez;
+    });
+    document.getElementById('sociCount').textContent = filtered.length + ' su ' + sociDemo.length + ' schede dimostrative';
+    if(filtered.length === 0){
+      el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0;">Nessun risultato per i filtri selezionati.</p>';
+      return;
+    }
+    el.innerHTML = filtered.map(function(s){
+      var idx = sociDemo.indexOf(s);
+      return '<div class="socio-row">'
+        + '<div class="socio-nome"><span class="socio-titolo">' + s.titolo + '</span>' + s.cognome + ' ' + s.nome + '</div>'
+        + '<div class="socio-ordine">Ordine degli Avvocati di<strong>' + s.ordine + '</strong></div>'
+        + '<div class="socio-sezione">Sezione Locale U.N.A.M.<strong>' + (s.sezione || '—') + '</strong></div>'
+        + '<button type="button" class="btn btn-primary" onclick="apriSchedaSocio(' + idx + ')">Scheda →</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  function popolaFiltriSoci(){
+    var ordini = [], sezioni = [];
+    sociDemo.forEach(function(s){
+      if(ordini.indexOf(s.ordine) === -1) ordini.push(s.ordine);
+      if(s.sezione && sezioni.indexOf(s.sezione) === -1) sezioni.push(s.sezione);
+    });
+    ordini.sort(); sezioni.sort();
+    var selOrd = document.getElementById('sociOrdine');
+    ordini.forEach(function(o){ selOrd.innerHTML += '<option value="' + o + '">' + o + '</option>'; });
+    var selSez = document.getElementById('sociSezione');
+    sezioni.forEach(function(s){ selSez.innerHTML += '<option value="' + s + '">' + s + '</option>'; });
+  }
+
+  function apriSchedaSocio(idx){
+    var s = sociDemo[idx];
+    if(!s) return;
+    var html = '<p style="margin-bottom:18px;"><a href="#soci" onclick="showPage('#soci')">← Torna all'elenco</a></p>'
+      + '<div class="card" style="padding:32px;">'
+      + '<span class="socio-titolo">' + s.titolo + '</span>'
+      + '<h2 style="margin:8px 0 0 0;">' + s.cognome + '</h2>'
+      + '<h3 style="color:var(--ink);font-weight:600;margin-top:2px;">' + s.nome + '</h3>'
+      + '<table class="data" style="margin-top:20px;">'
+      + (s.dal ? '<tr><td>Associato U.N.A.M. dal</td><td>' + s.dal + '</td></tr>' : '')
+      + '<tr><td>Iscritto all'Ordine degli Avvocati di</td><td>' + s.ordine + '</td></tr>'
+      + '<tr><td>Sezione Locale U.N.A.M.</td><td>' + (s.sezione || '—') + '</td></tr>'
+      + '<tr><td>E-mail</td><td><a href="mailto:' + s.email + '">' + s.email + '</a></td></tr>'
+      + '</table>'
+      + '</div>';
+    document.getElementById('socioSchedaContent').innerHTML = html;
+    showPage('#socio-scheda');
+    location.hash = '#socio-scheda';
+  }
+
+  popolaFiltriSoci();
+  renderSociLista();
+  document.getElementById('sociSearch').addEventListener('input', renderSociLista);
+  document.getElementById('sociOrdine').addEventListener('change', renderSociLista);
+  document.getElementById('sociSezione').addEventListener('change', renderSociLista);
+
 
   showPage(location.hash);
 </script>
