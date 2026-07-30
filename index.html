@@ -1018,7 +1018,17 @@
     window.scrollTo(0,0);
     document.getElementById('mainnav').classList.remove('open');
   }
-  window.addEventListener('hashchange', function(){ showPage(location.hash); });
+  function handleHash(hash){
+    hash = hash || '#home';
+    if(hash.indexOf('#socio/') === 0){
+      var slug = decodeURIComponent(hash.slice(7));
+      for(var i = 0; i < sociDemo.length; i++){
+        if(sociDemo[i].slug === slug){ apriSchedaSocio(i); return; }
+      }
+    }
+    showPage(hash);
+  }
+  window.addEventListener('hashchange', function(){ handleHash(location.hash); });
   document.getElementById('navtoggle').addEventListener('click', function(){
     document.getElementById('mainnav').classList.toggle('open');
   });
@@ -1150,24 +1160,24 @@
      dell'associazione). Nel sito definitivo l'elenco completo degli iscritti sarebbe alimentato
      dall'area riservata, come i dati di anagrafica e i documenti di iscrizione all'Ordine. */
   var sociDemo = [
-    {titolo:'Avv.', cognome:'ABBATANTUONI', nome:'Marisa', ordine:'Macerata', sezione:'Macerata', email:'segreteria@consulex.biz', dal:null},
-    {titolo:'Avv.', cognome:'ABBATE', nome:'Amedeo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'amedeoabbate@gmail.com', dal:'05/12/23'},
-    {titolo:'Avv.', cognome:'ACERRA', nome:'Vincenzo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'studiolegaleacerra@gmail.com', dal:'07/11/23'},
-    {titolo:'Avv.', cognome:'ADDAMIANO', nome:'Gianclaudio', ordine:'Potenza', sezione:'Potenza', email:'gianclaudioaddamiano@tiscali.it', dal:null},
-    {titolo:'Avv.', cognome:'AGNINO', nome:'Maria', ordine:'Roma', sezione:'Roma', email:'mariaagnino73@gmail.com', dal:'11/04/14'},
-    {titolo:'Avv.', cognome:'AGOSTONI', nome:'Fabio', ordine:'Lecco', sezione:'Lecco', email:'avv.agostonifabio@gmail.com', dal:'08/01/21'},
-    {titolo:'Avv.', cognome:'ALBANESE', nome:'Benedetta', ordine:'Firenze', sezione:'Firenze', email:'benedetta.albanese@gmail.com', dal:'21/12/17'},
-    {titolo:'Avv.', cognome:'ALBERICO', nome:'Elena', ordine:'Verbania', sezione:'Verbania', email:'elena.alberico@gmail.com', dal:'05/07/21'},
-    {titolo:'Avvocato', cognome:'ALBOREO', nome:'Patrizia', ordine:'Trani', sezione:null, email:'avvpatrizia.alboreo@gmail.com', dal:null},
-    {titolo:'Avv.', cognome:'ALESSANDRI', nome:'Maura', ordine:'Bologna', sezione:'Bologna', email:'maura.alessandri@studiolegalealessandri.com', dal:'07/11/23'},
-    {titolo:'Avv.', cognome:'ALESSIANI', nome:'Moira', ordine:'Macerata', sezione:'Macerata', email:'moira.alessiani@cheapnet.it', dal:'21/03/22'},
-    {titolo:'Avv.', cognome:'AMICI', nome:'Federica', ordine:'Verona', sezione:'Verona', email:'avv.federica.amici@gmail.com', dal:'21/09/21'},
-    {titolo:'Avv.', cognome:'ANCESCHI', nome:'Cinzia', ordine:'Modena', sezione:'Modena', email:'avvanceschi@interfree.it', dal:'11/06/18'},
-    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Cristiano', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'andreozzicristiano@gmail.com', dal:'21/11/23'},
-    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Luigi', ordine:'Ascoli Piceno', sezione:'Ascoli Piceno', email:'l.andreozzi@legalset.it', dal:'11/04/14'},
-    {titolo:'Prat.', cognome:'ARCHETTI', nome:'Eleonora', ordine:'Verbania', sezione:'Verbania', email:'eleonoraarchetti@libero.it', dal:'07/11/23'},
-    {titolo:'Avv.', cognome:'ARENI', nome:'Danilo', ordine:'Perugia', sezione:'Perugia', email:'studiolegaleareni@gmail.com', dal:'12/03/24'},
-    {titolo:'Avv.', cognome:'ASTARITA', nome:'Fabiola', ordine:'Santa Maria C.V.', sezione:'Santa Maria C.V.', email:'fabiola.astarita@gmail.com', dal:'07/11/23'}
+    {titolo:'Avv.', cognome:'ABBATANTUONI', nome:'Marisa', slug:'abbatantuoni-marisa', ordine:'Macerata', sezione:'Macerata', email:'segreteria@consulex.biz', dal:null},
+    {titolo:'Avv.', cognome:'ABBATE', nome:'Amedeo', slug:'abbate-amedeo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'amedeoabbate@gmail.com', dal:'05/12/23'},
+    {titolo:'Avv.', cognome:'ACERRA', nome:'Vincenzo', slug:'acerra-vincenzo', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'studiolegaleacerra@gmail.com', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ADDAMIANO', nome:'Gianclaudio', slug:'addamiano-gianclaudio', ordine:'Potenza', sezione:'Potenza', email:'gianclaudioaddamiano@tiscali.it', dal:null},
+    {titolo:'Avv.', cognome:'AGNINO', nome:'Maria', slug:'agnino-maria', ordine:'Roma', sezione:'Roma', email:'mariaagnino73@gmail.com', dal:'11/04/14'},
+    {titolo:'Avv.', cognome:'AGOSTONI', nome:'Fabio', slug:'agostoni-fabio', ordine:'Lecco', sezione:'Lecco', email:'avv.agostonifabio@gmail.com', dal:'08/01/21'},
+    {titolo:'Avv.', cognome:'ALBANESE', nome:'Benedetta', slug:'albanese-benedetta', ordine:'Firenze', sezione:'Firenze', email:'benedetta.albanese@gmail.com', dal:'21/12/17'},
+    {titolo:'Avv.', cognome:'ALBERICO', nome:'Elena', slug:'alberico-elena', ordine:'Verbania', sezione:'Verbania', email:'elena.alberico@gmail.com', dal:'05/07/21'},
+    {titolo:'Avvocato', cognome:'ALBOREO', nome:'Patrizia', slug:'alboreo-patrizia', ordine:'Trani', sezione:null, email:'avvpatrizia.alboreo@gmail.com', dal:null},
+    {titolo:'Avv.', cognome:'ALESSANDRI', nome:'Maura', slug:'alessandri-maura', ordine:'Bologna', sezione:'Bologna', email:'maura.alessandri@studiolegalealessandri.com', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ALESSIANI', nome:'Moira', slug:'alessiani-moira', ordine:'Macerata', sezione:'Macerata', email:'moira.alessiani@cheapnet.it', dal:'21/03/22'},
+    {titolo:'Avv.', cognome:'AMICI', nome:'Federica', slug:'amici-federica', ordine:'Verona', sezione:'Verona', email:'avv.federica.amici@gmail.com', dal:'21/09/21'},
+    {titolo:'Avv.', cognome:'ANCESCHI', nome:'Cinzia', slug:'anceschi-cinzia', ordine:'Modena', sezione:'Modena', email:'avvanceschi@interfree.it', dal:'11/06/18'},
+    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Cristiano', slug:'andreozzi-cristiano', ordine:'Napoli Nord', sezione:'Napoli Nord', email:'andreozzicristiano@gmail.com', dal:'21/11/23'},
+    {titolo:'Avv.', cognome:'ANDREOZZI', nome:'Luigi', slug:'andreozzi-luigi', ordine:'Ascoli Piceno', sezione:'Ascoli Piceno', email:'l.andreozzi@legalset.it', dal:'11/04/14'},
+    {titolo:'Prat.', cognome:'ARCHETTI', nome:'Eleonora', slug:'archetti-eleonora', ordine:'Verbania', sezione:'Verbania', email:'eleonoraarchetti@libero.it', dal:'07/11/23'},
+    {titolo:'Avv.', cognome:'ARENI', nome:'Danilo', slug:'areni-danilo', ordine:'Perugia', sezione:'Perugia', email:'studiolegaleareni@gmail.com', dal:'12/03/24'},
+    {titolo:'Avv.', cognome:'ASTARITA', nome:'Fabiola', slug:'astarita-fabiola', ordine:'Santa Maria C.V.', sezione:'Santa Maria C.V.', email:'fabiola.astarita@gmail.com', dal:'07/11/23'}
   ];
 
   function renderSociLista(){
@@ -1226,10 +1236,11 @@
       + '<tr><td>Sezione Locale U.N.A.M.</td><td>' + (s.sezione || '—') + '</td></tr>'
       + '<tr><td>E-mail</td><td><a href="mailto:' + s.email + '">' + s.email + '</a></td></tr>'
       + '</table>'
+      + (s.slug ? '<p style="margin-top:18px;font-size:12.5px;color:var(--muted);">🔒 Situazione quota, pagamenti e rinnovo — <a href="unam_area_riservata_prototipo.html?tesoreria=' + s.slug + '">riservato al Tesoriere</a></p>' : '')
       + '</div>';
     document.getElementById('socioSchedaContent').innerHTML = html;
     showPage('#socio-scheda');
-    location.hash = '#socio-scheda';
+    history.replaceState(null, '', '#socio/' + (s.slug || ''));
   }
 
   popolaFiltriSoci();
@@ -1239,7 +1250,7 @@
   document.getElementById('sociSezione').addEventListener('change', renderSociLista);
 
 
-  showPage(location.hash);
+  handleHash(location.hash);
 </script>
 </body>
 </html>
