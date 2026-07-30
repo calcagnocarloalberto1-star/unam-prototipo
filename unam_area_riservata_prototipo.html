@@ -64,6 +64,14 @@
   .badge.warn{background:var(--warn-bg);color:var(--warn);}
   .badge.late{background:#000000;color:#ffffff;}
 
+  .pw-tree{margin-top:22px;border:1px solid var(--line);border-radius:var(--radius);padding:6px 18px;background:#fff;}
+  .pw-tree summary{cursor:pointer;font-weight:700;color:var(--navy);font-size:14px;padding:12px 0;}
+  .pw-region{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 4px 4px;}
+  .pw-row{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:9px;cursor:pointer;}
+  .pw-row:hover{background:var(--blue-pale);}
+  .pw-name{font-size:13px;color:var(--ink);}
+  .pw-cred{font-size:12px;color:var(--muted);font-family:monospace;}
+
   .quota-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
   .quota-toolbar .filters{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
   .quota-toolbar label{font-size:13px;font-weight:600;color:var(--navy);margin:0;display:flex;align-items:center;gap:6px;}
@@ -246,6 +254,13 @@
       <p style="text-align:center;font-size:12.5px;"><button class="link-btn" onclick="showView('admin')">Vai alla vista amministrativa (segreteria) →</button></p>
     </div>
   </div>
+  <div class="wrap narrow">
+    <details class="pw-tree">
+      <summary>🔑 Credenziali demo per sezioni e organi</summary>
+      <p class="hint" style="margin-top:8px;">Ogni sezione locale e il Collegio dei Probiviri hanno un'utenza demo dedicata: la sezione (o l'organo) mostrati dopo l'accesso, e di conseguenza il canale visibile nella Chat di sezione, dipendono da quale utenza scegli. Clicca una riga per accedere direttamente con quell'utenza. Il campo password non è verificato da un vero sistema di autenticazione: in questo prototipo serve solo a illustrare come sarebbe strutturato l'accesso per sezione/organo nel sito definitivo.</p>
+      <div id="pwTreeList"></div>
+    </details>
+  </div>
 </section>
 
 <!-- ===================== REGISTRAZIONE ===================== -->
@@ -361,7 +376,7 @@
         </div>
         <div class="card">
           <h3>Il mio profilo</h3>
-          <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span id="dashOrdineSezione" style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span></p>
+          <p style="font-size:13.5px;"><strong id="dashName">Avv. Demo Rossi</strong><br><span id="dashOrdineSezione" style="color:var(--muted);">Ordine di Roma · Sezione locale Roma</span><span id="dashRuolo"></span></p>
           <button class="btn btn-outline btn-block btn-sm" onclick="apriSchedaAccount()">✎ Modifica la mia scheda</button>
           <button class="btn btn-outline btn-block btn-sm" style="margin-top:8px;" onclick="doLogout()">🚪 Esci (logout)</button>
         </div>
@@ -962,7 +977,7 @@
     studio: "Studio Legale Rossi", indirizzo: "Via della Mediazione, 12", citta: "Roma", cap: "00100", provincia: "RM",
     sito: "www.studiolegalerossi-demo.it",
     email: "demo.rossi@unam-demo.it", pec: "demo.rossi@pec-demo.it", telefono: "06 0000000", cellulare: "333 0000000",
-    cf: "", piva: ""
+    cf: "", piva: "", ruolo: ""
   };
   var pendingSoci = [
     { n: "Prat. Avv. Lorenzo Guidi", ordine: "Torino", sezione: "Piemonte", data: "20/07/2026" },
@@ -1304,6 +1319,81 @@
       sel.innerHTML = sezioniList.map(function(s){ return '<option>' + s + '</option>'; }).join('');
       if(sezioniList.indexOf(current) !== -1) sel.value = current;
     });
+  }
+
+  /* ===== Albero delle credenziali demo: un'utenza per ciascuna delle 20 sezioni locali
+     e una per il Collegio dei Probiviri, cosi' da poter provare l'isolamento delle chat
+     accedendo con identita' diverse invece di modificare il profilo. Il prototipo non ha
+     un vero backend di autenticazione: la password non viene verificata, conta solo l'email. ===== */
+  var demoCredentials = [
+    { nome: "Avv. Marco Rossi", nomeProprio: "Marco", cognome: "Rossi", titolo: "Avvocato", ordine: "Ascoli Piceno", sezione: "Ascoli Piceno", regione: "Marche", ruolo: "", email: "ascoli-piceno@unam-demo.it", pwd: "ascolipiceno2026" },
+    { nome: "Avv. Giulia Fantini", nomeProprio: "Giulia", cognome: "Fantini", titolo: "Avvocato", ordine: "Bari", sezione: "Bari", regione: "Puglia", ruolo: "", email: "bari@unam-demo.it", pwd: "bari2026" },
+    { nome: "Avv. Paola Serra", nomeProprio: "Paola", cognome: "Serra", titolo: "Avvocato", ordine: "Bologna", sezione: "Bologna", regione: "Emilia-Romagna", ruolo: "", email: "bologna@unam-demo.it", pwd: "bologna2026" },
+    { nome: "Avv. Beatrice Tonelli", nomeProprio: "Beatrice", cognome: "Tonelli", titolo: "Avvocato", ordine: "Firenze", sezione: "Firenze", regione: "Toscana", ruolo: "", email: "firenze@unam-demo.it", pwd: "firenze2026" },
+    { nome: "Avv. Chiara Ferraro", nomeProprio: "Chiara", cognome: "Ferraro", titolo: "Avvocato", ordine: "Genova", sezione: "Genova", regione: "Liguria", ruolo: "", email: "genova@unam-demo.it", pwd: "genova2026" },
+    { nome: "Avv. Silvia Martini", nomeProprio: "Silvia", cognome: "Martini", titolo: "Avvocato", ordine: "Lecco", sezione: "Lecco", regione: "Lombardia", ruolo: "", email: "lecco@unam-demo.it", pwd: "lecco2026" },
+    { nome: "Avv. Valentina Riva", nomeProprio: "Valentina", cognome: "Riva", titolo: "Avvocato", ordine: "Macerata", sezione: "Macerata", regione: "Marche", ruolo: "", email: "macerata@unam-demo.it", pwd: "macerata2026" },
+    { nome: "Avv. Alessia Grassi", nomeProprio: "Alessia", cognome: "Grassi", titolo: "Avvocato", ordine: "Milano", sezione: "Milano", regione: "Lombardia", ruolo: "", email: "milano@unam-demo.it", pwd: "milano2026" },
+    { nome: "Avv. Francesca Rinaldi", nomeProprio: "Francesca", cognome: "Rinaldi", titolo: "Avvocato", ordine: "Modena", sezione: "Modena", regione: "Emilia-Romagna", ruolo: "", email: "modena@unam-demo.it", pwd: "modena2026" },
+    { nome: "Avv. Roberta Caruso", nomeProprio: "Roberta", cognome: "Caruso", titolo: "Avvocato", ordine: "Napoli Nord", sezione: "Napoli Nord", regione: "Campania", ruolo: "", email: "napoli-nord@unam-demo.it", pwd: "napolinord2026" },
+    { nome: "Avv. Sara Gentile", nomeProprio: "Sara", cognome: "Gentile", titolo: "Avvocato", ordine: "Palermo", sezione: "Palermo", regione: "Sicilia", ruolo: "", email: "palermo@unam-demo.it", pwd: "palermo2026" },
+    { nome: "Avv. Ilaria Moretti", nomeProprio: "Ilaria", cognome: "Moretti", titolo: "Avvocato", ordine: "Perugia", sezione: "Perugia", regione: "Umbria", ruolo: "", email: "perugia@unam-demo.it", pwd: "perugia2026" },
+    { nome: "Avv. Martina Piras", nomeProprio: "Martina", cognome: "Piras", titolo: "Avvocato", ordine: "Potenza", sezione: "Potenza", regione: "Basilicata", ruolo: "", email: "potenza@unam-demo.it", pwd: "potenza2026" },
+    { nome: "Avv. Laura Ricci", nomeProprio: "Laura", cognome: "Ricci", titolo: "Avvocato", ordine: "Roma", sezione: "Roma", regione: "Lazio", ruolo: "", email: "roma@unam-demo.it", pwd: "roma2026" },
+    { nome: "Avv. Cristina Vitale", nomeProprio: "Cristina", cognome: "Vitale", titolo: "Avvocato", ordine: "Santa Maria C.V.", sezione: "Santa Maria C.V.", regione: "Campania", ruolo: "", email: "santa-maria-c-v@unam-demo.it", pwd: "santamariacv2026" },
+    { nome: "Avv. Federico Ferri", nomeProprio: "Federico", cognome: "Ferri", titolo: "Avvocato", ordine: "Trani", sezione: "Trani", regione: "Puglia", ruolo: "", email: "trani@unam-demo.it", pwd: "trani2026" },
+    { nome: "Avv. Elisabetta Neri", nomeProprio: "Elisabetta", cognome: "Neri", titolo: "Avvocato", ordine: "Treviso", sezione: "Treviso", regione: "Veneto", ruolo: "", email: "treviso@unam-demo.it", pwd: "treviso2026" },
+    { nome: "Avv. Veronica Longhi", nomeProprio: "Veronica", cognome: "Longhi", titolo: "Avvocato", ordine: "Verbania", sezione: "Verbania", regione: "Piemonte", ruolo: "", email: "verbania@unam-demo.it", pwd: "verbania2026" },
+    { nome: "Avv. Camilla Rossetti", nomeProprio: "Camilla", cognome: "Rossetti", titolo: "Avvocato", ordine: "Verona", sezione: "Verona", regione: "Veneto", ruolo: "", email: "verona@unam-demo.it", pwd: "verona2026" },
+    { nome: "Avv. Giorgia Manzo", nomeProprio: "Giorgia", cognome: "Manzo", titolo: "Avvocato", ordine: "Vicenza", sezione: "Vicenza", regione: "Veneto", ruolo: "", email: "vicenza@unam-demo.it", pwd: "vicenza2026" },
+    { nome: "Avv. Maria Agnino", nomeProprio: "Maria", cognome: "Agnino", titolo: "Avvocato", ordine: "Roma", sezione: "Roma", regione: null, ruolo: "Collegio dei Probiviri", email: "probiviri@unam-demo.it", pwd: "probiviri2026" }
+  ];
+
+  function renderPwTree(){
+    var el = document.getElementById('pwTreeList');
+    if(!el) return;
+    el.innerHTML = '';
+    var groups = {};
+    demoCredentials.forEach(function(c){
+      var g = c.ruolo ? 'Organi statutari' : (c.regione || 'Altre sezioni');
+      if(!groups[g]) groups[g] = [];
+      groups[g].push(c);
+    });
+    var regionOrder = Object.keys(groups).sort(function(a, b){
+      if(a === 'Organi statutari') return 1;
+      if(b === 'Organi statutari') return -1;
+      return a.localeCompare(b);
+    });
+    regionOrder.forEach(function(g){
+      var label = document.createElement('div');
+      label.className = 'pw-region';
+      label.textContent = g;
+      el.appendChild(label);
+      groups[g].forEach(function(c){
+        var row = document.createElement('div');
+        row.className = 'pw-row';
+        row.tabIndex = 0;
+        var nameSpan = document.createElement('div');
+        nameSpan.className = 'pw-name';
+        nameSpan.textContent = c.nome + (c.ruolo ? ' — ' + c.ruolo : ' — Sezione ' + c.sezione);
+        var credSpan = document.createElement('div');
+        credSpan.className = 'pw-cred';
+        credSpan.textContent = c.email + ' / ' + c.pwd;
+        row.appendChild(nameSpan);
+        row.appendChild(credSpan);
+        row.addEventListener('click', function(){ loginAsDemo(c.email); });
+        el.appendChild(row);
+      });
+    });
+  }
+
+  function loginAsDemo(email){
+    var emailInput = document.getElementById('loginEmail');
+    var pwdInput = document.getElementById('loginPwd');
+    var match = demoCredentials.filter(function(c){ return c.email === email; })[0];
+    if(emailInput) emailInput.value = email;
+    if(pwdInput) pwdInput.value = match ? match.pwd : '';
+    doLogin();
   }
 
   // ===================== POSTA INTERNA (settori + sotto-cartelle + smistamento automatico) =====================
@@ -2050,9 +2140,23 @@
   }
 
   function doLogin(){
+    var emailInput = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+    var match = demoCredentials.filter(function(c){ return c.email === emailInput; })[0];
+    if(match){
+      demoUser.nome = match.nome;
+      demoUser.nomeProprio = match.nomeProprio;
+      demoUser.cognome = match.cognome;
+      demoUser.titolo = match.titolo;
+      demoUser.ordine = match.ordine;
+      demoUser.sezione = match.sezione;
+      demoUser.email = match.email;
+      demoUser.ruolo = match.ruolo || '';
+    }
     document.getElementById('dashWelcome').textContent = 'Bentornato/a, ' + demoUser.nome;
     document.getElementById('dashName').textContent = demoUser.nome;
     document.getElementById('dashOrdineSezione').textContent = 'Ordine di ' + demoUser.ordine + ' · Sezione locale ' + demoUser.sezione;
+    var dashRuolo = document.getElementById('dashRuolo');
+    if(dashRuolo) dashRuolo.innerHTML = demoUser.ruolo ? '<br><span class="badge ok" style="margin-top:6px;">🏛️ ' + demoUser.ruolo + '</span>' : '';
     var params = new URLSearchParams(window.location.search);
     var requestedView = params.get('view');
     var requestedEl = requestedView ? document.getElementById(requestedView) : null;
@@ -2406,6 +2510,7 @@
 
   renderSociList();
   popolaSezioniSelect();
+  renderPwTree();
 
   /* ===== Collegamento con la scheda pubblica "I soci" (index.html): apre direttamente
      la Tesoreria sul socio richiesto tramite ?tesoreria=<slug> ===== */
