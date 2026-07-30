@@ -1215,14 +1215,14 @@
   function apriSchedaSocio(idx){
     var s = sociDemo[idx];
     if(!s) return;
-    var html = '<p style="margin-bottom:18px;"><a href="#soci" onclick="showPage('#soci')">← Torna all'elenco</a></p>'
+    var html = '<p style="margin-bottom:18px;"><a href="#soci">← Torna all’elenco</a></p>'
       + '<div class="card" style="padding:32px;">'
       + '<span class="socio-titolo">' + s.titolo + '</span>'
       + '<h2 style="margin:8px 0 0 0;">' + s.cognome + '</h2>'
       + '<h3 style="color:var(--ink);font-weight:600;margin-top:2px;">' + s.nome + '</h3>'
       + '<table class="data" style="margin-top:20px;">'
       + (s.dal ? '<tr><td>Associato U.N.A.M. dal</td><td>' + s.dal + '</td></tr>' : '')
-      + '<tr><td>Iscritto all'Ordine degli Avvocati di</td><td>' + s.ordine + '</td></tr>'
+      + '<tr><td>Iscritto all’Ordine degli Avvocati di</td><td>' + s.ordine + '</td></tr>'
       + '<tr><td>Sezione Locale U.N.A.M.</td><td>' + (s.sezione || '—') + '</td></tr>'
       + '<tr><td>E-mail</td><td><a href="mailto:' + s.email + '">' + s.email + '</a></td></tr>'
       + '</table>'
