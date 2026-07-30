@@ -82,6 +82,8 @@
   .chat-channel{padding:11px 12px;border-radius:9px;cursor:pointer;margin-bottom:4px;display:flex;flex-direction:column;gap:2px;}
   .chat-channel:hover{background:rgba(255,255,255,.6);}
   .chat-channel.active{background:#fff;box-shadow:0 2px 8px rgba(28,58,82,.08);}
+  .chat-group-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:12px 12px 4px;}
+  .chat-group-label:first-child{padding-top:2px;}
   .cc-name{font-weight:700;font-size:13.5px;color:var(--navy);}
   .cc-desc{font-size:11.5px;color:var(--muted);}
   .chat-main{display:flex;flex-direction:column;min-width:0;}
@@ -215,7 +217,8 @@
       <span class="name">U.N.A.M.<small>Area Riservata · Demo</small></span>
     </a>
     <div class="hdr-right" id="hdrRight">
-      <button type="button" class="btn btn-outline btn-sm" onclick="showView('chat')">💬 Chat riservata</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="showView('chat-sezioni')">💬 Chat di sezione</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="showView('chat-organi')">🏛️ Chat organi</button>
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('posta')">📧 Posta interna</button>
       <button type="button" class="btn btn-outline btn-sm" onclick="showView('aula-lezioni')">🎓 Aula virtuale</button>
       <a href="unam_verbali_prototipo.html" class="btn btn-outline btn-sm">📜 Verbali associativi</a>
@@ -342,9 +345,14 @@
           <button type="button" class="btn btn-primary btn-block" onclick="showView('aula-lezioni')">Apri l'aula, il calendario e gli inviti</button>
         </div>
         <div class="card">
-          <h3>Chat associativa riservata</h3>
-          <p style="font-size:13.5px;color:var(--muted);">Confrontati con gli altri soci su bacheca generale, sezione locale, progetti tematici e corso di formazione.</p>
-          <button class="btn btn-primary btn-block" onclick="showView('chat')">Apri la chat associativa</button>
+          <h3>💬 Chat di sezione</h3>
+          <p style="font-size:13.5px;color:var(--muted);">Confronto riservato ai soli soci della tua sezione locale. Nessun accesso o controllo da parte della segreteria nazionale.</p>
+          <button class="btn btn-primary btn-block" onclick="showView('chat-sezioni')">Apri la chat di sezione</button>
+        </div>
+        <div class="card">
+          <h3>🏛️ Chat degli organi rappresentativi</h3>
+          <p style="font-size:13.5px;color:var(--muted);">Bacheca nazionale, organi statutari (Comitato Esecutivo, Comitato Direttivo, Collegio dei Probiviri, Responsabili di Sezione) e gruppi di lavoro tematici.</p>
+          <button class="btn btn-outline btn-block" onclick="showView('chat-organi')">Apri la chat degli organi</button>
         </div>
         <div class="card">
           <h3>Posta interna</h3>
@@ -362,68 +370,92 @@
   </div>
 </section>
 
-<!-- ===================== CHAT ASSOCIATIVA RISERVATA ===================== -->
-<section class="view" id="chat">
+<!-- ===================== CHAT DI SEZIONE ===================== -->
+<section class="view" id="chat-sezioni">
   <div class="wrap">
     <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
-    <h1>Chat associativa riservata</h1>
-    <p style="color:var(--muted);margin-top:-8px;">Spazio di confronto riservato ai soci U.N.A.M., organizzato per canali tematici.</p>
+    <h1>Chat di sezione</h1>
+    <p style="color:var(--muted);margin-top:-8px;">Spazio di confronto riservato ai soli soci della tua sezione locale U.N.A.M.</p>
     <div class="chat-layout">
-      <aside class="chat-channels" id="chatChannels">
-        <div class="chat-channel active" data-channel="generale" onclick="selectChannel('generale', this)">
+      <aside class="chat-channels" id="chatSezioniChannels"></aside>
+      <div class="chat-main">
+        <div class="chat-header" id="chatSezioniHeader"># —</div>
+        <div class="chat-thread" id="chatSezioniThread"></div>
+        <form class="chat-input-row" onsubmit="event.preventDefault(); sendChatMessage('sezioni');">
+          <input type="text" id="chatSezioniInput" placeholder="Scrivi un messaggio…" autocomplete="off">
+          <button type="submit" class="btn btn-primary btn-sm">Invia</button>
+        </form>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:14px;">🔒 Per garantire la piena autonomia delle sezioni locali, questa chat è visibile e scrivibile solo dai soci della stessa sezione: non è previsto alcun accesso o controllo da parte della segreteria nazionale U.N.A.M. In questo prototipo la chat è simulata: i messaggi restano solo nella tua sessione del browser, non vengono realmente inviati né salvati.</p>
+  </div>
+</section>
+
+<!-- ===================== CHAT DEGLI ORGANI RAPPRESENTATIVI ===================== -->
+<section class="view" id="chat-organi">
+  <div class="wrap">
+    <button class="link-btn back-link" onclick="showView('dashboard')">← Torna alla dashboard</button>
+    <h1>Chat degli organi rappresentativi</h1>
+    <p style="color:var(--muted);margin-top:-8px;">Bacheca nazionale, organi statutari, gruppi di lavoro e delegati U.N.A.M.</p>
+    <div class="chat-layout">
+      <aside class="chat-channels" id="chatOrganiChannels">
+        <div class="chat-group-label">Bacheca nazionale</div>
+        <div class="chat-channel active" data-channel="generale" onclick="selectChannel('organi','generale', this)">
           <span class="cc-name"># Bacheca generale</span>
           <span class="cc-desc">Tutti i soci U.N.A.M.</span>
         </div>
-        <div class="chat-channel" data-channel="sezione-roma" onclick="selectChannel('sezione-roma', this)">
-          <span class="cc-name"># Sezione Roma</span>
-          <span class="cc-desc">Soci della sezione locale</span>
-        </div>
-        <div class="chat-channel" data-channel="progetto-scuola" onclick="selectChannel('progetto-scuola', this)">
-          <span class="cc-name"># Progetto Scuola</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="progetto-pa" onclick="selectChannel('progetto-pa', this)">
-          <span class="cc-name"># Progetto P.A.</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="progetto-impresa" onclick="selectChannel('progetto-impresa', this)">
-          <span class="cc-name"># Progetto Impresa</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="laboratorio-prassi" onclick="selectChannel('laboratorio-prassi', this)">
-          <span class="cc-name"># Laboratorio Prassi</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="progetto-ia" onclick="selectChannel('progetto-ia', this)">
-          <span class="cc-name"># Mediazione e Intelligenza Artificiale</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="progetto-mediazione-familiare" onclick="selectChannel('progetto-mediazione-familiare', this)">
-          <span class="cc-name"># Mediazione Familiare</span>
-          <span class="cc-desc">Gruppo di lavoro</span>
-        </div>
-        <div class="chat-channel" data-channel="formazione" onclick="selectChannel('formazione', this)">
-          <span class="cc-name"># Corso di Alta Formazione</span>
-          <span class="cc-desc">Corsisti 2026/2027</span>
-        </div>
-        <div class="chat-channel" data-channel="comitato-esecutivo" onclick="selectChannel('comitato-esecutivo', this)">
+        <div class="chat-group-label">Organi statutari</div>
+        <div class="chat-channel" data-channel="comitato-esecutivo" onclick="selectChannel('organi','comitato-esecutivo', this)">
           <span class="cc-name"># Comitato Esecutivo</span>
           <span class="cc-desc">Ufficio Direttivo + membri con deleghe</span>
         </div>
-        <div class="chat-channel" data-channel="comitato-direttivo" onclick="selectChannel('comitato-direttivo', this)">
+        <div class="chat-channel" data-channel="comitato-direttivo" onclick="selectChannel('organi','comitato-direttivo', this)">
           <span class="cc-name"># Comitato Direttivo</span>
           <span class="cc-desc">Ufficio Direttivo nazionale</span>
         </div>
-        <div class="chat-channel" data-channel="responsabili-sezione" onclick="selectChannel('responsabili-sezione', this)">
+        <div class="chat-channel" data-channel="collegio-probiviri" onclick="selectChannel('organi','collegio-probiviri', this)">
+          <span class="cc-name"># Collegio dei Probiviri</span>
+          <span class="cc-desc">Organo di garanzia statutario</span>
+        </div>
+        <div class="chat-channel" data-channel="responsabili-sezione" onclick="selectChannel('organi','responsabili-sezione', this)">
           <span class="cc-name"># Responsabili di Sezione</span>
           <span class="cc-desc">Coordinatori delle sezioni locali</span>
         </div>
+        <div class="chat-group-label">Gruppi di lavoro e delegati</div>
+        <div class="chat-channel" data-channel="progetto-scuola" onclick="selectChannel('organi','progetto-scuola', this)">
+          <span class="cc-name"># Progetto Scuola</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-pa" onclick="selectChannel('organi','progetto-pa', this)">
+          <span class="cc-name"># Progetto P.A.</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-impresa" onclick="selectChannel('organi','progetto-impresa', this)">
+          <span class="cc-name"># Progetto Impresa</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="laboratorio-prassi" onclick="selectChannel('organi','laboratorio-prassi', this)">
+          <span class="cc-name"># Laboratorio Prassi</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-ia" onclick="selectChannel('organi','progetto-ia', this)">
+          <span class="cc-name"># Mediazione e Intelligenza Artificiale</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="progetto-mediazione-familiare" onclick="selectChannel('organi','progetto-mediazione-familiare', this)">
+          <span class="cc-name"># Mediazione Familiare</span>
+          <span class="cc-desc">Gruppo di lavoro</span>
+        </div>
+        <div class="chat-channel" data-channel="formazione" onclick="selectChannel('organi','formazione', this)">
+          <span class="cc-name"># Corso di Alta Formazione</span>
+          <span class="cc-desc">Corsisti 2026/2027</span>
+        </div>
       </aside>
       <div class="chat-main">
-        <div class="chat-header" id="chatHeader"># Bacheca generale</div>
-        <div class="chat-thread" id="chatThread"></div>
-        <form class="chat-input-row" onsubmit="event.preventDefault(); sendChatMessage();">
-          <input type="text" id="chatInput" placeholder="Scrivi un messaggio…" autocomplete="off">
+        <div class="chat-header" id="chatOrganiHeader"># Bacheca generale</div>
+        <div class="chat-thread" id="chatOrganiThread"></div>
+        <form class="chat-input-row" onsubmit="event.preventDefault(); sendChatMessage('organi');">
+          <input type="text" id="chatOrganiInput" placeholder="Scrivi un messaggio…" autocomplete="off">
           <button type="submit" class="btn btn-primary btn-sm">Invia</button>
         </form>
       </div>
@@ -992,7 +1024,8 @@
     document.getElementById(prefix+'Cellulare').value = data.cellulare;
   }
 
-  var currentChannel = 'generale';
+  var currentChannel = { sezioni: null, organi: 'generale' };
+  var sezioniList = ['Ascoli Piceno','Bari','Bologna','Firenze','Genova','Lecco','Macerata','Milano','Modena','Napoli Nord','Palermo','Perugia','Potenza','Roma','Santa Maria C.V.','Trani','Treviso','Verbania','Verona','Vicenza'];
   var channelNames = {
     'generale': 'Bacheca generale',
     'sezione-roma': 'Sezione Roma',
@@ -1005,7 +1038,28 @@
     'formazione': 'Corso di Alta Formazione',
     'comitato-esecutivo': 'Comitato Esecutivo',
     'comitato-direttivo': 'Comitato Direttivo',
-    'responsabili-sezione': 'Responsabili di Sezione'
+    'responsabili-sezione': 'Responsabili di Sezione',
+    'collegio-probiviri': 'Collegio dei Probiviri',
+    'sez-ascoli-piceno': 'Sezione Ascoli Piceno',
+    'sez-bari': 'Sezione Bari',
+    'sez-bologna': 'Sezione Bologna',
+    'sez-firenze': 'Sezione Firenze',
+    'sez-genova': 'Sezione Genova',
+    'sez-lecco': 'Sezione Lecco',
+    'sez-macerata': 'Sezione Macerata',
+    'sez-milano': 'Sezione Milano',
+    'sez-modena': 'Sezione Modena',
+    'sez-napoli-nord': 'Sezione Napoli Nord',
+    'sez-palermo': 'Sezione Palermo',
+    'sez-perugia': 'Sezione Perugia',
+    'sez-potenza': 'Sezione Potenza',
+    'sez-roma': 'Sezione Roma',
+    'sez-santa-maria-c-v': 'Sezione Santa Maria C.V.',
+    'sez-trani': 'Sezione Trani',
+    'sez-treviso': 'Sezione Treviso',
+    'sez-verbania': 'Sezione Verbania',
+    'sez-verona': 'Sezione Verona',
+    'sez-vicenza': 'Sezione Vicenza',
   };
   var chatData = {
     'generale': [
@@ -1060,22 +1114,120 @@
       { a: 'Resp. Sezione Lombardia', t: 'Buongiorno colleghi, la sezione di Milano ha organizzato un evento formativo per ottobre.', time: '15:20' },
       { a: 'Resp. Sezione Campania', t: 'Bene, lo segnaliamo anche nel prossimo bollettino alle altre sezioni.', time: '15:27' },
       { a: 'Segreteria U.N.A.M.', t: 'Ricordiamo di inviare il report trimestrale delle attività di sezione entro il 30 del mese.', time: '15:40' }
-    ]
+    ],
+    'collegio-probiviri': [
+      { a: 'Avv. Maria Agnino', t: 'Buongiorno colleghi, ho ricevuto la richiesta di parere relativa a un reclamo pervenuto da una sezione locale.', time: '10:05' },
+      { a: 'Avv. Annalisa Atti', t: 'Va bene, lo esaminiamo insieme nella prossima riunione del Collegio.', time: '10:12' }
+    ],
+    'sez-ascoli-piceno': [
+      { a: 'Avv. Marco Rossi', t: "Buongiorno colleghi, qualcuno ha aggiornamenti sull'incontro di sezione di Ascoli Piceno?", time: '09:10' },
+      { a: 'Avv. Elena Bianchi', t: "Sì, lo organizziamo per la prossima settimana, appena confermo la sala vi scrivo qui.", time: '09:20' }
+    ],
+    'sez-bari': [
+      { a: 'Avv. Giulia Fantini', t: "Ho caricato il verbale dell'ultima riunione della sezione di Bari nella cartella condivisa.", time: '09:11' },
+      { a: 'Avv. Marco Conti', t: "Grazie, lo leggo subito e lo giro anche ai colleghi che non erano presenti.", time: '09:21' }
+    ],
+    'sez-bologna': [
+      { a: 'Avv. Paola Serra', t: "Ricordo a tutti che venerdì c'è l'incontro formativo organizzato dalla sezione di Bologna.", time: '09:12' },
+      { a: 'Avv. Federica Colombo', t: "Confermo la mia presenza, porto anche una collega praticante interessata.", time: '09:22' }
+    ],
+    'sez-firenze': [
+      { a: 'Avv. Beatrice Tonelli', t: "C'è qualche disponibilità per un nuovo punto di mediazione nella zona di Firenze?", time: '09:13' },
+      { a: 'Avv. Andrea Villa', t: "Ne parliamo alla prossima riunione, intanto raccolgo le disponibilità dei colleghi.", time: '09:23' }
+    ],
+    'sez-genova': [
+      { a: 'Avv. Chiara Ferraro', t: "Buongiorno colleghi, qualcuno ha aggiornamenti sull'incontro di sezione di Genova?", time: '09:14' },
+      { a: 'Avv. Davide Longo', t: "Sì, lo organizziamo per la prossima settimana, appena confermo la sala vi scrivo qui.", time: '09:24' }
+    ],
+    'sez-lecco': [
+      { a: 'Avv. Silvia Martini', t: "Ho caricato il verbale dell'ultima riunione della sezione di Lecco nella cartella condivisa.", time: '09:15' },
+      { a: 'Avv. Luca Testa', t: "Grazie, lo leggo subito e lo giro anche ai colleghi che non erano presenti.", time: '09:25' }
+    ],
+    'sez-macerata': [
+      { a: 'Avv. Valentina Riva', t: "Ricordo a tutti che venerdì c'è l'incontro formativo organizzato dalla sezione di Macerata.", time: '09:16' },
+      { a: 'Avv. Stefano Gallo', t: "Confermo la mia presenza, porto anche una collega praticante interessata.", time: '09:26' }
+    ],
+    'sez-milano': [
+      { a: 'Avv. Alessia Grassi', t: "C'è qualche disponibilità per un nuovo punto di mediazione nella zona di Milano?", time: '09:17' },
+      { a: 'Avv. Matteo Bruno', t: "Ne parliamo alla prossima riunione, intanto raccolgo le disponibilità dei colleghi.", time: '09:27' }
+    ],
+    'sez-modena': [
+      { a: 'Avv. Francesca Rinaldi', t: "Buongiorno colleghi, qualcuno ha aggiornamenti sull'incontro di sezione di Modena?", time: '09:18' },
+      { a: 'Avv. Nicola Fontana', t: "Sì, lo organizziamo per la prossima settimana, appena confermo la sala vi scrivo qui.", time: '09:28' }
+    ],
+    'sez-napoli-nord': [
+      { a: 'Avv. Roberta Caruso', t: "Ho caricato il verbale dell'ultima riunione della sezione di Napoli Nord nella cartella condivisa.", time: '09:19' },
+      { a: 'Avv. Emanuele Basile', t: "Grazie, lo leggo subito e lo giro anche ai colleghi che non erano presenti.", time: '09:29' }
+    ],
+    'sez-palermo': [
+      { a: 'Avv. Sara Gentile', t: "Ricordo a tutti che venerdì c'è l'incontro formativo organizzato dalla sezione di Palermo.", time: '09:10' },
+      { a: 'Avv. Fabio Barbieri', t: "Confermo la mia presenza, porto anche una collega praticante interessata.", time: '09:20' }
+    ],
+    'sez-perugia': [
+      { a: 'Avv. Ilaria Moretti', t: "C'è qualche disponibilità per un nuovo punto di mediazione nella zona di Perugia?", time: '09:11' },
+      { a: 'Avv. Giorgio Sartori', t: "Ne parliamo alla prossima riunione, intanto raccolgo le disponibilità dei colleghi.", time: '09:21' }
+    ],
+    'sez-potenza': [
+      { a: 'Avv. Martina Piras', t: "Buongiorno colleghi, qualcuno ha aggiornamenti sull'incontro di sezione di Potenza?", time: '09:12' },
+      { a: 'Avv. Enrico Orlando', t: "Sì, lo organizziamo per la prossima settimana, appena confermo la sala vi scrivo qui.", time: '09:22' }
+    ],
+    'sez-roma': [
+      { a: 'Avv. Laura Ricci', t: "Ho caricato il verbale dell'ultima riunione della sezione di Roma nella cartella condivisa.", time: '09:13' },
+      { a: 'Avv. Michele Farina', t: "Grazie, lo leggo subito e lo giro anche ai colleghi che non erano presenti.", time: '09:23' }
+    ],
+    'sez-santa-maria-c-v': [
+      { a: 'Avv. Cristina Vitale', t: "Ricordo a tutti che venerdì c'è l'incontro formativo organizzato dalla sezione di Santa Maria C.V..", time: '09:14' },
+      { a: 'Avv. Alberto Coppola', t: "Confermo la mia presenza, porto anche una collega praticante interessata.", time: '09:24' }
+    ],
+    'sez-trani': [
+      { a: 'Avv. Federico Ferri', t: "C'è qualche disponibilità per un nuovo punto di mediazione nella zona di Trani?", time: '09:15' },
+      { a: 'Avv. Anna Marchetti', t: "Ne parliamo alla prossima riunione, intanto raccolgo le disponibilità dei colleghi.", time: '09:25' }
+    ],
+    'sez-treviso': [
+      { a: 'Avv. Elisabetta Neri', t: "Buongiorno colleghi, qualcuno ha aggiornamenti sull'incontro di sezione di Treviso?", time: '09:16' },
+      { a: 'Avv. Simone Bianco', t: "Sì, lo organizziamo per la prossima settimana, appena confermo la sala vi scrivo qui.", time: '09:26' }
+    ],
+    'sez-verbania': [
+      { a: 'Avv. Veronica Longhi', t: "Ho caricato il verbale dell'ultima riunione della sezione di Verbania nella cartella condivisa.", time: '09:17' },
+      { a: 'Avv. Riccardo Sabatini', t: "Grazie, lo leggo subito e lo giro anche ai colleghi che non erano presenti.", time: '09:27' }
+    ],
+    'sez-verona': [
+      { a: 'Avv. Camilla Rossetti', t: "Ricordo a tutti che venerdì c'è l'incontro formativo organizzato dalla sezione di Verona.", time: '09:18' },
+      { a: 'Avv. Tommaso Guidi', t: "Confermo la mia presenza, porto anche una collega praticante interessata.", time: '09:28' }
+    ],
+    'sez-vicenza': [
+      { a: 'Avv. Giorgia Manzo', t: "C'è qualche disponibilità per un nuovo punto di mediazione nella zona di Vicenza?", time: '09:19' },
+      { a: 'Avv. Pietro Salvi', t: "Ne parliamo alla prossima riunione, intanto raccolgo le disponibilità dei colleghi.", time: '09:29' }
+    ],
   };
 
-  function selectChannel(ch, el){
-    currentChannel = ch;
-    document.querySelectorAll('.chat-channel').forEach(function(c){ c.classList.remove('active'); });
-    if(el) el.classList.add('active');
-    document.getElementById('chatHeader').textContent = '# ' + channelNames[ch];
-    renderChatThread();
+  function chatIds(chatId){
+    return {
+      channels: chatId === 'sezioni' ? 'chatSezioniChannels' : 'chatOrganiChannels',
+      header: chatId === 'sezioni' ? 'chatSezioniHeader' : 'chatOrganiHeader',
+      thread: chatId === 'sezioni' ? 'chatSezioniThread' : 'chatOrganiThread',
+      input: chatId === 'sezioni' ? 'chatSezioniInput' : 'chatOrganiInput'
+    };
   }
 
-  function renderChatThread(){
-    var thread = document.getElementById('chatThread');
+  function selectChannel(chatId, ch, el){
+    currentChannel[chatId] = ch;
+    var ids = chatIds(chatId);
+    var container = document.getElementById(ids.channels);
+    if(container) container.querySelectorAll('.chat-channel').forEach(function(c){ c.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    var header = document.getElementById(ids.header);
+    if(header) header.textContent = '# ' + (channelNames[ch] || ch);
+    renderChatThread(chatId);
+  }
+
+  function renderChatThread(chatId){
+    var ids = chatIds(chatId);
+    var thread = document.getElementById(ids.thread);
     if(!thread) return;
+    var ch = currentChannel[chatId];
     thread.innerHTML = '';
-    (chatData[currentChannel] || []).forEach(function(m){
+    (chatData[ch] || []).forEach(function(m){
       var isMe = m.a === demoUser.nome;
       var row = document.createElement('div');
       row.className = 'chat-msg' + (isMe ? ' me' : '');
@@ -1096,19 +1248,62 @@
       row.appendChild(bubble);
       thread.appendChild(row);
     });
+    if(thread.children.length === 0){
+      var empty = document.createElement('p');
+      empty.style.cssText = 'color:var(--muted);font-size:13px;';
+      empty.textContent = 'Nessun messaggio in questo canale, per ora.';
+      thread.appendChild(empty);
+    }
     thread.scrollTop = thread.scrollHeight;
   }
 
-  function sendChatMessage(){
-    var input = document.getElementById('chatInput');
+  function sendChatMessage(chatId){
+    var ids = chatIds(chatId);
+    var input = document.getElementById(ids.input);
     var val = input.value.trim();
     if(!val) return;
     var now = new Date();
     var hh = ('0' + now.getHours()).slice(-2);
     var mm = ('0' + now.getMinutes()).slice(-2);
-    chatData[currentChannel].push({ a: demoUser.nome, t: val, time: hh + ':' + mm });
+    var ch = currentChannel[chatId];
+    if(!chatData[ch]) chatData[ch] = [];
+    chatData[ch].push({ a: demoUser.nome, t: val, time: hh + ':' + mm });
     input.value = '';
-    renderChatThread();
+    renderChatThread(chatId);
+  }
+
+  function slugSezione(nome){
+    return (nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  }
+
+  function openSectionChat(){
+    var sezione = demoUser.sezione || 'Roma';
+    var key = 'sez-' + slugSezione(sezione);
+    if(!chatData[key]){
+      chatData[key] = [];
+      channelNames[key] = 'Sezione ' + sezione;
+    }
+    currentChannel.sezioni = key;
+    var container = document.getElementById('chatSezioniChannels');
+    if(container){
+      container.innerHTML = '<div class="chat-channel active" data-channel="' + key + '">'
+        + '<span class="cc-name">\uD83D\uDD12 # Sezione ' + sezione + '</span>'
+        + '<span class="cc-desc">Soli soci di questa sezione locale</span>'
+        + '</div>';
+    }
+    var header = document.getElementById('chatSezioniHeader');
+    if(header) header.textContent = '# Sezione ' + sezione;
+    renderChatThread('sezioni');
+  }
+
+  function popolaSezioniSelect(){
+    ['regSezione', 'accSezione'].forEach(function(id){
+      var sel = document.getElementById(id);
+      if(!sel) return;
+      var current = sel.value;
+      sel.innerHTML = sezioniList.map(function(s){ return '<option>' + s + '</option>'; }).join('');
+      if(sezioniList.indexOf(current) !== -1) sel.value = current;
+    });
   }
 
   // ===================== POSTA INTERNA (settori + sotto-cartelle + smistamento automatico) =====================
@@ -1701,7 +1896,8 @@
   function showView(id){
     document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
-    if(id === 'chat'){ renderChatThread(); }
+    if(id === 'chat-sezioni'){ openSectionChat(); }
+    if(id === 'chat-organi'){ renderChatThread('organi'); }
     if(id === 'posta'){ renderMailFolders(); renderMailSubfolders(); renderMailList(); }
     window.scrollTo(0,0);
   }
@@ -2209,6 +2405,7 @@
   function rejectSocio(i){ alertInline('Richiesta rifiutata: ' + pendingSoci[i].n); pendingSoci.splice(i,1); renderSociList(); }
 
   renderSociList();
+  popolaSezioniSelect();
 
   /* ===== Collegamento con la scheda pubblica "I soci" (index.html): apre direttamente
      la Tesoreria sul socio richiesto tramite ?tesoreria=<slug> ===== */
