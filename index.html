@@ -314,10 +314,39 @@
 
   <section class="block alt">
     <div class="wrap">
-      <div class="section-head left" style="display:flex;justify-content:space-between;align-items:baseline;">
+      <div class="section-head left" style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;">
         <div><span class="kicker">In collegamento</span><h2 style="margin:0;">Eventi di Sezione in aula virtuale</h2></div>
+        <button type="button" class="btn btn-outline btn-sm" onclick="toggleAggiungiEventoSezione()">➕ Aggiungi un evento di Sezione</button>
       </div>
       <p style="max-width:760px;color:var(--muted);font-size:14px;margin:-6px 0 18px;">Ogni Responsabile di Sezione — o un organo centrale — può aprire un proprio evento in aula virtuale e condividerne qui il link: ci si collega direttamente, insieme agli iscritti ai corsi, senza dover prima accedere all'area riservata.</p>
+      <form class="contact" id="aggiungiEventoSezioneForm" style="display:none;margin-bottom:24px;">
+        <p style="font-size:12px;color:var(--muted);margin-top:-4px;">ℹ️ Riservato al Responsabile della Sezione organizzatrice (o a un organo centrale): mostrato qui senza login a fini dimostrativi.</p>
+        <label>Sezione organizzatrice</label>
+        <input type="text" id="nesSezione" placeholder="Es. Sezione Roma" required>
+        <label>Titolo dell'evento</label>
+        <input type="text" id="nesTitolo" placeholder="Es. La mediazione in ambito condominiale" required>
+        <label>Data</label>
+        <input type="date" id="nesData" required>
+        <label>Ora</label>
+        <input type="time" id="nesOra" required>
+        <label>Link all'aula virtuale (facoltativo — se vuoto viene generato automaticamente)</label>
+        <input type="text" id="nesLink" placeholder="unam_aula_virtuale_prototipo.html?...">
+        <label style="display:flex;align-items:center;gap:7px;font-weight:400;margin-bottom:16px;">
+          <input type="checkbox" id="nesCreditiRichiesti" style="width:auto;margin:0;" onchange="toggleCreditiConcessiField()">
+          Crediti formativi richiesti al COA per questo evento
+        </label>
+        <div id="nesCreditiFields" style="display:none;">
+          <label>Numero di crediti richiesti</label>
+          <input type="number" id="nesCreditiNum" min="1" step="1" placeholder="Es. 2">
+          <label>Numero di crediti concessi dal COA (lascia vuoto se non ancora deliberato)</label>
+          <input type="number" id="nesCreditiConcessi" min="0" step="1" placeholder="Es. 2">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button type="submit" class="btn btn-primary">Pubblica nella vetrina</button>
+          <button type="button" class="btn btn-outline" onclick="toggleAggiungiEventoSezione()">Annulla</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:10px;margin-bottom:0;">Pubblicazione dimostrativa: l'evento resta visibile solo per la durata di questa sessione del browser.</p>
+      </form>
       <div class="cards" id="eventiSezioneVetrina"></div>
       <p style="margin-top:16px;font-size:12.5px;color:var(--muted);">A titolo dimostrativo, questa vetrina mostra alcuni eventi di esempio generati dall'area riservata: nel sito reale comparirebbero qui automaticamente gli eventi pianificati dai Responsabili di Sezione.</p>
     </div>
@@ -1233,17 +1262,33 @@
       sezione: 'Sezione Roma',
       titolo: 'La mediazione familiare: casi pratici',
       data: '10 settembre 2026', ora: '17:00',
-      crediti: false,
+      creditiRichiesti: 0, creditiConcessi: null,
       link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Roma')
     },
     {
       sezione: 'Sezione Toscana',
       titolo: 'Novità sulla negoziazione assistita dopo la Riforma Cartabia',
       data: '24 settembre 2026', ora: '18:30',
-      crediti: true,
+      creditiRichiesti: 2, creditiConcessi: null,
       link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Toscana') + '&crediti=si'
+    },
+    {
+      sezione: 'Sezione Bologna',
+      titolo: 'La negoziazione assistita: aggiornamenti pratici',
+      data: '5 ottobre 2026', ora: '17:30',
+      creditiRichiesti: 3, creditiConcessi: 3,
+      link: 'unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent('Sezione Bologna') + '&crediti=si'
     }
   ];
+  function creditiTagHtml(ev){
+    if(!ev.creditiRichiesti){
+      return '<span class="tag" style="background:var(--warn-bg,#fdf1e0);color:var(--warn,#a15c00);">🚫 Crediti non richiesti</span>';
+    }
+    if(ev.creditiConcessi === null || ev.creditiConcessi === undefined || ev.creditiConcessi === ''){
+      return '<span class="tag" style="background:var(--warn-bg,#fdf1e0);color:var(--warn,#a15c00);">⏳ ' + ev.creditiRichiesti + ' crediti richiesti al COA — in attesa di delibera</span>';
+    }
+    return '<span class="tag" style="background:var(--good-bg,#e6f7ed);color:var(--good,#1a7f4b);">✅ ' + ev.creditiConcessi + ' crediti formativi concessi (di ' + ev.creditiRichiesti + ' richiesti)</span>';
+  }
   function renderEventiSezioneVetrina(){
     var el = document.getElementById('eventiSezioneVetrina');
     if(!el) return;
@@ -1252,11 +1297,8 @@
       return;
     }
     el.innerHTML = eventiSezionePubblici.map(function(ev){
-      var creditiTag = ev.crediti
-        ? '<span class="tag" style="background:var(--good-bg,#e6f7ed);color:var(--good,#1a7f4b);">✅ Crediti richiesti al COA</span>'
-        : '<span class="tag" style="background:var(--warn-bg,#fdf1e0);color:var(--warn,#a15c00);">🚫 Crediti non richiesti</span>';
       return '<div class="card">'
-        + '<span class="tag gold">📍 ' + ev.sezione + '</span> ' + creditiTag
+        + '<span class="tag gold">📍 ' + ev.sezione + '</span> ' + creditiTagHtml(ev)
         + '<h3 style="margin-top:10px;">' + ev.titolo + '</h3>'
         + '<p>' + ev.data + ' · ore ' + ev.ora + ' · in collegamento video</p>'
         + '<a href="' + ev.link + '" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:12px;display:inline-block;">Collegati all\'evento →</a>'
@@ -1264,6 +1306,46 @@
     }).join('');
   }
   renderEventiSezioneVetrina();
+
+  function toggleAggiungiEventoSezione(){
+    var f = document.getElementById('aggiungiEventoSezioneForm');
+    if(!f) return;
+    f.style.display = (f.style.display === 'none' || !f.style.display) ? 'block' : 'none';
+  }
+  function toggleCreditiConcessiField(){
+    var box = document.getElementById('nesCreditiFields');
+    var chk = document.getElementById('nesCreditiRichiesti');
+    if(box && chk) box.style.display = chk.checked ? 'block' : 'none';
+  }
+  var aggiungiEventoSezioneFormEl = document.getElementById('aggiungiEventoSezioneForm');
+  if(aggiungiEventoSezioneFormEl){
+    aggiungiEventoSezioneFormEl.addEventListener('submit', function(e){
+      e.preventDefault();
+      var sezione = document.getElementById('nesSezione').value.trim();
+      var titolo = document.getElementById('nesTitolo').value.trim();
+      var dataRaw = document.getElementById('nesData').value;
+      var ora = document.getElementById('nesOra').value;
+      if(!sezione || !titolo || !dataRaw || !ora) return;
+      var dataParts = dataRaw.split('-');
+      var mesi = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+      var dataFmt = dataParts.length === 3 ? (parseInt(dataParts[2], 10) + ' ' + mesi[parseInt(dataParts[1], 10) - 1] + ' ' + dataParts[0]) : dataRaw;
+      var creditiRichiestiOn = document.getElementById('nesCreditiRichiesti').checked;
+      var creditiNum = creditiRichiestiOn ? (parseInt(document.getElementById('nesCreditiNum').value, 10) || 0) : 0;
+      var creditiConcessiRaw = document.getElementById('nesCreditiConcessi').value;
+      var creditiConcessi = creditiRichiestiOn && creditiConcessiRaw !== '' ? (parseInt(creditiConcessiRaw, 10) || 0) : null;
+      var link = document.getElementById('nesLink').value.trim()
+        || ('unam_aula_virtuale_prototipo.html?tipo=sezione&sezione=' + encodeURIComponent(sezione) + (creditiRichiestiOn ? '&crediti=si' : ''));
+      eventiSezionePubblici.push({
+        sezione: sezione, titolo: titolo, data: dataFmt, ora: ora,
+        creditiRichiesti: creditiNum, creditiConcessi: creditiConcessi,
+        link: link
+      });
+      renderEventiSezioneVetrina();
+      this.reset();
+      document.getElementById('nesCreditiFields').style.display = 'none';
+      toggleAggiungiEventoSezione();
+    });
+  }
 
   /* ===== I soci — vetrina dimostrativa =====
      Campione di 18 schede reali tratte dal registro pubblico "I soci" di unam.it
