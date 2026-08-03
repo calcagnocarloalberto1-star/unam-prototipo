@@ -124,6 +124,8 @@
   .mail-main{display:flex;flex-direction:column;min-width:0;height:100%;overflow-y:auto;}
   .mail-header{padding:14px 20px;border-bottom:1px solid var(--line);font-weight:700;color:var(--navy);font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .mail-subfolders{display:flex;gap:4px;padding:8px 16px 0 16px;border-bottom:1px solid var(--line);}
+  .mail-search-row{padding:10px 16px 0 16px;}
+  .mail-search-row input{margin-bottom:0;font-size:13px;padding:8px 12px;}
   .mail-subfolder{padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
   .mail-subfolder:hover{color:var(--navy);}
   .mail-subfolder.active{color:var(--navy);border-bottom-color:var(--blue);}
@@ -498,6 +500,7 @@
           <span id="mailFolderCount" style="font-weight:400;font-size:12px;color:var(--muted);"></span>
         </div>
         <div class="mail-subfolders" id="mailSubfolders"></div>
+        <div class="mail-search-row"><input type="text" id="mailSearchInput" placeholder="🔍 Cerca per oggetto, mittente o testo…" autocomplete="off" oninput="renderMailList()"></div>
         <div class="mail-body" id="mailBody"></div>
         <div id="mailReadPane"></div>
         <form class="mail-compose" onsubmit="event.preventDefault(); sendMail();">
@@ -544,7 +547,7 @@
         </form>
       </div>
     </div>
-    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare. Con "📎 Allega file" puoi allegare uno o più documenti al messaggio prima di inviarlo (o rimuoverli con "✕" prima dell'invio); inoltrando un messaggio con allegati, questi vengono automaticamente ripresi nell'inoltro. I messaggi ricevuti con allegati mostrano l'indicatore 📎 in elenco e permettono di scaricarli aprendo il messaggio — in questo prototipo il download genera un file segnaposto dimostrativo, non il documento reale.</p>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Il campo di ricerca sopra l'elenco filtra i messaggi della cartella aperta per oggetto, mittente o testo. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare. Con "📎 Allega file" puoi allegare uno o più documenti al messaggio prima di inviarlo (o rimuoverli con "✕" prima dell'invio); inoltrando un messaggio con allegati, questi vengono automaticamente ripresi nell'inoltro. I messaggi ricevuti con allegati mostrano l'indicatore 📎 in elenco e permettono di scaricarli aprendo il messaggio — in questo prototipo il download genera un file segnaposto dimostrativo, non il documento reale.</p>
   </div>
 </section>
 
@@ -1561,13 +1564,28 @@
     var subDef = mailSubfolderDefs[currentMailSubfolder];
     if(titleEl) titleEl.textContent = '# ' + def.name + ' — ' + subDef.name;
     var items = mailData[currentMailFolder][currentMailSubfolder] || [];
-    if(countEl) countEl.textContent = items.length + (items.length === 1 ? ' messaggio' : ' messaggi');
+    var searchInput = document.getElementById('mailSearchInput');
+    var searchQuery = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    var entries = items.map(function(m, idx){ return { m: m, idx: idx }; });
+    if(searchQuery){
+      entries = entries.filter(function(entry){
+        var m = entry.m;
+        var hay = ((m.from || '') + ' ' + (m.subject || '') + ' ' + (m.text || '')).toLowerCase();
+        return hay.indexOf(searchQuery) !== -1;
+      });
+    }
+    if(countEl) countEl.textContent = (searchQuery ? (entries.length + ' di ' + items.length) : items.length) + (items.length === 1 && !searchQuery ? ' messaggio' : ' messaggi');
     body.innerHTML = '';
     if(!items.length){
       body.innerHTML = '<p style="padding:16px 20px;color:var(--muted);font-size:13px;">Nessun messaggio in questa cartella.</p>';
       return;
     }
-    items.forEach(function(m, idx){
+    if(!entries.length){
+      body.innerHTML = '<p style="padding:16px 20px;color:var(--muted);font-size:13px;">Nessun messaggio trovato per \'' + searchQuery + '\'.</p>';
+      return;
+    }
+    entries.forEach(function(entry){
+      var m = entry.m, idx = entry.idx;
       var row = document.createElement('div');
       row.className = 'mail-item' + (m.routedFrom ? ' routed' : '');
       row.onclick = function(){ openMailMessage(idx); };
