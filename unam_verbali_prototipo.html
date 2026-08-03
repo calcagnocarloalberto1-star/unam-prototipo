@@ -236,6 +236,7 @@ function renderVerbaleItem(v){
     html += '<button type="button" class="btn btn-outline btn-sm" onclick="presentaVerbaleInAula(\'' + v.id + '\')">🖥️ Presenta in aula virtuale</button>';
   }
   html += '<button type="button" class="btn btn-outline btn-sm" onclick="stampaVerbale(\'' + v.id + '\')">🖨️ Stampa</button>'
+    + '<button type="button" class="btn btn-outline btn-sm" onclick="scaricaVerbale(\'' + v.id + '\')">⬇️ Scarica</button>'
     + '<button type="button" class="btn btn-outline btn-sm" onclick="inviaVerbaleComponenti(\'' + v.id + '\')">✉️ Invia ai componenti</button>'
     + '</div>';
   if(v.dataCerta){
@@ -347,6 +348,29 @@ function stampaVerbale(id){
   document.body.classList.add('printing');
   window.print();
   setTimeout(function(){ document.body.classList.remove('printing'); }, 500);
+}
+
+function scaricaVerbale(id){
+  var found = findVerbale(id);
+  if(!found) return;
+  var v = found.v;
+  var def = verbaliCategorie[found.key];
+  var testo = 'U.N.A.M. — Unione Nazionale Avvocati per la Mediazione\n'
+    + def.name + '\n\n'
+    + v.title + '\n'
+    + 'Data riunione: ' + v.date + '\n'
+    + 'Presenti: ' + v.presenti + '\n\n'
+    + v.testo + '\n\n'
+    + (v.dataCerta ? ('Data certa apposta il ' + v.dataCerta.timestamp + ' — codice di verifica ' + v.dataCerta.code) : 'Bozza — data certa non ancora apposta.');
+  var blob = new Blob([testo], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (v.title || 'verbale').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '') + '.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
 }
 
 /* ===================== INIT ===================== */
