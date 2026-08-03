@@ -156,6 +156,8 @@
   .mail-attachment-chip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-pale);border:1px solid var(--blue);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--navy);}
   .mail-attachment-chip .ma-size{color:var(--muted);}
   .mail-attachment-chip button{border:none;background:transparent;color:var(--navy);cursor:pointer;font-size:12px;padding:0 0 0 2px;line-height:1;}
+  .mail-attachment-chip.large{background:#fff3d6;border-color:#c99a2e;color:#8a6100;}
+  .mail-attachment-chip.large .ma-size{color:#8a6100;}
   .mail-attachments-view{margin-top:10px;}
   .mail-attachments-view .mail-attachment-chip{margin:0 6px 6px 0;}
   .mail-notify-preview{margin-top:8px;background:#fff;border:1px dashed var(--blue);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink);}
@@ -547,7 +549,7 @@
         </form>
       </div>
     </div>
-    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Il campo di ricerca sopra l'elenco filtra i messaggi della cartella aperta per oggetto, mittente o testo. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare. Con "📎 Allega file" puoi allegare uno o più documenti al messaggio prima di inviarlo (o rimuoverli con "✕" prima dell'invio); inoltrando un messaggio con allegati, questi vengono automaticamente ripresi nell'inoltro. I messaggi ricevuti con allegati mostrano l'indicatore 📎 in elenco e permettono di scaricarli aprendo il messaggio — in questo prototipo il download genera un file segnaposto dimostrativo, non il documento reale.</p>
+    <p class="hint" style="margin-top:14px;">In questo prototipo la posta interna è simulata: i messaggi restano solo nella tua sessione del browser. Il campo di ricerca sopra l'elenco filtra i messaggi della cartella aperta per oggetto, mittente o testo. Inviando alla Casella Generale, il sistema analizza l'oggetto e smista automaticamente una copia alla casella di settore pertinente (es. un oggetto con "corso"/"formazione" viene inoltrato anche al Corso di Alta Formazione). Aprendo un messaggio ricevuto puoi rispondere con "↩️ Rispondi" (l'oggetto e i destinatari si compilano automaticamente e il testo originale viene citato in calce). Nel compositore puoi aggiungere copia conoscenza (Cc) e copia nascosta (Ccn) con "+ Cc/Ccn" — i destinatari in Ccn restano visibili solo a te — e scegliere se avvisare il destinatario anche sulla sua email personale. Da ogni cartella puoi archiviare (🗄️) o eliminare (🗑️) un messaggio: quelli eliminati vanno nel Cestino, da cui possono essere ripristinati (↩️) o eliminati definitivamente (❌). Dal compositore puoi anche salvare una bozza senza inviare. Con "📎 Allega file" puoi allegare uno o più documenti al messaggio prima di inviarlo (o rimuoverli con "✕" prima dell'invio); inoltrando un messaggio con allegati, questi vengono automaticamente ripresi nell'inoltro. I file superiori a 5 MB vengono contrassegnati con 🔗 e, nel sito reale, condivisi tramite link di download invece di essere allegati direttamente al messaggio. I messaggi ricevuti con allegati mostrano l'indicatore 📎 in elenco e permettono di scaricarli aprendo il messaggio — in questo prototipo il download genera un file segnaposto dimostrativo, non il documento reale.</p>
   </div>
 </section>
 
@@ -1465,7 +1467,7 @@
     },
     'esecutivo': {
       ricevuta: [
-        { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni.', time: '10:02', date: '21/07/2026', routedTo: null, attachments: [{ name: 'Materiali_Incontro_Esecutivo.pdf', size: '1.4 MB' }, { name: 'Aggiornamento_Nuove_Adesioni.xlsx', size: '96 KB' }] }
+        { from: 'Avv. Simone Frediani', subject: 'Materiali per l\'incontro di Comitato Esecutivo', text: 'Vi giro in anticipo i materiali per l\'incontro di venerdì, tra cui l\'aggiornamento sulle nuove adesioni e la registrazione della sessione precedente.', time: '10:02', date: '21/07/2026', routedTo: null, attachments: [{ name: 'Materiali_Incontro_Esecutivo.pdf', size: '1.4 MB' }, { name: 'Aggiornamento_Nuove_Adesioni.xlsx', size: '96 KB' }, { name: 'Registrazione_Incontro_Precedente.mp4', size: '18.6 MB', large: true }] }
       ],
       inviata: [
         { from: 'Avv. Elisa Fichera', subject: 'Conferma ordine del giorno', text: 'Confermiamo l\'ordine del giorno dell\'incontro di venerdì, con il punto sulle nuove adesioni.', time: '10:20', date: '21/07/2026' }
@@ -1841,7 +1843,8 @@
   }
 
   // ---- Allegati (compose) ----
-  var composeAttachments = []; // { name, size }
+  var composeAttachments = []; // { name, size, large }
+  var MAIL_LARGE_ATTACHMENT_BYTES = 5 * 1024 * 1024; // 5 MB
 
   function formatFileSize(bytes){
     if(bytes < 1024) return bytes + ' B';
@@ -1852,7 +1855,7 @@
   function onMailAttachmentChange(ev){
     var files = Array.prototype.slice.call((ev.target && ev.target.files) || []);
     files.forEach(function(f){
-      composeAttachments.push({ name: f.name, size: formatFileSize(f.size) });
+      composeAttachments.push({ name: f.name, size: formatFileSize(f.size), large: f.size > MAIL_LARGE_ATTACHMENT_BYTES });
     });
     ev.target.value = ''; // consente di selezionare di nuovo lo stesso file
     renderComposeAttachments();
@@ -1872,10 +1875,13 @@
       list.innerHTML = '';
       return;
     }
-    if(hint) hint.textContent = composeAttachments.length + (composeAttachments.length === 1 ? ' allegato' : ' allegati');
+    var hasLarge = composeAttachments.some(function(a){ return a.large; });
+    if(hint) hint.textContent = composeAttachments.length + (composeAttachments.length === 1 ? ' allegato' : ' allegati') + (hasLarge ? ' — i file oltre 5 MB verranno condivisi tramite link di download' : '');
     var html = '';
     composeAttachments.forEach(function(a, i){
-      html += '<span class="mail-attachment-chip">📎 ' + a.name + ' <span class="ma-size">(' + a.size + ')</span> <button type="button" onclick="removeComposeAttachment(' + i + ')" aria-label="Rimuovi allegato" title="Rimuovi allegato">✕</button></span>';
+      var icon = a.large ? '🔗' : '📎';
+      var label = a.large ? ' <span class="ma-size">(' + a.size + ' — oltre 5 MB, via link)</span>' : ' <span class="ma-size">(' + a.size + ')</span>';
+      html += '<span class="mail-attachment-chip' + (a.large ? ' large' : '') + '">' + icon + ' ' + a.name + label + ' <button type="button" onclick="removeComposeAttachment(' + i + ')" aria-label="Rimuovi allegato" title="Rimuovi allegato">✕</button></span>';
     });
     list.innerHTML = html;
   }
@@ -1885,7 +1891,9 @@
     var html = '<div class="mail-attachments-view"><p style="font-size:12px;color:var(--muted);margin:10px 0 6px;">📎 ' + attachments.length + (attachments.length === 1 ? ' allegato:' : ' allegati:') + '</p>';
     attachments.forEach(function(a){
       var nameAttr = String(a.name).replace(/'/g, "\\'");
-      html += '<span class="mail-attachment-chip">📎 ' + a.name + ' <span class="ma-size">(' + a.size + ')</span> <button type="button" onclick="scaricaAllegatoDemo(\'' + nameAttr + '\')">⬇️ Scarica</button></span>';
+      var icon = a.large ? '🔗' : '📎';
+      var label = a.large ? ' <span class="ma-size">(' + a.size + ' — oltre 5 MB, condiviso tramite link)</span>' : ' <span class="ma-size">(' + a.size + ')</span>';
+      html += '<span class="mail-attachment-chip' + (a.large ? ' large' : '') + '">' + icon + ' ' + a.name + label + ' <button type="button" onclick="scaricaAllegatoDemo(\'' + nameAttr + '\')">⬇️ Scarica</button></span>';
     });
     html += '</div>';
     return html;
